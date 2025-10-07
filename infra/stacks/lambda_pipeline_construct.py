@@ -1,6 +1,9 @@
 from constructs import Construct
 from aws_cdk import aws_lambda as _lambda
 
+#Constructor que crea las 3 funciones lambdas de la fase de generación de entregables
+#y les asigna los permisos necesarios para su funcionamiento
+
 class LambdaPipelineConstruct(Construct):
     def __init__(self, scope: Construct, id: str, bucket, folder_name: str, project_name: str):
         super().__init__(scope, id)
