@@ -11,7 +11,7 @@ class StorageStack(Stack):
         self.bucket = s3.Bucket(
             self,
             f"{project_name}-SharedBucket",
-            bucket_name=f"{project_name.lower()}-shared-bucket",
+            bucket_name=f"{project_name.lower()}-bucket",
             versioned=True,
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True,

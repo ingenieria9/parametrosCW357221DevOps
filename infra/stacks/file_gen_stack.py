@@ -1,0 +1,33 @@
+from aws_cdk import Stack
+from constructs import Construct
+from .lambdas_file_gen_construct import LambdasFileGenConstruct
+
+class FileGenStack(Stack):
+    def __init__(self, scope: Construct, id: str, bucket, project_name: str, db_access_lambda_arn: str, **kwargs):
+        super().__init__(scope, id, **kwargs)
+
+        self.pipeline1 = LambdasFileGenConstruct(
+            self, f"{project_name}-fileGenFase1",
+            bucket=bucket,
+            folder_name="Fase1",
+            project_name=project_name,
+            db_access_lambda_arn = db_access_lambda_arn
+        )
+
+        '''
+        self.pipeline2 = LambdasFileGenConstruct(
+            self, f"{project_name}-fileGenFase2",
+            bucket=bucket,
+            folder_name="Fase2",
+            project_name=project_name,
+            db_access_lambda_arn=db_access_lambda_arn
+        )
+        
+        self.pipeline3 = LambdasFileGenConstruct(
+            self, f"{project_name}-fileGenFase3",
+            bucket=bucket,
+            folder_name="Fase3",
+            project_name=project_name,
+            db_access_lambda_arn=db_access_lambda_arn
+        )
+        '''

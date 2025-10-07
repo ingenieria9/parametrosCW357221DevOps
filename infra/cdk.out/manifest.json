@@ -1,124 +1,28 @@
 {
   "version": "36.3.0",
   "artifacts": {
-    "LambdaApiStack.assets": {
+    "CW357221ParametrosDevOps-DbAccessStack.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
-        "file": "LambdaApiStack.assets.json",
+        "file": "CW357221ParametrosDevOps-DbAccessStack.assets.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
       }
     },
-    "LambdaApiStack": {
-      "type": "aws:cloudformation:stack",
-      "environment": "aws://339713063336/us-west-2",
-      "properties": {
-        "templateFile": "LambdaApiStack.template.json",
-        "terminationProtection": false,
-        "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-deploy-role-339713063336-us-west-2",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-cfn-exec-role-339713063336-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/36186fd14b7ca4eccb083159d786b73b5a11839b16af9f6e4885b236b06d81d5.json",
-        "requiresBootstrapStackVersion": 6,
-        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
-        "additionalDependencies": [
-          "LambdaApiStack.assets"
-        ],
-        "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-lookup-role-339713063336-us-west-2",
-          "requiresBootstrapStackVersion": 8,
-          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
-        }
-      },
-      "dependencies": [
-        "LambdaApiStack.assets"
-      ],
-      "metadata": {
-        "/LambdaApiStack/HelloHandler/ServiceRole/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HelloHandlerServiceRole11EF7C63"
-          }
-        ],
-        "/LambdaApiStack/HelloHandler/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HelloHandler2E4FBA4D"
-          }
-        ],
-        "/LambdaApiStack/HttpApi/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HttpApiF5A9A8A7"
-          }
-        ],
-        "/LambdaApiStack/HttpApi/DefaultRoute/LambdaIntegration/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HttpApiDefaultRouteLambdaIntegrationC1A64CAE"
-          }
-        ],
-        "/LambdaApiStack/HttpApi/DefaultRoute/LambdaIntegration-Permission": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HttpApiDefaultRouteLambdaIntegrationPermission8AC1882E"
-          }
-        ],
-        "/LambdaApiStack/HttpApi/DefaultRoute/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HttpApiDefaultRoute146696CE"
-          }
-        ],
-        "/LambdaApiStack/HttpApi/DefaultStage/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HttpApiDefaultStage3EEB07D6"
-          }
-        ],
-        "/LambdaApiStack/CDKMetadata/Default": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CDKMetadata"
-          }
-        ],
-        "/LambdaApiStack/BootstrapVersion": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "BootstrapVersion"
-          }
-        ],
-        "/LambdaApiStack/CheckBootstrapVersion": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CheckBootstrapVersion"
-          }
-        ]
-      },
-      "displayName": "LambdaApiStack"
-    },
-    "CW357221ParametrosDevOpsdev-DbAccessStack.assets": {
-      "type": "cdk:asset-manifest",
-      "properties": {
-        "file": "CW357221ParametrosDevOpsdev-DbAccessStack.assets.json",
-        "requiresBootstrapStackVersion": 6,
-        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
-      }
-    },
-    "CW357221ParametrosDevOpsdev-DbAccessStack": {
+    "CW357221ParametrosDevOps-DbAccessStack": {
       "type": "aws:cloudformation:stack",
       "environment": "aws://339713063336/us-east-1",
       "properties": {
-        "templateFile": "CW357221ParametrosDevOpsdev-DbAccessStack.template.json",
+        "templateFile": "CW357221ParametrosDevOps-DbAccessStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-deploy-role-339713063336-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-cfn-exec-role-339713063336-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-east-1/4b95bc4477bf826978ba2009de9919dcde7731bafbfd2b3ce82439f7d23feace.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-east-1/b855aef6a543d1024f61ac1d22b9829294331bcca389d0a0ecda17c0ab5ab2bb.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
-          "CW357221ParametrosDevOpsdev-DbAccessStack.assets"
+          "CW357221ParametrosDevOps-DbAccessStack.assets"
         ],
         "lookupRole": {
           "arn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-lookup-role-339713063336-us-east-1",
@@ -127,82 +31,88 @@
         }
       },
       "dependencies": [
-        "CW357221ParametrosDevOpsdev-DbAccessStack.assets"
+        "CW357221ParametrosDevOps-DbAccessStack.assets"
       ],
       "metadata": {
-        "/CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/ServiceRole/Resource": [
+        "/CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevDbAccessLambdaServiceRole772B92BA"
+            "data": "CW357221ParametrosDevOpsDbAccessLambdaServiceRoleB21746D4"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/ServiceRole/DefaultPolicy/Resource": [
+        "/CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevDbAccessLambdaServiceRoleDefaultPolicyB1F214E7"
+            "data": "CW357221ParametrosDevOpsDbAccessLambdaServiceRoleDefaultPolicyED81C77D"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/SecurityGroup/Resource": [
+        "/CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/SecurityGroup/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevDbAccessLambdaSecurityGroup3E6FCAF3"
+            "data": "CW357221ParametrosDevOpsDbAccessLambdaSecurityGroupBCED8FB2"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/Resource": [
+        "/CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevDbAccessLambda9BC774EC"
+            "data": "CW357221ParametrosDevOpsDbAccessLambda70C42C27"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-DbAccessStack/DbAccessLambdaArn": [
+        "/CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/AllowInvocationFromOtherRegionLambdas": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CW357221ParametrosDevOpsDbAccessLambdaAllowInvocationFromOtherRegionLambdasF5E73E21"
+          }
+        ],
+        "/CW357221ParametrosDevOps-DbAccessStack/DbAccessLambdaArn": [
           {
             "type": "aws:cdk:logicalId",
             "data": "DbAccessLambdaArn"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-DbAccessStack/CDKMetadata/Default": [
+        "/CW357221ParametrosDevOps-DbAccessStack/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-DbAccessStack/BootstrapVersion": [
+        "/CW357221ParametrosDevOps-DbAccessStack/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BootstrapVersion"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-DbAccessStack/CheckBootstrapVersion": [
+        "/CW357221ParametrosDevOps-DbAccessStack/CheckBootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
         ]
       },
-      "displayName": "CW357221ParametrosDevOpsdev-DbAccessStack"
+      "displayName": "CW357221ParametrosDevOps-DbAccessStack"
     },
-    "CW357221ParametrosDevOpsdev-StorageStack.assets": {
+    "CW357221ParametrosDevOps-StorageStack.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
-        "file": "CW357221ParametrosDevOpsdev-StorageStack.assets.json",
+        "file": "CW357221ParametrosDevOps-StorageStack.assets.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
       }
     },
-    "CW357221ParametrosDevOpsdev-StorageStack": {
+    "CW357221ParametrosDevOps-StorageStack": {
       "type": "aws:cloudformation:stack",
       "environment": "aws://339713063336/us-west-2",
       "properties": {
-        "templateFile": "CW357221ParametrosDevOpsdev-StorageStack.template.json",
+        "templateFile": "CW357221ParametrosDevOps-StorageStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-deploy-role-339713063336-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-cfn-exec-role-339713063336-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/5c2daa7a0c6e4f171b870943d6dd871b4ba752bd3aa9c576550e815e93dee003.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/31fb3ce3f24ff59245d8f2d5bea6edd771e2af792603c77d5d8dfb35886d2052.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
-          "CW357221ParametrosDevOpsdev-StorageStack.assets"
+          "CW357221ParametrosDevOps-StorageStack.assets"
         ],
         "lookupRole": {
           "arn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-lookup-role-339713063336-us-west-2",
@@ -211,100 +121,100 @@
         }
       },
       "dependencies": [
-        "CW357221ParametrosDevOpsdev-StorageStack.assets"
+        "CW357221ParametrosDevOps-StorageStack.assets"
       ],
       "metadata": {
-        "/CW357221ParametrosDevOpsdev-StorageStack/CW357221ParametrosDevOpsdev-SharedBucket/Resource": [
+        "/CW357221ParametrosDevOps-StorageStack/CW357221ParametrosDevOps-SharedBucket/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevSharedBucket64E172F0"
+            "data": "CW357221ParametrosDevOpsSharedBucket2B2D0922"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/CW357221ParametrosDevOpsdev-SharedBucket/Policy/Resource": [
+        "/CW357221ParametrosDevOps-StorageStack/CW357221ParametrosDevOps-SharedBucket/Policy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevSharedBucketPolicy3FAAE506"
+            "data": "CW357221ParametrosDevOpsSharedBucketPolicy16F71262"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/CW357221ParametrosDevOpsdev-SharedBucket/AutoDeleteObjectsCustomResource/Default": [
+        "/CW357221ParametrosDevOps-StorageStack/CW357221ParametrosDevOps-SharedBucket/AutoDeleteObjectsCustomResource/Default": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevSharedBucketAutoDeleteObjectsCustomResource20A99A8F"
+            "data": "CW357221ParametrosDevOpsSharedBucketAutoDeleteObjectsCustomResource622C1040"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
+        "/CW357221ParametrosDevOps-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
           {
             "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
             "data": true
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+        "/CW357221ParametrosDevOps-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+        "/CW357221ParametrosDevOps-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/CDKMetadata/Default": [
+        "/CW357221ParametrosDevOps-StorageStack/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/Exports/Output{\"Fn::GetAtt\":[\"CW357221ParametrosDevOpsdevSharedBucket64E172F0\",\"Arn\"]}": [
+        "/CW357221ParametrosDevOps-StorageStack/Exports/Output{\"Fn::GetAtt\":[\"CW357221ParametrosDevOpsSharedBucket2B2D0922\",\"Arn\"]}": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
+            "data": "ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/Exports/Output{\"Ref\":\"CW357221ParametrosDevOpsdevSharedBucket64E172F0\"}": [
+        "/CW357221ParametrosDevOps-StorageStack/Exports/Output{\"Ref\":\"CW357221ParametrosDevOpsSharedBucket2B2D0922\"}": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
+            "data": "ExportsOutputRefCW357221ParametrosDevOpsSharedBucket2B2D0922E35C415C"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/BootstrapVersion": [
+        "/CW357221ParametrosDevOps-StorageStack/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BootstrapVersion"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-StorageStack/CheckBootstrapVersion": [
+        "/CW357221ParametrosDevOps-StorageStack/CheckBootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
         ]
       },
-      "displayName": "CW357221ParametrosDevOpsdev-StorageStack"
+      "displayName": "CW357221ParametrosDevOps-StorageStack"
     },
-    "CW357221ParametrosDevOpsdev-ApplicationStack.assets": {
+    "CW357221ParametrosDevOps-FileGenStack.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
-        "file": "CW357221ParametrosDevOpsdev-ApplicationStack.assets.json",
+        "file": "CW357221ParametrosDevOps-FileGenStack.assets.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
       }
     },
-    "CW357221ParametrosDevOpsdev-ApplicationStack": {
+    "CW357221ParametrosDevOps-FileGenStack": {
       "type": "aws:cloudformation:stack",
       "environment": "aws://339713063336/us-west-2",
       "properties": {
-        "templateFile": "CW357221ParametrosDevOpsdev-ApplicationStack.template.json",
+        "templateFile": "CW357221ParametrosDevOps-FileGenStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-deploy-role-339713063336-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-cfn-exec-role-339713063336-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/60e83de32762d775d130c2abf20d737e020e614e442c980de4e04a08ceceb644.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/48112e3ffd95705c7b7d196e0d0af561c984cee0a803f6a16f5f3ed96282e9b3.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
-          "CW357221ParametrosDevOpsdev-ApplicationStack.assets"
+          "CW357221ParametrosDevOps-FileGenStack.assets"
         ],
         "lookupRole": {
           "arn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-lookup-role-339713063336-us-west-2",
@@ -313,192 +223,84 @@
         }
       },
       "dependencies": [
-        "CW357221ParametrosDevOpsdev-StorageStack",
-        "CW357221ParametrosDevOpsdev-ApplicationStack.assets"
+        "CW357221ParametrosDevOps-StorageStack",
+        "CW357221ParametrosDevOps-FileGenStack.assets"
       ],
       "metadata": {
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/ServiceRole/Resource": [
+        "/CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaBFase1ServiceRoleAD838DAC"
+            "data": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1ServiceRole0A066096"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/ServiceRole/DefaultPolicy/Resource": [
+        "/CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaBFase1ServiceRoleDefaultPolicy1C80D91F"
+            "data": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1ServiceRoleDefaultPolicy89297315"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/Resource": [
+        "/CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaBFase1D5401102"
+            "data": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1D480904D"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/ServiceRole/Resource": [
+        "/CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaCFase1ServiceRoleD82057D3"
+            "data": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1ServiceRole795C2DAA"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/ServiceRole/DefaultPolicy/Resource": [
+        "/CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaCFase1ServiceRoleDefaultPolicyB0A3E5DD"
+            "data": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1ServiceRoleDefaultPolicyA32701B8"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/Resource": [
+        "/CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaCFase1AE4CECA5"
+            "data": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1F8D2BBF8"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/ServiceRole/Resource": [
+        "/CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaAFase1ServiceRole83ECCA4E"
+            "data": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase1ServiceRole927C3583"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/ServiceRole/DefaultPolicy/Resource": [
+        "/CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaAFase1ServiceRoleDefaultPolicy56DC30EB"
+            "data": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase1ServiceRoleDefaultPolicy003B1C53"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/Resource": [
+        "/CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaAFase17220901F"
+            "data": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase16F765A89"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/ServiceRole/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaBFase2ServiceRoleA1D660E4"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/ServiceRole/DefaultPolicy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaBFase2ServiceRoleDefaultPolicy6C2003A3"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaBFase27CBEFABB"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/ServiceRole/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaCFase2ServiceRole4CC4740C"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/ServiceRole/DefaultPolicy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaCFase2ServiceRoleDefaultPolicy34A32953"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaCFase220AD80F0"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/ServiceRole/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaAFase2ServiceRole86D39139"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/ServiceRole/DefaultPolicy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaAFase2ServiceRoleDefaultPolicyFFC64A9F"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaAFase2A80EDA5D"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/ServiceRole/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaBFase3ServiceRole04AA4ED8"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/ServiceRole/DefaultPolicy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaBFase3ServiceRoleDefaultPolicyC76A84E4"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaBFase38F7ECE58"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/ServiceRole/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaCFase3ServiceRole6B0231D2"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/ServiceRole/DefaultPolicy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaCFase3ServiceRoleDefaultPolicy1C50B487"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaCFase302D5DC98"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/ServiceRole/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaAFase3ServiceRoleE7BE3DE9"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/ServiceRole/DefaultPolicy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaAFase3ServiceRoleDefaultPolicy2B599203"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaAFase3DBDADFB4"
-          }
-        ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CDKMetadata/Default": [
+        "/CW357221ParametrosDevOps-FileGenStack/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/BootstrapVersion": [
+        "/CW357221ParametrosDevOps-FileGenStack/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BootstrapVersion"
           }
         ],
-        "/CW357221ParametrosDevOpsdev-ApplicationStack/CheckBootstrapVersion": [
+        "/CW357221ParametrosDevOps-FileGenStack/CheckBootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
         ]
       },
-      "displayName": "CW357221ParametrosDevOpsdev-ApplicationStack"
+      "displayName": "CW357221ParametrosDevOps-FileGenStack"
     },
     "Tree": {
       "type": "cdk:tree",

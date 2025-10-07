@@ -66,3 +66,10 @@ class DbAccessStack(Stack):
         )
 
         self.db_access_lambda_arn = db_access_fn.function_arn
+
+        db_access_fn.add_permission(
+            "AllowInvocationFromOtherRegionLambdas",
+            principal=aws_iam.ServicePrincipal("lambda.amazonaws.com"),
+            action="lambda:InvokeFunction",
+            source_account=self.account
+        )

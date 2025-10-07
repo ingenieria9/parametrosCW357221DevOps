@@ -2,15 +2,13 @@
 import aws_cdk as cdk
 from stacks.lambda_api_stack import LambdaApiStack
 from stacks.s3_storage_stack import StorageStack
-from stacks.application_stack import ApplicationStack
+from stacks.file_gen_stack import FileGenStack
 from stacks.db_access_stack import DbAccessStack
 
 app = cdk.App()
 
 #Variables que se usaran para identificar los recursos
-MAIN_NAME = "CW357221ParametrosDevOps"
-ENV_NAME = "dev"
-PROJECT_NAME = f"{MAIN_NAME}{ENV_NAME}"
+PROJECT_NAME = "CW357221ParametrosDevOps"
 
 
 MAIN_REGION = "us-west-2"
@@ -20,15 +18,13 @@ ACCOUNT = "339713063336"
 #por lo que la lambda de acceso a la DB entra como variable de entorno para 
 #las lambdas que la invocan
 
-LAMBDA_DB_ACCESS = "arn:aws:lambda:us-east-1:123456789012:function:xxx"
-
 
 # ------------- Stacks --------------------
 # Cada stack representa un conjunto de recursos de AWS 
 
 
 # Stack de prueba inicial: Api gateway v2 + lambda
-LambdaApiStack(app, "LambdaApiStack", env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
+#LambdaApiStack(app, "LambdaApiStack", env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
 
 
 #Stack que se despliega en N. Virginia (us-east-1) y contiene la lambda de acceso a la DB
@@ -46,17 +42,21 @@ db_stack = DbAccessStack(
     env=cdk.Environment(account=ACCOUNT, region="us-east-1"),
 )
 
+#output de stack: Lambda ARN
+#db_stack.db_access_lambda_arn
+
 
 # Stack de almacenamiento S3 (Bucket del proyecto)
 storage = StorageStack(app, f"{PROJECT_NAME}-StorageStack", project_name=PROJECT_NAME, env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
 
-# Stack para paso 2 "Generación de entregables" para Fase I, II  y III.A
-ApplicationStack(
+# Stack para etapa 2 "Generación de entregables" para Fase I, II  y III.A
+FileGenStack(
     app,
-    f"{PROJECT_NAME}-ApplicationStack",
+    f"{PROJECT_NAME}-FileGenStack",
     bucket=storage.bucket,
     project_name=PROJECT_NAME,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION),
+    db_access_lambda_arn=db_stack.db_access_lambda_arn
 )
 
 app.synth()

@@ -4,343 +4,17 @@
     "id": "App",
     "path": "",
     "children": {
-      "LambdaApiStack": {
-        "id": "LambdaApiStack",
-        "path": "LambdaApiStack",
+      "CW357221ParametrosDevOps-DbAccessStack": {
+        "id": "CW357221ParametrosDevOps-DbAccessStack",
+        "path": "CW357221ParametrosDevOps-DbAccessStack",
         "children": {
-          "HelloHandler": {
-            "id": "HelloHandler",
-            "path": "LambdaApiStack/HelloHandler",
-            "children": {
-              "ServiceRole": {
-                "id": "ServiceRole",
-                "path": "LambdaApiStack/HelloHandler/ServiceRole",
-                "children": {
-                  "ImportServiceRole": {
-                    "id": "ImportServiceRole",
-                    "path": "LambdaApiStack/HelloHandler/ServiceRole/ImportServiceRole",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "LambdaApiStack/HelloHandler/ServiceRole/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                      "aws:cdk:cloudformation:props": {
-                        "assumeRolePolicyDocument": {
-                          "Statement": [
-                            {
-                              "Action": "sts:AssumeRole",
-                              "Effect": "Allow",
-                              "Principal": {
-                                "Service": "lambda.amazonaws.com"
-                              }
-                            }
-                          ],
-                          "Version": "2012-10-17"
-                        },
-                        "managedPolicyArns": [
-                          {
-                            "Fn::Join": [
-                              "",
-                              [
-                                "arn:",
-                                {
-                                  "Ref": "AWS::Partition"
-                                },
-                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                              ]
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_iam.Role",
-                  "version": "2.155.0"
-                }
-              },
-              "Code": {
-                "id": "Code",
-                "path": "LambdaApiStack/HelloHandler/Code",
-                "children": {
-                  "Stage": {
-                    "id": "Stage",
-                    "path": "LambdaApiStack/HelloHandler/Code/Stage",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.AssetStaging",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "AssetBucket": {
-                    "id": "AssetBucket",
-                    "path": "LambdaApiStack/HelloHandler/Code/AssetBucket",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                  "version": "2.155.0"
-                }
-              },
-              "Resource": {
-                "id": "Resource",
-                "path": "LambdaApiStack/HelloHandler/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
-                  "aws:cdk:cloudformation:props": {
-                    "code": {
-                      "s3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-                      "s3Key": "1ec6ce40bfab85dc51372e3f64fe0181478f8a9b09d76f4ca5289878b69fb58a.zip"
-                    },
-                    "functionName": "cdk-demo-hello",
-                    "handler": "handler.lambda_handler",
-                    "role": {
-                      "Fn::GetAtt": [
-                        "HelloHandlerServiceRole11EF7C63",
-                        "Arn"
-                      ]
-                    },
-                    "runtime": "python3.12"
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                  "version": "2.155.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_lambda.Function",
-              "version": "2.155.0"
-            }
-          },
-          "HttpApi": {
-            "id": "HttpApi",
-            "path": "LambdaApiStack/HttpApi",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "LambdaApiStack/HttpApi/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Api",
-                  "aws:cdk:cloudformation:props": {
-                    "name": "cdk-demo-http-api",
-                    "protocolType": "HTTP"
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnApi",
-                  "version": "2.155.0"
-                }
-              },
-              "DefaultRoute": {
-                "id": "DefaultRoute",
-                "path": "LambdaApiStack/HttpApi/DefaultRoute",
-                "children": {
-                  "LambdaIntegration": {
-                    "id": "LambdaIntegration",
-                    "path": "LambdaApiStack/HttpApi/DefaultRoute/LambdaIntegration",
-                    "children": {
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "LambdaApiStack/HttpApi/DefaultRoute/LambdaIntegration/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Integration",
-                          "aws:cdk:cloudformation:props": {
-                            "apiId": {
-                              "Ref": "HttpApiF5A9A8A7"
-                            },
-                            "integrationType": "AWS_PROXY",
-                            "integrationUri": {
-                              "Fn::GetAtt": [
-                                "HelloHandler2E4FBA4D",
-                                "Arn"
-                              ]
-                            },
-                            "payloadFormatVersion": "2.0"
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnIntegration",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_apigatewayv2.HttpIntegration",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "LambdaIntegration-Permission": {
-                    "id": "LambdaIntegration-Permission",
-                    "path": "LambdaApiStack/HttpApi/DefaultRoute/LambdaIntegration-Permission",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
-                      "aws:cdk:cloudformation:props": {
-                        "action": "lambda:InvokeFunction",
-                        "functionName": {
-                          "Fn::GetAtt": [
-                            "HelloHandler2E4FBA4D",
-                            "Arn"
-                          ]
-                        },
-                        "principal": "apigateway.amazonaws.com",
-                        "sourceArn": {
-                          "Fn::Join": [
-                            "",
-                            [
-                              "arn:",
-                              {
-                                "Ref": "AWS::Partition"
-                              },
-                              ":execute-api:us-west-2:339713063336:",
-                              {
-                                "Ref": "HttpApiF5A9A8A7"
-                              },
-                              "/*/*"
-                            ]
-                          ]
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "LambdaApiStack/HttpApi/DefaultRoute/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Route",
-                      "aws:cdk:cloudformation:props": {
-                        "apiId": {
-                          "Ref": "HttpApiF5A9A8A7"
-                        },
-                        "authorizationType": "NONE",
-                        "routeKey": "$default",
-                        "target": {
-                          "Fn::Join": [
-                            "",
-                            [
-                              "integrations/",
-                              {
-                                "Ref": "HttpApiDefaultRouteLambdaIntegrationC1A64CAE"
-                              }
-                            ]
-                          ]
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnRoute",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_apigatewayv2.HttpRoute",
-                  "version": "2.155.0"
-                }
-              },
-              "DefaultStage": {
-                "id": "DefaultStage",
-                "path": "LambdaApiStack/HttpApi/DefaultStage",
-                "children": {
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "LambdaApiStack/HttpApi/DefaultStage/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Stage",
-                      "aws:cdk:cloudformation:props": {
-                        "apiId": {
-                          "Ref": "HttpApiF5A9A8A7"
-                        },
-                        "autoDeploy": true,
-                        "stageName": "$default"
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnStage",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_apigatewayv2.HttpStage",
-                  "version": "2.155.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_apigatewayv2.HttpApi",
-              "version": "2.155.0"
-            }
-          },
-          "CDKMetadata": {
-            "id": "CDKMetadata",
-            "path": "LambdaApiStack/CDKMetadata",
-            "children": {
-              "Default": {
-                "id": "Default",
-                "path": "LambdaApiStack/CDKMetadata/Default",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.155.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "constructs.Construct",
-              "version": "10.4.2"
-            }
-          },
-          "BootstrapVersion": {
-            "id": "BootstrapVersion",
-            "path": "LambdaApiStack/BootstrapVersion",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnParameter",
-              "version": "2.155.0"
-            }
-          },
-          "CheckBootstrapVersion": {
-            "id": "CheckBootstrapVersion",
-            "path": "LambdaApiStack/CheckBootstrapVersion",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnRule",
-              "version": "2.155.0"
-            }
-          }
-        },
-        "constructInfo": {
-          "fqn": "aws-cdk-lib.Stack",
-          "version": "2.155.0"
-        }
-      },
-      "CW357221ParametrosDevOpsdev-DbAccessStack": {
-        "id": "CW357221ParametrosDevOpsdev-DbAccessStack",
-        "path": "CW357221ParametrosDevOpsdev-DbAccessStack",
-        "children": {
-          "CW357221ParametrosDevOpsdev-ExistingVpc": {
-            "id": "CW357221ParametrosDevOpsdev-ExistingVpc",
-            "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-ExistingVpc",
+          "CW357221ParametrosDevOps-ExistingVpc": {
+            "id": "CW357221ParametrosDevOps-ExistingVpc",
+            "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-ExistingVpc",
             "children": {
               "PublicSubnet1": {
                 "id": "PublicSubnet1",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-ExistingVpc/PublicSubnet1",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-ExistingVpc/PublicSubnet1",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.155.0"
@@ -348,7 +22,7 @@
               },
               "PublicSubnet2": {
                 "id": "PublicSubnet2",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-ExistingVpc/PublicSubnet2",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-ExistingVpc/PublicSubnet2",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.155.0"
@@ -356,7 +30,7 @@
               },
               "PublicSubnet3": {
                 "id": "PublicSubnet3",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-ExistingVpc/PublicSubnet3",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-ExistingVpc/PublicSubnet3",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.155.0"
@@ -364,7 +38,7 @@
               },
               "PublicSubnet4": {
                 "id": "PublicSubnet4",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-ExistingVpc/PublicSubnet4",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-ExistingVpc/PublicSubnet4",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.155.0"
@@ -372,7 +46,7 @@
               },
               "PublicSubnet5": {
                 "id": "PublicSubnet5",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-ExistingVpc/PublicSubnet5",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-ExistingVpc/PublicSubnet5",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.155.0"
@@ -380,7 +54,7 @@
               },
               "PublicSubnet6": {
                 "id": "PublicSubnet6",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-ExistingVpc/PublicSubnet6",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-ExistingVpc/PublicSubnet6",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.155.0"
@@ -392,25 +66,25 @@
               "version": "2.155.0"
             }
           },
-          "CW357221ParametrosDevOpsdev-Psycopg2Layer": {
-            "id": "CW357221ParametrosDevOpsdev-Psycopg2Layer",
-            "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-Psycopg2Layer",
+          "CW357221ParametrosDevOps-Psycopg2Layer": {
+            "id": "CW357221ParametrosDevOps-Psycopg2Layer",
+            "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-Psycopg2Layer",
             "constructInfo": {
               "fqn": "aws-cdk-lib.Resource",
               "version": "2.155.0"
             }
           },
-          "CW357221ParametrosDevOpsdev-DbAccessLambda": {
-            "id": "CW357221ParametrosDevOpsdev-DbAccessLambda",
-            "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda",
+          "CW357221ParametrosDevOps-DbAccessLambda": {
+            "id": "CW357221ParametrosDevOps-DbAccessLambda",
+            "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda",
             "children": {
               "ServiceRole": {
                 "id": "ServiceRole",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/ServiceRole",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/ServiceRole",
                 "children": {
                   "ImportServiceRole": {
                     "id": "ImportServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/ServiceRole/ImportServiceRole",
+                    "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/ServiceRole/ImportServiceRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.155.0"
@@ -418,7 +92,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/ServiceRole/Resource",
+                    "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/ServiceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -469,11 +143,11 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/ServiceRole/DefaultPolicy",
+                    "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/ServiceRole/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/ServiceRole/DefaultPolicy/Resource",
+                        "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/ServiceRole/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -491,10 +165,10 @@
                               ],
                               "Version": "2012-10-17"
                             },
-                            "policyName": "CW357221ParametrosDevOpsdevDbAccessLambdaServiceRoleDefaultPolicyB1F214E7",
+                            "policyName": "CW357221ParametrosDevOpsDbAccessLambdaServiceRoleDefaultPolicyED81C77D",
                             "roles": [
                               {
-                                "Ref": "CW357221ParametrosDevOpsdevDbAccessLambdaServiceRole772B92BA"
+                                "Ref": "CW357221ParametrosDevOpsDbAccessLambdaServiceRoleB21746D4"
                               }
                             ]
                           }
@@ -518,11 +192,11 @@
               },
               "Code": {
                 "id": "Code",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/Code",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/Code/Stage",
+                    "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.155.0"
@@ -530,7 +204,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/Code/AssetBucket",
+                    "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.155.0"
@@ -544,15 +218,15 @@
               },
               "SecurityGroup": {
                 "id": "SecurityGroup",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/SecurityGroup",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/SecurityGroup",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/SecurityGroup/Resource",
+                    "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/SecurityGroup/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroup",
                       "aws:cdk:cloudformation:props": {
-                        "groupDescription": "Automatic security group for Lambda Function CW357221ParametrosDevOpsdevDbAccessStackCW357221ParametrosDevOpsdevDbAccessLambdaBFF6270C",
+                        "groupDescription": "Automatic security group for Lambda Function CW357221ParametrosDevOpsDbAccessStackCW357221ParametrosDevOpsDbAccessLambda204E18D5",
                         "securityGroupEgress": [
                           {
                             "cidrIp": "0.0.0.0/0",
@@ -576,7 +250,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CW357221ParametrosDevOpsdev-DbAccessLambda/Resource",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -592,14 +266,14 @@
                         "ENABLE_LOGS": "false"
                       }
                     },
-                    "functionName": "CW357221ParametrosDevOpsdev-db-access",
+                    "functionName": "CW357221ParametrosDevOps-db-access",
                     "handler": "db_access.lambda_handler",
                     "layers": [
                       "arn:aws:lambda:us-east-1:339713063336:layer:psycopg2:1"
                     ],
                     "role": {
                       "Fn::GetAtt": [
-                        "CW357221ParametrosDevOpsdevDbAccessLambdaServiceRole772B92BA",
+                        "CW357221ParametrosDevOpsDbAccessLambdaServiceRoleB21746D4",
                         "Arn"
                       ]
                     },
@@ -616,7 +290,7 @@
                       "securityGroupIds": [
                         {
                           "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevDbAccessLambdaSecurityGroup3E6FCAF3",
+                            "CW357221ParametrosDevOpsDbAccessLambdaSecurityGroupBCED8FB2",
                             "GroupId"
                           ]
                         }
@@ -628,6 +302,28 @@
                   "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
                   "version": "2.155.0"
                 }
+              },
+              "AllowInvocationFromOtherRegionLambdas": {
+                "id": "AllowInvocationFromOtherRegionLambdas",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CW357221ParametrosDevOps-DbAccessLambda/AllowInvocationFromOtherRegionLambdas",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                  "aws:cdk:cloudformation:props": {
+                    "action": "lambda:InvokeFunction",
+                    "functionName": {
+                      "Fn::GetAtt": [
+                        "CW357221ParametrosDevOpsDbAccessLambda70C42C27",
+                        "Arn"
+                      ]
+                    },
+                    "principal": "lambda.amazonaws.com",
+                    "sourceAccount": "339713063336"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                  "version": "2.155.0"
+                }
               }
             },
             "constructInfo": {
@@ -637,7 +333,7 @@
           },
           "DbAccessLambdaArn": {
             "id": "DbAccessLambdaArn",
-            "path": "CW357221ParametrosDevOpsdev-DbAccessStack/DbAccessLambdaArn",
+            "path": "CW357221ParametrosDevOps-DbAccessStack/DbAccessLambdaArn",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.155.0"
@@ -645,11 +341,11 @@
           },
           "CDKMetadata": {
             "id": "CDKMetadata",
-            "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CDKMetadata",
+            "path": "CW357221ParametrosDevOps-DbAccessStack/CDKMetadata",
             "children": {
               "Default": {
                 "id": "Default",
-                "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CDKMetadata/Default",
+                "path": "CW357221ParametrosDevOps-DbAccessStack/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.155.0"
@@ -663,7 +359,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "CW357221ParametrosDevOpsdev-DbAccessStack/BootstrapVersion",
+            "path": "CW357221ParametrosDevOps-DbAccessStack/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.155.0"
@@ -671,7 +367,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "CW357221ParametrosDevOpsdev-DbAccessStack/CheckBootstrapVersion",
+            "path": "CW357221ParametrosDevOps-DbAccessStack/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.155.0"
@@ -683,21 +379,21 @@
           "version": "2.155.0"
         }
       },
-      "CW357221ParametrosDevOpsdev-StorageStack": {
-        "id": "CW357221ParametrosDevOpsdev-StorageStack",
-        "path": "CW357221ParametrosDevOpsdev-StorageStack",
+      "CW357221ParametrosDevOps-StorageStack": {
+        "id": "CW357221ParametrosDevOps-StorageStack",
+        "path": "CW357221ParametrosDevOps-StorageStack",
         "children": {
-          "CW357221ParametrosDevOpsdev-SharedBucket": {
-            "id": "CW357221ParametrosDevOpsdev-SharedBucket",
-            "path": "CW357221ParametrosDevOpsdev-StorageStack/CW357221ParametrosDevOpsdev-SharedBucket",
+          "CW357221ParametrosDevOps-SharedBucket": {
+            "id": "CW357221ParametrosDevOps-SharedBucket",
+            "path": "CW357221ParametrosDevOps-StorageStack/CW357221ParametrosDevOps-SharedBucket",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "CW357221ParametrosDevOpsdev-StorageStack/CW357221ParametrosDevOpsdev-SharedBucket/Resource",
+                "path": "CW357221ParametrosDevOps-StorageStack/CW357221ParametrosDevOps-SharedBucket/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                   "aws:cdk:cloudformation:props": {
-                    "bucketName": "cw357221parametrosdevopsdev-shared-bucket",
+                    "bucketName": "cw357221parametrosdevops-bucket",
                     "tags": [
                       {
                         "key": "aws-cdk:auto-delete-objects",
@@ -716,16 +412,16 @@
               },
               "Policy": {
                 "id": "Policy",
-                "path": "CW357221ParametrosDevOpsdev-StorageStack/CW357221ParametrosDevOpsdev-SharedBucket/Policy",
+                "path": "CW357221ParametrosDevOps-StorageStack/CW357221ParametrosDevOps-SharedBucket/Policy",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-StorageStack/CW357221ParametrosDevOpsdev-SharedBucket/Policy/Resource",
+                    "path": "CW357221ParametrosDevOps-StorageStack/CW357221ParametrosDevOps-SharedBucket/Policy/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::S3::BucketPolicy",
                       "aws:cdk:cloudformation:props": {
                         "bucket": {
-                          "Ref": "CW357221ParametrosDevOpsdevSharedBucket64E172F0"
+                          "Ref": "CW357221ParametrosDevOpsSharedBucket2B2D0922"
                         },
                         "policyDocument": {
                           "Statement": [
@@ -748,7 +444,7 @@
                               "Resource": [
                                 {
                                   "Fn::GetAtt": [
-                                    "CW357221ParametrosDevOpsdevSharedBucket64E172F0",
+                                    "CW357221ParametrosDevOpsSharedBucket2B2D0922",
                                     "Arn"
                                   ]
                                 },
@@ -758,7 +454,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "CW357221ParametrosDevOpsdevSharedBucket64E172F0",
+                                          "CW357221ParametrosDevOpsSharedBucket2B2D0922",
                                           "Arn"
                                         ]
                                       },
@@ -786,11 +482,11 @@
               },
               "AutoDeleteObjectsCustomResource": {
                 "id": "AutoDeleteObjectsCustomResource",
-                "path": "CW357221ParametrosDevOpsdev-StorageStack/CW357221ParametrosDevOpsdev-SharedBucket/AutoDeleteObjectsCustomResource",
+                "path": "CW357221ParametrosDevOps-StorageStack/CW357221ParametrosDevOps-SharedBucket/AutoDeleteObjectsCustomResource",
                 "children": {
                   "Default": {
                     "id": "Default",
-                    "path": "CW357221ParametrosDevOpsdev-StorageStack/CW357221ParametrosDevOpsdev-SharedBucket/AutoDeleteObjectsCustomResource/Default",
+                    "path": "CW357221ParametrosDevOps-StorageStack/CW357221ParametrosDevOps-SharedBucket/AutoDeleteObjectsCustomResource/Default",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.CfnResource",
                       "version": "2.155.0"
@@ -810,11 +506,11 @@
           },
           "Custom::S3AutoDeleteObjectsCustomResourceProvider": {
             "id": "Custom::S3AutoDeleteObjectsCustomResourceProvider",
-            "path": "CW357221ParametrosDevOpsdev-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider",
+            "path": "CW357221ParametrosDevOps-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider",
             "children": {
               "Staging": {
                 "id": "Staging",
-                "path": "CW357221ParametrosDevOpsdev-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Staging",
+                "path": "CW357221ParametrosDevOps-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Staging",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.AssetStaging",
                   "version": "2.155.0"
@@ -822,7 +518,7 @@
               },
               "Role": {
                 "id": "Role",
-                "path": "CW357221ParametrosDevOpsdev-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role",
+                "path": "CW357221ParametrosDevOps-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.155.0"
@@ -830,7 +526,7 @@
               },
               "Handler": {
                 "id": "Handler",
-                "path": "CW357221ParametrosDevOpsdev-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+                "path": "CW357221ParametrosDevOps-StorageStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.155.0"
@@ -844,11 +540,11 @@
           },
           "CDKMetadata": {
             "id": "CDKMetadata",
-            "path": "CW357221ParametrosDevOpsdev-StorageStack/CDKMetadata",
+            "path": "CW357221ParametrosDevOps-StorageStack/CDKMetadata",
             "children": {
               "Default": {
                 "id": "Default",
-                "path": "CW357221ParametrosDevOpsdev-StorageStack/CDKMetadata/Default",
+                "path": "CW357221ParametrosDevOps-StorageStack/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.155.0"
@@ -862,19 +558,19 @@
           },
           "Exports": {
             "id": "Exports",
-            "path": "CW357221ParametrosDevOpsdev-StorageStack/Exports",
+            "path": "CW357221ParametrosDevOps-StorageStack/Exports",
             "children": {
-              "Output{\"Fn::GetAtt\":[\"CW357221ParametrosDevOpsdevSharedBucket64E172F0\",\"Arn\"]}": {
-                "id": "Output{\"Fn::GetAtt\":[\"CW357221ParametrosDevOpsdevSharedBucket64E172F0\",\"Arn\"]}",
-                "path": "CW357221ParametrosDevOpsdev-StorageStack/Exports/Output{\"Fn::GetAtt\":[\"CW357221ParametrosDevOpsdevSharedBucket64E172F0\",\"Arn\"]}",
+              "Output{\"Fn::GetAtt\":[\"CW357221ParametrosDevOpsSharedBucket2B2D0922\",\"Arn\"]}": {
+                "id": "Output{\"Fn::GetAtt\":[\"CW357221ParametrosDevOpsSharedBucket2B2D0922\",\"Arn\"]}",
+                "path": "CW357221ParametrosDevOps-StorageStack/Exports/Output{\"Fn::GetAtt\":[\"CW357221ParametrosDevOpsSharedBucket2B2D0922\",\"Arn\"]}",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnOutput",
                   "version": "2.155.0"
                 }
               },
-              "Output{\"Ref\":\"CW357221ParametrosDevOpsdevSharedBucket64E172F0\"}": {
-                "id": "Output{\"Ref\":\"CW357221ParametrosDevOpsdevSharedBucket64E172F0\"}",
-                "path": "CW357221ParametrosDevOpsdev-StorageStack/Exports/Output{\"Ref\":\"CW357221ParametrosDevOpsdevSharedBucket64E172F0\"}",
+              "Output{\"Ref\":\"CW357221ParametrosDevOpsSharedBucket2B2D0922\"}": {
+                "id": "Output{\"Ref\":\"CW357221ParametrosDevOpsSharedBucket2B2D0922\"}",
+                "path": "CW357221ParametrosDevOps-StorageStack/Exports/Output{\"Ref\":\"CW357221ParametrosDevOpsSharedBucket2B2D0922\"}",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnOutput",
                   "version": "2.155.0"
@@ -888,7 +584,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "CW357221ParametrosDevOpsdev-StorageStack/BootstrapVersion",
+            "path": "CW357221ParametrosDevOps-StorageStack/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.155.0"
@@ -896,7 +592,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "CW357221ParametrosDevOpsdev-StorageStack/CheckBootstrapVersion",
+            "path": "CW357221ParametrosDevOps-StorageStack/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.155.0"
@@ -908,25 +604,25 @@
           "version": "2.155.0"
         }
       },
-      "CW357221ParametrosDevOpsdev-ApplicationStack": {
-        "id": "CW357221ParametrosDevOpsdev-ApplicationStack",
-        "path": "CW357221ParametrosDevOpsdev-ApplicationStack",
+      "CW357221ParametrosDevOps-FileGenStack": {
+        "id": "CW357221ParametrosDevOps-FileGenStack",
+        "path": "CW357221ParametrosDevOps-FileGenStack",
         "children": {
-          "CW357221ParametrosDevOpsdev-PipelineFase1": {
-            "id": "CW357221ParametrosDevOpsdev-PipelineFase1",
-            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1",
+          "CW357221ParametrosDevOps-fileGenFase1": {
+            "id": "CW357221ParametrosDevOps-fileGenFase1",
+            "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1",
             "children": {
-              "CW357221ParametrosDevOpsdev-LambdaB-Fase1": {
-                "id": "CW357221ParametrosDevOpsdev-LambdaB-Fase1",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1",
+              "CW357221ParametrosDevOps-Formato-Fase1": {
+                "id": "CW357221ParametrosDevOps-Formato-Fase1",
+                "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1",
                 "children": {
                   "ServiceRole": {
                     "id": "ServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/ServiceRole",
+                    "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/ServiceRole",
                     "children": {
                       "ImportServiceRole": {
                         "id": "ImportServiceRole",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/ServiceRole/ImportServiceRole",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/ServiceRole/ImportServiceRole",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.Resource",
                           "version": "2.155.0"
@@ -934,7 +630,7 @@
                       },
                       "Resource": {
                         "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/ServiceRole/Resource",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/ServiceRole/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                           "aws:cdk:cloudformation:props": {
@@ -973,11 +669,11 @@
                       },
                       "DefaultPolicy": {
                         "id": "DefaultPolicy",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/ServiceRole/DefaultPolicy",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/ServiceRole/DefaultPolicy",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/ServiceRole/DefaultPolicy/Resource",
+                            "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/ServiceRole/DefaultPolicy/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                               "aws:cdk:cloudformation:props": {
@@ -999,28 +695,44 @@
                                       "Effect": "Allow",
                                       "Resource": [
                                         {
-                                          "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
+                                          "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
                                         },
                                         {
                                           "Fn::Join": [
                                             "",
                                             [
                                               {
-                                                "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
+                                                "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
                                               },
                                               "/*"
                                             ]
                                           ]
                                         }
                                       ]
+                                    },
+                                    {
+                                      "Action": "lambda:InvokeFunction",
+                                      "Effect": "Allow",
+                                      "Resource": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:",
+                                            {
+                                              "Ref": "AWS::Partition"
+                                            },
+                                            ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+                                          ]
+                                        ]
+                                      }
                                     }
                                   ],
                                   "Version": "2012-10-17"
                                 },
-                                "policyName": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaBFase1ServiceRoleDefaultPolicy1C80D91F",
+                                "policyName": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1ServiceRoleDefaultPolicy89297315",
                                 "roles": [
                                   {
-                                    "Ref": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaBFase1ServiceRoleAD838DAC"
+                                    "Ref": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1ServiceRole0A066096"
                                   }
                                 ]
                               }
@@ -1044,11 +756,11 @@
                   },
                   "Code": {
                     "id": "Code",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/Code",
+                    "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/Code",
                     "children": {
                       "Stage": {
                         "id": "Stage",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/Code/Stage",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/Code/Stage",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.AssetStaging",
                           "version": "2.155.0"
@@ -1056,7 +768,7 @@
                       },
                       "AssetBucket": {
                         "id": "AssetBucket",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/Code/AssetBucket",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/Code/AssetBucket",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                           "version": "2.155.0"
@@ -1070,27 +782,39 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaB-Fase1/Resource",
+                    "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                       "aws:cdk:cloudformation:props": {
                         "code": {
                           "s3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-                          "s3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+                          "s3Key": "4cc46fd79c62c270ca52ed4c3c92b2d3d3c78068f14860944e1db7f45acfa4bc.zip"
                         },
                         "environment": {
                           "variables": {
                             "BUCKET_NAME": {
-                              "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
+                              "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsSharedBucket2B2D0922E35C415C"
                             },
-                            "FOLDER_NAME": "Fase1"
+                            "FOLDER_NAME": "Fase1",
+                            "DB_ACCESS_LAMBDA_ARN": {
+                              "Fn::Join": [
+                                "",
+                                [
+                                  "arn:",
+                                  {
+                                    "Ref": "AWS::Partition"
+                                  },
+                                  ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+                                ]
+                              ]
+                            }
                           }
                         },
-                        "functionName": "CW357221ParametrosDevOpsdev-LambdaB-Fase1",
+                        "functionName": "CW357221ParametrosDevOps-Formato-Fase1",
                         "handler": "handler.lambda_handler",
                         "role": {
                           "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaBFase1ServiceRoleAD838DAC",
+                            "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1ServiceRole0A066096",
                             "Arn"
                           ]
                         },
@@ -1108,17 +832,17 @@
                   "version": "2.155.0"
                 }
               },
-              "CW357221ParametrosDevOpsdev-LambdaC-Fase1": {
-                "id": "CW357221ParametrosDevOpsdev-LambdaC-Fase1",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1",
+              "CW357221ParametrosDevOps-Informe-Fase1": {
+                "id": "CW357221ParametrosDevOps-Informe-Fase1",
+                "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1",
                 "children": {
                   "ServiceRole": {
                     "id": "ServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/ServiceRole",
+                    "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/ServiceRole",
                     "children": {
                       "ImportServiceRole": {
                         "id": "ImportServiceRole",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/ServiceRole/ImportServiceRole",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/ServiceRole/ImportServiceRole",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.Resource",
                           "version": "2.155.0"
@@ -1126,7 +850,7 @@
                       },
                       "Resource": {
                         "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/ServiceRole/Resource",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/ServiceRole/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                           "aws:cdk:cloudformation:props": {
@@ -1165,11 +889,11 @@
                       },
                       "DefaultPolicy": {
                         "id": "DefaultPolicy",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/ServiceRole/DefaultPolicy",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/ServiceRole/DefaultPolicy",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/ServiceRole/DefaultPolicy/Resource",
+                            "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/ServiceRole/DefaultPolicy/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                               "aws:cdk:cloudformation:props": {
@@ -1191,28 +915,44 @@
                                       "Effect": "Allow",
                                       "Resource": [
                                         {
-                                          "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
+                                          "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
                                         },
                                         {
                                           "Fn::Join": [
                                             "",
                                             [
                                               {
-                                                "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
+                                                "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
                                               },
                                               "/*"
                                             ]
                                           ]
                                         }
                                       ]
+                                    },
+                                    {
+                                      "Action": "lambda:InvokeFunction",
+                                      "Effect": "Allow",
+                                      "Resource": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:",
+                                            {
+                                              "Ref": "AWS::Partition"
+                                            },
+                                            ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+                                          ]
+                                        ]
+                                      }
                                     }
                                   ],
                                   "Version": "2012-10-17"
                                 },
-                                "policyName": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaCFase1ServiceRoleDefaultPolicyB0A3E5DD",
+                                "policyName": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1ServiceRoleDefaultPolicyA32701B8",
                                 "roles": [
                                   {
-                                    "Ref": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaCFase1ServiceRoleD82057D3"
+                                    "Ref": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1ServiceRole795C2DAA"
                                   }
                                 ]
                               }
@@ -1236,11 +976,11 @@
                   },
                   "Code": {
                     "id": "Code",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/Code",
+                    "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/Code",
                     "children": {
                       "Stage": {
                         "id": "Stage",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/Code/Stage",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/Code/Stage",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.AssetStaging",
                           "version": "2.155.0"
@@ -1248,7 +988,7 @@
                       },
                       "AssetBucket": {
                         "id": "AssetBucket",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/Code/AssetBucket",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/Code/AssetBucket",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                           "version": "2.155.0"
@@ -1262,7 +1002,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaC-Fase1/Resource",
+                    "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                       "aws:cdk:cloudformation:props": {
@@ -1273,16 +1013,28 @@
                         "environment": {
                           "variables": {
                             "BUCKET_NAME": {
-                              "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
+                              "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsSharedBucket2B2D0922E35C415C"
                             },
-                            "FOLDER_NAME": "Fase1"
+                            "FOLDER_NAME": "Fase1",
+                            "DB_ACCESS_LAMBDA_ARN": {
+                              "Fn::Join": [
+                                "",
+                                [
+                                  "arn:",
+                                  {
+                                    "Ref": "AWS::Partition"
+                                  },
+                                  ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+                                ]
+                              ]
+                            }
                           }
                         },
-                        "functionName": "CW357221ParametrosDevOpsdev-LambdaC-Fase1",
+                        "functionName": "CW357221ParametrosDevOps-Informe-Fase1",
                         "handler": "handler.lambda_handler",
                         "role": {
                           "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaCFase1ServiceRoleD82057D3",
+                            "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1ServiceRole795C2DAA",
                             "Arn"
                           ]
                         },
@@ -1300,17 +1052,17 @@
                   "version": "2.155.0"
                 }
               },
-              "CW357221ParametrosDevOpsdev-LambdaA-Fase1": {
-                "id": "CW357221ParametrosDevOpsdev-LambdaA-Fase1",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1",
+              "CW357221ParametrosDevOps-Entregable-Fase1": {
+                "id": "CW357221ParametrosDevOps-Entregable-Fase1",
+                "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1",
                 "children": {
                   "ServiceRole": {
                     "id": "ServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/ServiceRole",
+                    "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/ServiceRole",
                     "children": {
                       "ImportServiceRole": {
                         "id": "ImportServiceRole",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/ServiceRole/ImportServiceRole",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/ServiceRole/ImportServiceRole",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.Resource",
                           "version": "2.155.0"
@@ -1318,7 +1070,7 @@
                       },
                       "Resource": {
                         "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/ServiceRole/Resource",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/ServiceRole/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                           "aws:cdk:cloudformation:props": {
@@ -1357,11 +1109,11 @@
                       },
                       "DefaultPolicy": {
                         "id": "DefaultPolicy",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/ServiceRole/DefaultPolicy",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/ServiceRole/DefaultPolicy",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/ServiceRole/DefaultPolicy/Resource",
+                            "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/ServiceRole/DefaultPolicy/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                               "aws:cdk:cloudformation:props": {
@@ -1373,7 +1125,7 @@
                                       "Resource": [
                                         {
                                           "Fn::GetAtt": [
-                                            "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaBFase1D5401102",
+                                            "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1D480904D",
                                             "Arn"
                                           ]
                                         },
@@ -1383,7 +1135,7 @@
                                             [
                                               {
                                                 "Fn::GetAtt": [
-                                                  "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaBFase1D5401102",
+                                                  "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1D480904D",
                                                   "Arn"
                                                 ]
                                               },
@@ -1399,7 +1151,7 @@
                                       "Resource": [
                                         {
                                           "Fn::GetAtt": [
-                                            "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaCFase1AE4CECA5",
+                                            "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1F8D2BBF8",
                                             "Arn"
                                           ]
                                         },
@@ -1409,7 +1161,7 @@
                                             [
                                               {
                                                 "Fn::GetAtt": [
-                                                  "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaCFase1AE4CECA5",
+                                                  "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1F8D2BBF8",
                                                   "Arn"
                                                 ]
                                               },
@@ -1418,14 +1170,30 @@
                                           ]
                                         }
                                       ]
+                                    },
+                                    {
+                                      "Action": "lambda:InvokeFunction",
+                                      "Effect": "Allow",
+                                      "Resource": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:",
+                                            {
+                                              "Ref": "AWS::Partition"
+                                            },
+                                            ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+                                          ]
+                                        ]
+                                      }
                                     }
                                   ],
                                   "Version": "2012-10-17"
                                 },
-                                "policyName": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaAFase1ServiceRoleDefaultPolicy56DC30EB",
+                                "policyName": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase1ServiceRoleDefaultPolicy003B1C53",
                                 "roles": [
                                   {
-                                    "Ref": "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaAFase1ServiceRole83ECCA4E"
+                                    "Ref": "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase1ServiceRole927C3583"
                                   }
                                 ]
                               }
@@ -1449,11 +1217,11 @@
                   },
                   "Code": {
                     "id": "Code",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/Code",
+                    "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/Code",
                     "children": {
                       "Stage": {
                         "id": "Stage",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/Code/Stage",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/Code/Stage",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.AssetStaging",
                           "version": "2.155.0"
@@ -1461,7 +1229,7 @@
                       },
                       "AssetBucket": {
                         "id": "AssetBucket",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/Code/AssetBucket",
+                        "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/Code/AssetBucket",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                           "version": "2.155.0"
@@ -1475,7 +1243,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase1/CW357221ParametrosDevOpsdev-LambdaA-Fase1/Resource",
+                    "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                       "aws:cdk:cloudformation:props": {
@@ -1485,231 +1253,41 @@
                         },
                         "environment": {
                           "variables": {
-                            "LAMBDA_B_ARN": {
+                            "formato_ARN": {
                               "Fn::GetAtt": [
-                                "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaBFase1D5401102",
+                                "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1D480904D",
                                 "Arn"
                               ]
                             },
-                            "LAMBDA_C_ARN": {
+                            "informe_ARN": {
                               "Fn::GetAtt": [
-                                "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaCFase1AE4CECA5",
+                                "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1F8D2BBF8",
                                 "Arn"
                               ]
                             },
                             "BUCKET_NAME": {
-                              "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
+                              "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsSharedBucket2B2D0922E35C415C"
                             },
-                            "FOLDER_NAME": "Fase1"
-                          }
-                        },
-                        "functionName": "CW357221ParametrosDevOpsdev-LambdaA-Fase1",
-                        "handler": "handler.lambda_handler",
-                        "role": {
-                          "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevPipelineFase1CW357221ParametrosDevOpsdevLambdaAFase1ServiceRole83ECCA4E",
-                            "Arn"
-                          ]
-                        },
-                        "runtime": "python3.12"
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.Function",
-                  "version": "2.155.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "constructs.Construct",
-              "version": "10.4.2"
-            }
-          },
-          "CW357221ParametrosDevOpsdev-PipelineFase2": {
-            "id": "CW357221ParametrosDevOpsdev-PipelineFase2",
-            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2",
-            "children": {
-              "CW357221ParametrosDevOpsdev-LambdaB-Fase2": {
-                "id": "CW357221ParametrosDevOpsdev-LambdaB-Fase2",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2",
-                "children": {
-                  "ServiceRole": {
-                    "id": "ServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/ServiceRole",
-                    "children": {
-                      "ImportServiceRole": {
-                        "id": "ImportServiceRole",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/ServiceRole/ImportServiceRole",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.Resource",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/ServiceRole/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                          "aws:cdk:cloudformation:props": {
-                            "assumeRolePolicyDocument": {
-                              "Statement": [
-                                {
-                                  "Action": "sts:AssumeRole",
-                                  "Effect": "Allow",
-                                  "Principal": {
-                                    "Service": "lambda.amazonaws.com"
-                                  }
-                                }
-                              ],
-                              "Version": "2012-10-17"
-                            },
-                            "managedPolicyArns": [
-                              {
-                                "Fn::Join": [
-                                  "",
-                                  [
-                                    "arn:",
-                                    {
-                                      "Ref": "AWS::Partition"
-                                    },
-                                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                                  ]
-                                ]
-                              }
-                            ]
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "DefaultPolicy": {
-                        "id": "DefaultPolicy",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/ServiceRole/DefaultPolicy",
-                        "children": {
-                          "Resource": {
-                            "id": "Resource",
-                            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/ServiceRole/DefaultPolicy/Resource",
-                            "attributes": {
-                              "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
-                              "aws:cdk:cloudformation:props": {
-                                "policyDocument": {
-                                  "Statement": [
-                                    {
-                                      "Action": [
-                                        "s3:GetObject*",
-                                        "s3:GetBucket*",
-                                        "s3:List*",
-                                        "s3:DeleteObject*",
-                                        "s3:PutObject",
-                                        "s3:PutObjectLegalHold",
-                                        "s3:PutObjectRetention",
-                                        "s3:PutObjectTagging",
-                                        "s3:PutObjectVersionTagging",
-                                        "s3:Abort*"
-                                      ],
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              {
-                                                "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
-                                              },
-                                              "/*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ],
-                                  "Version": "2012-10-17"
-                                },
-                                "policyName": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaBFase2ServiceRoleDefaultPolicy6C2003A3",
-                                "roles": [
+                            "FOLDER_NAME": "Fase1",
+                            "DB_ACCESS_LAMBDA_ARN": {
+                              "Fn::Join": [
+                                "",
+                                [
+                                  "arn:",
                                   {
-                                    "Ref": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaBFase2ServiceRoleA1D660E4"
-                                  }
+                                    "Ref": "AWS::Partition"
+                                  },
+                                  ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
                                 ]
-                              }
-                            },
-                            "constructInfo": {
-                              "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
-                              "version": "2.155.0"
+                              ]
                             }
                           }
                         },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.Policy",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.Role",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Code": {
-                    "id": "Code",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/Code",
-                    "children": {
-                      "Stage": {
-                        "id": "Stage",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/Code/Stage",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.AssetStaging",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "AssetBucket": {
-                        "id": "AssetBucket",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/Code/AssetBucket",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaB-Fase2/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
-                      "aws:cdk:cloudformation:props": {
-                        "code": {
-                          "s3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-                          "s3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
-                        },
-                        "environment": {
-                          "variables": {
-                            "BUCKET_NAME": {
-                              "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
-                            },
-                            "FOLDER_NAME": "Fase2"
-                          }
-                        },
-                        "functionName": "CW357221ParametrosDevOpsdev-LambdaB-Fase2",
+                        "functionName": "CW357221ParametrosDevOps-Entregable-Fase1",
                         "handler": "handler.lambda_handler",
                         "role": {
                           "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaBFase2ServiceRoleA1D660E4",
+                            "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase1ServiceRole927C3583",
                             "Arn"
                           ]
                         },
@@ -1727,1039 +1305,11 @@
                   "version": "2.155.0"
                 }
               },
-              "CW357221ParametrosDevOpsdev-LambdaC-Fase2": {
-                "id": "CW357221ParametrosDevOpsdev-LambdaC-Fase2",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2",
-                "children": {
-                  "ServiceRole": {
-                    "id": "ServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/ServiceRole",
-                    "children": {
-                      "ImportServiceRole": {
-                        "id": "ImportServiceRole",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/ServiceRole/ImportServiceRole",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.Resource",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/ServiceRole/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                          "aws:cdk:cloudformation:props": {
-                            "assumeRolePolicyDocument": {
-                              "Statement": [
-                                {
-                                  "Action": "sts:AssumeRole",
-                                  "Effect": "Allow",
-                                  "Principal": {
-                                    "Service": "lambda.amazonaws.com"
-                                  }
-                                }
-                              ],
-                              "Version": "2012-10-17"
-                            },
-                            "managedPolicyArns": [
-                              {
-                                "Fn::Join": [
-                                  "",
-                                  [
-                                    "arn:",
-                                    {
-                                      "Ref": "AWS::Partition"
-                                    },
-                                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                                  ]
-                                ]
-                              }
-                            ]
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "DefaultPolicy": {
-                        "id": "DefaultPolicy",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/ServiceRole/DefaultPolicy",
-                        "children": {
-                          "Resource": {
-                            "id": "Resource",
-                            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/ServiceRole/DefaultPolicy/Resource",
-                            "attributes": {
-                              "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
-                              "aws:cdk:cloudformation:props": {
-                                "policyDocument": {
-                                  "Statement": [
-                                    {
-                                      "Action": [
-                                        "s3:GetObject*",
-                                        "s3:GetBucket*",
-                                        "s3:List*",
-                                        "s3:DeleteObject*",
-                                        "s3:PutObject",
-                                        "s3:PutObjectLegalHold",
-                                        "s3:PutObjectRetention",
-                                        "s3:PutObjectTagging",
-                                        "s3:PutObjectVersionTagging",
-                                        "s3:Abort*"
-                                      ],
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              {
-                                                "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
-                                              },
-                                              "/*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ],
-                                  "Version": "2012-10-17"
-                                },
-                                "policyName": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaCFase2ServiceRoleDefaultPolicy34A32953",
-                                "roles": [
-                                  {
-                                    "Ref": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaCFase2ServiceRole4CC4740C"
-                                  }
-                                ]
-                              }
-                            },
-                            "constructInfo": {
-                              "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
-                              "version": "2.155.0"
-                            }
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.Policy",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.Role",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Code": {
-                    "id": "Code",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/Code",
-                    "children": {
-                      "Stage": {
-                        "id": "Stage",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/Code/Stage",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.AssetStaging",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "AssetBucket": {
-                        "id": "AssetBucket",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/Code/AssetBucket",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaC-Fase2/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
-                      "aws:cdk:cloudformation:props": {
-                        "code": {
-                          "s3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-                          "s3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
-                        },
-                        "environment": {
-                          "variables": {
-                            "BUCKET_NAME": {
-                              "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
-                            },
-                            "FOLDER_NAME": "Fase2"
-                          }
-                        },
-                        "functionName": "CW357221ParametrosDevOpsdev-LambdaC-Fase2",
-                        "handler": "handler.lambda_handler",
-                        "role": {
-                          "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaCFase2ServiceRole4CC4740C",
-                            "Arn"
-                          ]
-                        },
-                        "runtime": "python3.12"
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
+              "ImportedDBAccessLambda": {
+                "id": "ImportedDBAccessLambda",
+                "path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/ImportedDBAccessLambda",
                 "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.Function",
-                  "version": "2.155.0"
-                }
-              },
-              "CW357221ParametrosDevOpsdev-LambdaA-Fase2": {
-                "id": "CW357221ParametrosDevOpsdev-LambdaA-Fase2",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2",
-                "children": {
-                  "ServiceRole": {
-                    "id": "ServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/ServiceRole",
-                    "children": {
-                      "ImportServiceRole": {
-                        "id": "ImportServiceRole",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/ServiceRole/ImportServiceRole",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.Resource",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/ServiceRole/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                          "aws:cdk:cloudformation:props": {
-                            "assumeRolePolicyDocument": {
-                              "Statement": [
-                                {
-                                  "Action": "sts:AssumeRole",
-                                  "Effect": "Allow",
-                                  "Principal": {
-                                    "Service": "lambda.amazonaws.com"
-                                  }
-                                }
-                              ],
-                              "Version": "2012-10-17"
-                            },
-                            "managedPolicyArns": [
-                              {
-                                "Fn::Join": [
-                                  "",
-                                  [
-                                    "arn:",
-                                    {
-                                      "Ref": "AWS::Partition"
-                                    },
-                                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                                  ]
-                                ]
-                              }
-                            ]
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "DefaultPolicy": {
-                        "id": "DefaultPolicy",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/ServiceRole/DefaultPolicy",
-                        "children": {
-                          "Resource": {
-                            "id": "Resource",
-                            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/ServiceRole/DefaultPolicy/Resource",
-                            "attributes": {
-                              "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
-                              "aws:cdk:cloudformation:props": {
-                                "policyDocument": {
-                                  "Statement": [
-                                    {
-                                      "Action": "lambda:InvokeFunction",
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::GetAtt": [
-                                            "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaBFase27CBEFABB",
-                                            "Arn"
-                                          ]
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              {
-                                                "Fn::GetAtt": [
-                                                  "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaBFase27CBEFABB",
-                                                  "Arn"
-                                                ]
-                                              },
-                                              ":*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "Action": "lambda:InvokeFunction",
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::GetAtt": [
-                                            "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaCFase220AD80F0",
-                                            "Arn"
-                                          ]
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              {
-                                                "Fn::GetAtt": [
-                                                  "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaCFase220AD80F0",
-                                                  "Arn"
-                                                ]
-                                              },
-                                              ":*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ],
-                                  "Version": "2012-10-17"
-                                },
-                                "policyName": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaAFase2ServiceRoleDefaultPolicyFFC64A9F",
-                                "roles": [
-                                  {
-                                    "Ref": "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaAFase2ServiceRole86D39139"
-                                  }
-                                ]
-                              }
-                            },
-                            "constructInfo": {
-                              "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
-                              "version": "2.155.0"
-                            }
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.Policy",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.Role",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Code": {
-                    "id": "Code",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/Code",
-                    "children": {
-                      "Stage": {
-                        "id": "Stage",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/Code/Stage",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.AssetStaging",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "AssetBucket": {
-                        "id": "AssetBucket",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/Code/AssetBucket",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase2/CW357221ParametrosDevOpsdev-LambdaA-Fase2/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
-                      "aws:cdk:cloudformation:props": {
-                        "code": {
-                          "s3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-                          "s3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
-                        },
-                        "environment": {
-                          "variables": {
-                            "LAMBDA_B_ARN": {
-                              "Fn::GetAtt": [
-                                "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaBFase27CBEFABB",
-                                "Arn"
-                              ]
-                            },
-                            "LAMBDA_C_ARN": {
-                              "Fn::GetAtt": [
-                                "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaCFase220AD80F0",
-                                "Arn"
-                              ]
-                            },
-                            "BUCKET_NAME": {
-                              "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
-                            },
-                            "FOLDER_NAME": "Fase2"
-                          }
-                        },
-                        "functionName": "CW357221ParametrosDevOpsdev-LambdaA-Fase2",
-                        "handler": "handler.lambda_handler",
-                        "role": {
-                          "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevPipelineFase2CW357221ParametrosDevOpsdevLambdaAFase2ServiceRole86D39139",
-                            "Arn"
-                          ]
-                        },
-                        "runtime": "python3.12"
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.Function",
-                  "version": "2.155.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "constructs.Construct",
-              "version": "10.4.2"
-            }
-          },
-          "CW357221ParametrosDevOpsdev-PipelineFase3": {
-            "id": "CW357221ParametrosDevOpsdev-PipelineFase3",
-            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3",
-            "children": {
-              "CW357221ParametrosDevOpsdev-LambdaB-Fase3": {
-                "id": "CW357221ParametrosDevOpsdev-LambdaB-Fase3",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3",
-                "children": {
-                  "ServiceRole": {
-                    "id": "ServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/ServiceRole",
-                    "children": {
-                      "ImportServiceRole": {
-                        "id": "ImportServiceRole",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/ServiceRole/ImportServiceRole",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.Resource",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/ServiceRole/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                          "aws:cdk:cloudformation:props": {
-                            "assumeRolePolicyDocument": {
-                              "Statement": [
-                                {
-                                  "Action": "sts:AssumeRole",
-                                  "Effect": "Allow",
-                                  "Principal": {
-                                    "Service": "lambda.amazonaws.com"
-                                  }
-                                }
-                              ],
-                              "Version": "2012-10-17"
-                            },
-                            "managedPolicyArns": [
-                              {
-                                "Fn::Join": [
-                                  "",
-                                  [
-                                    "arn:",
-                                    {
-                                      "Ref": "AWS::Partition"
-                                    },
-                                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                                  ]
-                                ]
-                              }
-                            ]
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "DefaultPolicy": {
-                        "id": "DefaultPolicy",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/ServiceRole/DefaultPolicy",
-                        "children": {
-                          "Resource": {
-                            "id": "Resource",
-                            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/ServiceRole/DefaultPolicy/Resource",
-                            "attributes": {
-                              "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
-                              "aws:cdk:cloudformation:props": {
-                                "policyDocument": {
-                                  "Statement": [
-                                    {
-                                      "Action": [
-                                        "s3:GetObject*",
-                                        "s3:GetBucket*",
-                                        "s3:List*",
-                                        "s3:DeleteObject*",
-                                        "s3:PutObject",
-                                        "s3:PutObjectLegalHold",
-                                        "s3:PutObjectRetention",
-                                        "s3:PutObjectTagging",
-                                        "s3:PutObjectVersionTagging",
-                                        "s3:Abort*"
-                                      ],
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              {
-                                                "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
-                                              },
-                                              "/*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ],
-                                  "Version": "2012-10-17"
-                                },
-                                "policyName": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaBFase3ServiceRoleDefaultPolicyC76A84E4",
-                                "roles": [
-                                  {
-                                    "Ref": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaBFase3ServiceRole04AA4ED8"
-                                  }
-                                ]
-                              }
-                            },
-                            "constructInfo": {
-                              "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
-                              "version": "2.155.0"
-                            }
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.Policy",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.Role",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Code": {
-                    "id": "Code",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/Code",
-                    "children": {
-                      "Stage": {
-                        "id": "Stage",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/Code/Stage",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.AssetStaging",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "AssetBucket": {
-                        "id": "AssetBucket",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/Code/AssetBucket",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaB-Fase3/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
-                      "aws:cdk:cloudformation:props": {
-                        "code": {
-                          "s3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-                          "s3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
-                        },
-                        "environment": {
-                          "variables": {
-                            "BUCKET_NAME": {
-                              "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
-                            },
-                            "FOLDER_NAME": "Fase3"
-                          }
-                        },
-                        "functionName": "CW357221ParametrosDevOpsdev-LambdaB-Fase3",
-                        "handler": "handler.lambda_handler",
-                        "role": {
-                          "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaBFase3ServiceRole04AA4ED8",
-                            "Arn"
-                          ]
-                        },
-                        "runtime": "python3.12"
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.Function",
-                  "version": "2.155.0"
-                }
-              },
-              "CW357221ParametrosDevOpsdev-LambdaC-Fase3": {
-                "id": "CW357221ParametrosDevOpsdev-LambdaC-Fase3",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3",
-                "children": {
-                  "ServiceRole": {
-                    "id": "ServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/ServiceRole",
-                    "children": {
-                      "ImportServiceRole": {
-                        "id": "ImportServiceRole",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/ServiceRole/ImportServiceRole",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.Resource",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/ServiceRole/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                          "aws:cdk:cloudformation:props": {
-                            "assumeRolePolicyDocument": {
-                              "Statement": [
-                                {
-                                  "Action": "sts:AssumeRole",
-                                  "Effect": "Allow",
-                                  "Principal": {
-                                    "Service": "lambda.amazonaws.com"
-                                  }
-                                }
-                              ],
-                              "Version": "2012-10-17"
-                            },
-                            "managedPolicyArns": [
-                              {
-                                "Fn::Join": [
-                                  "",
-                                  [
-                                    "arn:",
-                                    {
-                                      "Ref": "AWS::Partition"
-                                    },
-                                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                                  ]
-                                ]
-                              }
-                            ]
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "DefaultPolicy": {
-                        "id": "DefaultPolicy",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/ServiceRole/DefaultPolicy",
-                        "children": {
-                          "Resource": {
-                            "id": "Resource",
-                            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/ServiceRole/DefaultPolicy/Resource",
-                            "attributes": {
-                              "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
-                              "aws:cdk:cloudformation:props": {
-                                "policyDocument": {
-                                  "Statement": [
-                                    {
-                                      "Action": [
-                                        "s3:GetObject*",
-                                        "s3:GetBucket*",
-                                        "s3:List*",
-                                        "s3:DeleteObject*",
-                                        "s3:PutObject",
-                                        "s3:PutObjectLegalHold",
-                                        "s3:PutObjectRetention",
-                                        "s3:PutObjectTagging",
-                                        "s3:PutObjectVersionTagging",
-                                        "s3:Abort*"
-                                      ],
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              {
-                                                "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsdevSharedBucket64E172F0Arn85A117F3"
-                                              },
-                                              "/*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ],
-                                  "Version": "2012-10-17"
-                                },
-                                "policyName": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaCFase3ServiceRoleDefaultPolicy1C50B487",
-                                "roles": [
-                                  {
-                                    "Ref": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaCFase3ServiceRole6B0231D2"
-                                  }
-                                ]
-                              }
-                            },
-                            "constructInfo": {
-                              "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
-                              "version": "2.155.0"
-                            }
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.Policy",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.Role",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Code": {
-                    "id": "Code",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/Code",
-                    "children": {
-                      "Stage": {
-                        "id": "Stage",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/Code/Stage",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.AssetStaging",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "AssetBucket": {
-                        "id": "AssetBucket",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/Code/AssetBucket",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaC-Fase3/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
-                      "aws:cdk:cloudformation:props": {
-                        "code": {
-                          "s3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-                          "s3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
-                        },
-                        "environment": {
-                          "variables": {
-                            "BUCKET_NAME": {
-                              "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
-                            },
-                            "FOLDER_NAME": "Fase3"
-                          }
-                        },
-                        "functionName": "CW357221ParametrosDevOpsdev-LambdaC-Fase3",
-                        "handler": "handler.lambda_handler",
-                        "role": {
-                          "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaCFase3ServiceRole6B0231D2",
-                            "Arn"
-                          ]
-                        },
-                        "runtime": "python3.12"
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.Function",
-                  "version": "2.155.0"
-                }
-              },
-              "CW357221ParametrosDevOpsdev-LambdaA-Fase3": {
-                "id": "CW357221ParametrosDevOpsdev-LambdaA-Fase3",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3",
-                "children": {
-                  "ServiceRole": {
-                    "id": "ServiceRole",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/ServiceRole",
-                    "children": {
-                      "ImportServiceRole": {
-                        "id": "ImportServiceRole",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/ServiceRole/ImportServiceRole",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.Resource",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/ServiceRole/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                          "aws:cdk:cloudformation:props": {
-                            "assumeRolePolicyDocument": {
-                              "Statement": [
-                                {
-                                  "Action": "sts:AssumeRole",
-                                  "Effect": "Allow",
-                                  "Principal": {
-                                    "Service": "lambda.amazonaws.com"
-                                  }
-                                }
-                              ],
-                              "Version": "2012-10-17"
-                            },
-                            "managedPolicyArns": [
-                              {
-                                "Fn::Join": [
-                                  "",
-                                  [
-                                    "arn:",
-                                    {
-                                      "Ref": "AWS::Partition"
-                                    },
-                                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                                  ]
-                                ]
-                              }
-                            ]
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "DefaultPolicy": {
-                        "id": "DefaultPolicy",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/ServiceRole/DefaultPolicy",
-                        "children": {
-                          "Resource": {
-                            "id": "Resource",
-                            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/ServiceRole/DefaultPolicy/Resource",
-                            "attributes": {
-                              "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
-                              "aws:cdk:cloudformation:props": {
-                                "policyDocument": {
-                                  "Statement": [
-                                    {
-                                      "Action": "lambda:InvokeFunction",
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::GetAtt": [
-                                            "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaBFase38F7ECE58",
-                                            "Arn"
-                                          ]
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              {
-                                                "Fn::GetAtt": [
-                                                  "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaBFase38F7ECE58",
-                                                  "Arn"
-                                                ]
-                                              },
-                                              ":*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "Action": "lambda:InvokeFunction",
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::GetAtt": [
-                                            "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaCFase302D5DC98",
-                                            "Arn"
-                                          ]
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              {
-                                                "Fn::GetAtt": [
-                                                  "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaCFase302D5DC98",
-                                                  "Arn"
-                                                ]
-                                              },
-                                              ":*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ],
-                                  "Version": "2012-10-17"
-                                },
-                                "policyName": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaAFase3ServiceRoleDefaultPolicy2B599203",
-                                "roles": [
-                                  {
-                                    "Ref": "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaAFase3ServiceRoleE7BE3DE9"
-                                  }
-                                ]
-                              }
-                            },
-                            "constructInfo": {
-                              "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
-                              "version": "2.155.0"
-                            }
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.Policy",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.Role",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Code": {
-                    "id": "Code",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/Code",
-                    "children": {
-                      "Stage": {
-                        "id": "Stage",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/Code/Stage",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.AssetStaging",
-                          "version": "2.155.0"
-                        }
-                      },
-                      "AssetBucket": {
-                        "id": "AssetBucket",
-                        "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/Code/AssetBucket",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                          "version": "2.155.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                      "version": "2.155.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CW357221ParametrosDevOpsdev-PipelineFase3/CW357221ParametrosDevOpsdev-LambdaA-Fase3/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
-                      "aws:cdk:cloudformation:props": {
-                        "code": {
-                          "s3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-                          "s3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
-                        },
-                        "environment": {
-                          "variables": {
-                            "LAMBDA_B_ARN": {
-                              "Fn::GetAtt": [
-                                "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaBFase38F7ECE58",
-                                "Arn"
-                              ]
-                            },
-                            "LAMBDA_C_ARN": {
-                              "Fn::GetAtt": [
-                                "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaCFase302D5DC98",
-                                "Arn"
-                              ]
-                            },
-                            "BUCKET_NAME": {
-                              "Fn::ImportValue": "CW357221ParametrosDevOpsdev-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsdevSharedBucket64E172F042EFFA53"
-                            },
-                            "FOLDER_NAME": "Fase3"
-                          }
-                        },
-                        "functionName": "CW357221ParametrosDevOpsdev-LambdaA-Fase3",
-                        "handler": "handler.lambda_handler",
-                        "role": {
-                          "Fn::GetAtt": [
-                            "CW357221ParametrosDevOpsdevPipelineFase3CW357221ParametrosDevOpsdevLambdaAFase3ServiceRoleE7BE3DE9",
-                            "Arn"
-                          ]
-                        },
-                        "runtime": "python3.12"
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                      "version": "2.155.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.Function",
+                  "fqn": "aws-cdk-lib.aws_lambda.FunctionBase",
                   "version": "2.155.0"
                 }
               }
@@ -2771,11 +1321,11 @@
           },
           "CDKMetadata": {
             "id": "CDKMetadata",
-            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CDKMetadata",
+            "path": "CW357221ParametrosDevOps-FileGenStack/CDKMetadata",
             "children": {
               "Default": {
                 "id": "Default",
-                "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CDKMetadata/Default",
+                "path": "CW357221ParametrosDevOps-FileGenStack/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.155.0"
@@ -2789,7 +1339,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/BootstrapVersion",
+            "path": "CW357221ParametrosDevOps-FileGenStack/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.155.0"
@@ -2797,7 +1347,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "CW357221ParametrosDevOpsdev-ApplicationStack/CheckBootstrapVersion",
+            "path": "CW357221ParametrosDevOps-FileGenStack/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.155.0"
