@@ -41,7 +41,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
      },
-     "S3Key": "f886d9303209e9cd468a314de91b2531c12a4699c9e71f48cf4612ddbea513d4.zip"
+     "S3Key": "a331beaa1cc7a7820c6a951c47afae319ceca0de20277ee35420d1d8b6894f8c.zip"
     },
     "FunctionName": "cdk-demo-hello",
     "Handler": "handler.lambda_handler",
@@ -58,128 +58,41 @@
    ],
    "Metadata": {
     "aws:cdk:path": "LambdaApiStack/HelloHandler/Resource",
-    "aws:asset:path": "asset.f886d9303209e9cd468a314de91b2531c12a4699c9e71f48cf4612ddbea513d4",
+    "aws:asset:path": "asset.a331beaa1cc7a7820c6a951c47afae319ceca0de20277ee35420d1d8b6894f8c",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "EndpointEEF1FD8F": {
-   "Type": "AWS::ApiGateway::RestApi",
+  "HttpApiF5A9A8A7": {
+   "Type": "AWS::ApiGatewayV2::Api",
    "Properties": {
-    "Name": "cdk-demo-api"
+    "Name": "cdk-demo-http-api",
+    "ProtocolType": "HTTP"
    },
    "Metadata": {
-    "aws:cdk:path": "LambdaApiStack/Endpoint/Resource"
+    "aws:cdk:path": "LambdaApiStack/HttpApi/Resource"
    }
   },
-  "EndpointCloudWatchRoleC3C64E0F": {
-   "Type": "AWS::IAM::Role",
+  "HttpApiDefaultRouteLambdaIntegrationC1A64CAE": {
+   "Type": "AWS::ApiGatewayV2::Integration",
    "Properties": {
-    "AssumeRolePolicyDocument": {
-     "Statement": [
-      {
-       "Action": "sts:AssumeRole",
-       "Effect": "Allow",
-       "Principal": {
-        "Service": "apigateway.amazonaws.com"
-       }
-      }
-     ],
-     "Version": "2012-10-17"
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
     },
-    "ManagedPolicyArns": [
-     {
-      "Fn::Join": [
-       "",
-       [
-        "arn:",
-        {
-         "Ref": "AWS::Partition"
-        },
-        ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
-       ]
-      ]
-     }
-    ]
-   },
-   "UpdateReplacePolicy": "Retain",
-   "DeletionPolicy": "Retain",
-   "Metadata": {
-    "aws:cdk:path": "LambdaApiStack/Endpoint/CloudWatchRole/Resource"
-   }
-  },
-  "EndpointAccountB8304247": {
-   "Type": "AWS::ApiGateway::Account",
-   "Properties": {
-    "CloudWatchRoleArn": {
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
      "Fn::GetAtt": [
-      "EndpointCloudWatchRoleC3C64E0F",
+      "HelloHandler2E4FBA4D",
       "Arn"
      ]
-    }
-   },
-   "DependsOn": [
-    "EndpointEEF1FD8F"
-   ],
-   "UpdateReplacePolicy": "Retain",
-   "DeletionPolicy": "Retain",
-   "Metadata": {
-    "aws:cdk:path": "LambdaApiStack/Endpoint/Account"
-   }
-  },
-  "EndpointDeployment318525DAfa19360caa8a8bc7d311953ab0502ee1": {
-   "Type": "AWS::ApiGateway::Deployment",
-   "Properties": {
-    "Description": "Automatically created by the RestApi construct",
-    "RestApiId": {
-     "Ref": "EndpointEEF1FD8F"
-    }
-   },
-   "DependsOn": [
-    "EndpointhelloGET17B01EB6",
-    "EndpointhelloBBDCA266"
-   ],
-   "Metadata": {
-    "aws:cdk:path": "LambdaApiStack/Endpoint/Deployment/Resource"
-   }
-  },
-  "EndpointDeploymentStageprodB78BEEA0": {
-   "Type": "AWS::ApiGateway::Stage",
-   "Properties": {
-    "DeploymentId": {
-     "Ref": "EndpointDeployment318525DAfa19360caa8a8bc7d311953ab0502ee1"
     },
-    "RestApiId": {
-     "Ref": "EndpointEEF1FD8F"
-    },
-    "StageName": "prod"
-   },
-   "DependsOn": [
-    "EndpointAccountB8304247"
-   ],
-   "Metadata": {
-    "aws:cdk:path": "LambdaApiStack/Endpoint/DeploymentStage.prod/Resource"
-   }
-  },
-  "EndpointhelloBBDCA266": {
-   "Type": "AWS::ApiGateway::Resource",
-   "Properties": {
-    "ParentId": {
-     "Fn::GetAtt": [
-      "EndpointEEF1FD8F",
-      "RootResourceId"
-     ]
-    },
-    "PathPart": "hello",
-    "RestApiId": {
-     "Ref": "EndpointEEF1FD8F"
-    }
+    "PayloadFormatVersion": "2.0"
    },
    "Metadata": {
-    "aws:cdk:path": "LambdaApiStack/Endpoint/Default/hello/Resource"
+    "aws:cdk:path": "LambdaApiStack/HttpApi/DefaultRoute/LambdaIntegration/Resource"
    }
   },
-  "EndpointhelloGETApiPermissionLambdaApiStackEndpointC4DC2BF5GEThelloFF78E858": {
+  "HttpApiDefaultRouteLambdaIntegrationPermission8AC1882E": {
    "Type": "AWS::Lambda::Permission",
    "Properties": {
     "Action": "lambda:InvokeFunction",
@@ -204,127 +117,61 @@
        },
        ":",
        {
-        "Ref": "EndpointEEF1FD8F"
+        "Ref": "HttpApiF5A9A8A7"
        },
-       "/",
-       {
-        "Ref": "EndpointDeploymentStageprodB78BEEA0"
-       },
-       "/GET/hello"
+       "/*/*"
       ]
      ]
     }
    },
    "Metadata": {
-    "aws:cdk:path": "LambdaApiStack/Endpoint/Default/hello/GET/ApiPermission.LambdaApiStackEndpointC4DC2BF5.GET..hello"
+    "aws:cdk:path": "LambdaApiStack/HttpApi/DefaultRoute/LambdaIntegration-Permission"
    }
   },
-  "EndpointhelloGETApiPermissionTestLambdaApiStackEndpointC4DC2BF5GEThelloECE9515F": {
-   "Type": "AWS::Lambda::Permission",
+  "HttpApiDefaultRoute146696CE": {
+   "Type": "AWS::ApiGatewayV2::Route",
    "Properties": {
-    "Action": "lambda:InvokeFunction",
-    "FunctionName": {
-     "Fn::GetAtt": [
-      "HelloHandler2E4FBA4D",
-      "Arn"
-     ]
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
     },
-    "Principal": "apigateway.amazonaws.com",
-    "SourceArn": {
-     "Fn::Join": [
-      "",
-      [
-       "arn:",
-       {
-        "Ref": "AWS::Partition"
-       },
-       ":execute-api:us-west-2:",
-       {
-        "Ref": "AWS::AccountId"
-       },
-       ":",
-       {
-        "Ref": "EndpointEEF1FD8F"
-       },
-       "/test-invoke-stage/GET/hello"
-      ]
-     ]
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "LambdaApiStack/Endpoint/Default/hello/GET/ApiPermission.Test.LambdaApiStackEndpointC4DC2BF5.GET..hello"
-   }
-  },
-  "EndpointhelloGET17B01EB6": {
-   "Type": "AWS::ApiGateway::Method",
-   "Properties": {
     "AuthorizationType": "NONE",
-    "HttpMethod": "GET",
-    "Integration": {
-     "IntegrationHttpMethod": "POST",
-     "Type": "AWS_PROXY",
-     "Uri": {
-      "Fn::Join": [
-       "",
-       [
-        "arn:",
-        {
-         "Ref": "AWS::Partition"
-        },
-        ":apigateway:us-west-2:lambda:path/2015-03-31/functions/",
-        {
-         "Fn::GetAtt": [
-          "HelloHandler2E4FBA4D",
-          "Arn"
-         ]
-        },
-        "/invocations"
-       ]
+    "RouteKey": "$default",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "HttpApiDefaultRouteLambdaIntegrationC1A64CAE"
+       }
       ]
-     }
-    },
-    "ResourceId": {
-     "Ref": "EndpointhelloBBDCA266"
-    },
-    "RestApiId": {
-     "Ref": "EndpointEEF1FD8F"
+     ]
     }
    },
    "Metadata": {
-    "aws:cdk:path": "LambdaApiStack/Endpoint/Default/hello/GET/Resource"
+    "aws:cdk:path": "LambdaApiStack/HttpApi/DefaultRoute/Resource"
+   }
+  },
+  "HttpApiDefaultStage3EEB07D6": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AutoDeploy": true,
+    "StageName": "$default"
+   },
+   "Metadata": {
+    "aws:cdk:path": "LambdaApiStack/HttpApi/DefaultStage/Resource"
    }
   },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/02OTW6DQAyFz5L94JaiLLIkrbpqlYgcIHIGlzjADMIeIYS4ezXQKqze57/3/Abpfg+vOxwksWWdNHyD6aJoa4ODXKcG21uJMH0GZ5W9M+8/bstn6lsWYe9mw9jCVPiG4iDqbCS7ogipQB7FSAbHYGvSIwoZ7LhCpQFHmL6WoIJE844Xgyfm1vrg1HxQ1/ixJaexu6kuitWSukJB4kNvaQn5L/48V/4mvfsytlaa5+fe8mk0YlfFjVPQLuj2fDbnUe/evWSQpnDYPYQ56YNTbgmKVX8BxtsjKlkBAAA="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/12OQW/CMAyFfwv31FupOOwIk6bthsoPQCZ4ndc2qWpnFYry36cEENNO33t+tp7XUG828LzCRSp77quBTxAPirY3uMgxDjiezgjxLTir7J15/XR/9Z7mkUXYu2QYR4itHygHmclIc0QRUoFthpEGdsH2pDsUMjhxh0oLXn7WEN9Vp+3E+Tgj29YHpaI+nFI34732n33sHRS70l9ESqYl8WG2ZMoDecquKze3IJn9Rb+8e2qgruFl9S3M1Ryc8kjQXvkLxUhH4iYBAAA="
    },
    "Metadata": {
     "aws:cdk:path": "LambdaApiStack/CDKMetadata/Default"
-   }
-  }
- },
- "Outputs": {
-  "Endpoint8024A810": {
-   "Value": {
-    "Fn::Join": [
-     "",
-     [
-      "https://",
-      {
-       "Ref": "EndpointEEF1FD8F"
-      },
-      ".execute-api.us-west-2.",
-      {
-       "Ref": "AWS::URLSuffix"
-      },
-      "/",
-      {
-       "Ref": "EndpointDeploymentStageprodB78BEEA0"
-      },
-      "/"
-     ]
-    ]
    }
   }
  },

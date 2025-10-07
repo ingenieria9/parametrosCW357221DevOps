@@ -1,4 +1,4 @@
-from aws_cdk import Stack, aws_s3 as s3
+from aws_cdk import Stack, RemovalPolicy, aws_s3 as s3
 from constructs import Construct
 
 class StorageStack(Stack):
@@ -10,7 +10,6 @@ class StorageStack(Stack):
             f"{project_name}-SharedBucket",
             bucket_name=f"{project_name.lower()}-shared-bucket",
             versioned=True,
-            removal_policy=s3.RemovalPolicy.DESTROY,
+            removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True,
         )
-

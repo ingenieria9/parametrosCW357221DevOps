@@ -1,0 +1,1286 @@
+{
+ "Resources": {
+  "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase1ServiceRole6DA3E3FC": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase1/CW357221ParametrosDevOps-LambdaB-Fase1/ServiceRole/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase1ServiceRoleDefaultPolicyB21841E4": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase1ServiceRoleDefaultPolicyB21841E4",
+    "Roles": [
+     {
+      "Ref": "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase1ServiceRole6DA3E3FC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase1/CW357221ParametrosDevOps-LambdaB-Fase1/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase11DBC9273": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": "cw357221parametrosdevops-shared-bucket",
+      "FOLDER_NAME": "Fase1"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-LambdaB-Fase1",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase1ServiceRole6DA3E3FC",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12"
+   },
+   "DependsOn": [
+    "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase1ServiceRoleDefaultPolicyB21841E4",
+    "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase1ServiceRole6DA3E3FC"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase1/CW357221ParametrosDevOps-LambdaB-Fase1/Resource",
+    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1ServiceRole287A598A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase1/CW357221ParametrosDevOps-LambdaC-Fase1/ServiceRole/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1ServiceRoleDefaultPolicy67B84D4A": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1ServiceRoleDefaultPolicy67B84D4A",
+    "Roles": [
+     {
+      "Ref": "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1ServiceRole287A598A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase1/CW357221ParametrosDevOps-LambdaC-Fase1/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1F1D722EB": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": "cw357221parametrosdevops-shared-bucket",
+      "FOLDER_NAME": "Fase1"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-LambdaC-Fase1",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1ServiceRole287A598A",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12"
+   },
+   "DependsOn": [
+    "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1ServiceRoleDefaultPolicy67B84D4A",
+    "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1ServiceRole287A598A"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase1/CW357221ParametrosDevOps-LambdaC-Fase1/Resource",
+    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaAFase1ServiceRole4DDA9B4C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase1/CW357221ParametrosDevOps-LambdaA-Fase1/ServiceRole/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaAFase1ServiceRoleDefaultPolicy81A15F8E": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase11DBC9273",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase11DBC9273",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1F1D722EB",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1F1D722EB",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaAFase1ServiceRoleDefaultPolicy81A15F8E",
+    "Roles": [
+     {
+      "Ref": "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaAFase1ServiceRole4DDA9B4C"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase1/CW357221ParametrosDevOps-LambdaA-Fase1/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaAFase173598D64": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "LAMBDA_B_ARN": {
+       "Fn::GetAtt": [
+        "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaBFase11DBC9273",
+        "Arn"
+       ]
+      },
+      "LAMBDA_C_ARN": {
+       "Fn::GetAtt": [
+        "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaCFase1F1D722EB",
+        "Arn"
+       ]
+      },
+      "BUCKET_NAME": "cw357221parametrosdevops-shared-bucket",
+      "FOLDER_NAME": "Fase1"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-LambdaA-Fase1",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaAFase1ServiceRole4DDA9B4C",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12"
+   },
+   "DependsOn": [
+    "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaAFase1ServiceRoleDefaultPolicy81A15F8E",
+    "CW357221ParametrosDevOpsPipelineFase1CW357221ParametrosDevOpsLambdaAFase1ServiceRole4DDA9B4C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase1/CW357221ParametrosDevOps-LambdaA-Fase1/Resource",
+    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2ServiceRole58B90E8B": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase2/CW357221ParametrosDevOps-LambdaB-Fase2/ServiceRole/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2ServiceRoleDefaultPolicyCFB029B0": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2ServiceRoleDefaultPolicyCFB029B0",
+    "Roles": [
+     {
+      "Ref": "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2ServiceRole58B90E8B"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase2/CW357221ParametrosDevOps-LambdaB-Fase2/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2FFC3CD4B": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": "cw357221parametrosdevops-shared-bucket",
+      "FOLDER_NAME": "Fase2"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-LambdaB-Fase2",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2ServiceRole58B90E8B",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12"
+   },
+   "DependsOn": [
+    "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2ServiceRoleDefaultPolicyCFB029B0",
+    "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2ServiceRole58B90E8B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase2/CW357221ParametrosDevOps-LambdaB-Fase2/Resource",
+    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2ServiceRole60534736": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase2/CW357221ParametrosDevOps-LambdaC-Fase2/ServiceRole/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2ServiceRoleDefaultPolicy870B373C": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2ServiceRoleDefaultPolicy870B373C",
+    "Roles": [
+     {
+      "Ref": "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2ServiceRole60534736"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase2/CW357221ParametrosDevOps-LambdaC-Fase2/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2E861362E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": "cw357221parametrosdevops-shared-bucket",
+      "FOLDER_NAME": "Fase2"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-LambdaC-Fase2",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2ServiceRole60534736",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12"
+   },
+   "DependsOn": [
+    "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2ServiceRoleDefaultPolicy870B373C",
+    "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2ServiceRole60534736"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase2/CW357221ParametrosDevOps-LambdaC-Fase2/Resource",
+    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaAFase2ServiceRoleADB1D702": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase2/CW357221ParametrosDevOps-LambdaA-Fase2/ServiceRole/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaAFase2ServiceRoleDefaultPolicy7AF74BC3": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2FFC3CD4B",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2FFC3CD4B",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2E861362E",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2E861362E",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaAFase2ServiceRoleDefaultPolicy7AF74BC3",
+    "Roles": [
+     {
+      "Ref": "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaAFase2ServiceRoleADB1D702"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase2/CW357221ParametrosDevOps-LambdaA-Fase2/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaAFase2967BEB00": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "LAMBDA_B_ARN": {
+       "Fn::GetAtt": [
+        "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaBFase2FFC3CD4B",
+        "Arn"
+       ]
+      },
+      "LAMBDA_C_ARN": {
+       "Fn::GetAtt": [
+        "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaCFase2E861362E",
+        "Arn"
+       ]
+      },
+      "BUCKET_NAME": "cw357221parametrosdevops-shared-bucket",
+      "FOLDER_NAME": "Fase2"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-LambdaA-Fase2",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaAFase2ServiceRoleADB1D702",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12"
+   },
+   "DependsOn": [
+    "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaAFase2ServiceRoleDefaultPolicy7AF74BC3",
+    "CW357221ParametrosDevOpsPipelineFase2CW357221ParametrosDevOpsLambdaAFase2ServiceRoleADB1D702"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase2/CW357221ParametrosDevOps-LambdaA-Fase2/Resource",
+    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3ServiceRole1B2B88DD": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase3/CW357221ParametrosDevOps-LambdaB-Fase3/ServiceRole/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3ServiceRoleDefaultPolicy01576CF7": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3ServiceRoleDefaultPolicy01576CF7",
+    "Roles": [
+     {
+      "Ref": "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3ServiceRole1B2B88DD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase3/CW357221ParametrosDevOps-LambdaB-Fase3/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3FE9CE62B": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": "cw357221parametrosdevops-shared-bucket",
+      "FOLDER_NAME": "Fase3"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-LambdaB-Fase3",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3ServiceRole1B2B88DD",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12"
+   },
+   "DependsOn": [
+    "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3ServiceRoleDefaultPolicy01576CF7",
+    "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3ServiceRole1B2B88DD"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase3/CW357221ParametrosDevOps-LambdaB-Fase3/Resource",
+    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3ServiceRole0D2A4E8D": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase3/CW357221ParametrosDevOps-LambdaC-Fase3/ServiceRole/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3ServiceRoleDefaultPolicy880E2560": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cw357221parametrosdevops-shared-bucket/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3ServiceRoleDefaultPolicy880E2560",
+    "Roles": [
+     {
+      "Ref": "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3ServiceRole0D2A4E8D"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase3/CW357221ParametrosDevOps-LambdaC-Fase3/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3A7AF04A4": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": "cw357221parametrosdevops-shared-bucket",
+      "FOLDER_NAME": "Fase3"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-LambdaC-Fase3",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3ServiceRole0D2A4E8D",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12"
+   },
+   "DependsOn": [
+    "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3ServiceRoleDefaultPolicy880E2560",
+    "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3ServiceRole0D2A4E8D"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase3/CW357221ParametrosDevOps-LambdaC-Fase3/Resource",
+    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaAFase3ServiceRoleB404826C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase3/CW357221ParametrosDevOps-LambdaA-Fase3/ServiceRole/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaAFase3ServiceRoleDefaultPolicy486F5B05": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3FE9CE62B",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3FE9CE62B",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3A7AF04A4",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3A7AF04A4",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaAFase3ServiceRoleDefaultPolicy486F5B05",
+    "Roles": [
+     {
+      "Ref": "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaAFase3ServiceRoleB404826C"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase3/CW357221ParametrosDevOps-LambdaA-Fase3/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaAFase3DC909CC6": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "LAMBDA_B_ARN": {
+       "Fn::GetAtt": [
+        "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaBFase3FE9CE62B",
+        "Arn"
+       ]
+      },
+      "LAMBDA_C_ARN": {
+       "Fn::GetAtt": [
+        "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaCFase3A7AF04A4",
+        "Arn"
+       ]
+      },
+      "BUCKET_NAME": "cw357221parametrosdevops-shared-bucket",
+      "FOLDER_NAME": "Fase3"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-LambdaA-Fase3",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaAFase3ServiceRoleB404826C",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12"
+   },
+   "DependsOn": [
+    "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaAFase3ServiceRoleDefaultPolicy486F5B05",
+    "CW357221ParametrosDevOpsPipelineFase3CW357221ParametrosDevOpsLambdaAFase3ServiceRoleB404826C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CW357221ParametrosDevOps-PipelineFase3/CW357221ParametrosDevOps-LambdaA-Fase3/Resource",
+    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zWMwQqDMBBEv6X3dVsrHnqshZ5FP0DWmNqtmoCbIBLy70VtT+/NDMwV0zzHy4kWSVQ3JCO3GGpHagBapAkjTW1HGJ7eKMfWwONl/h6BacJQ2VFv9c7SjqzWLR4WQbKGRLQTvG8AybDwatCuINERKi3Wz0rDvtaOejb9fvcbIpSre1tzzjBN8Xb6CHMye+N40lgd/AIZaq5KxgAAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ApplicationStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
