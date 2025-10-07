@@ -1,16 +1,15 @@
 from aws_cdk import (
     Stack,
     aws_lambda as _lambda,
-    aws_apigateway as apigw,
+    aws_apigatewayv2 as apigwv2,
+    aws_apigatewayv2_integrations as integrations,
 )
 from constructs import Construct
-
 
 class LambdaApiStack(Stack):
     def __init__(self, scope: Construct, id: str, **kwargs):
         super().__init__(scope, id, **kwargs)
 
-        # Lambda Function
         hello_fn = _lambda.Function(
             self,
             "HelloHandler",
@@ -20,18 +19,16 @@ class LambdaApiStack(Stack):
             function_name="cdk-demo-hello",
         )
 
-        # API Gateway
-        api = apigw.LambdaRestApi(
-            self,
-            "Endpoint",
+        integration = integrations.HttpLambdaIntegration(
+            "LambdaIntegration",
             handler=hello_fn,
-            proxy=False,
-            rest_api_name="cdk-demo-api",
         )
 
-        # Create /hello endpoint
-        items = api.root.add_resource("hello")
-        items.add_method("GET")  # GET /hello
+        api = apigwv2.HttpApi(
+            self,
+            "HttpApi",
+            default_integration=integration,
+            api_name="cdk-demo-http-api",
+        )
 
-        # Output the API URL
-        self.api_url = api.url
+        self.api_url = api.api_endpoint
