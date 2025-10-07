@@ -1,0 +1,38 @@
+name: Deploy CDK Stack
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install CDK and dependencies
+        run: |
+          pip install -r infra/requirements.txt
+          npm install -g aws-cdk
+
+      - name: Synthesize CDK
+        working-directory: infra
+        run: cdk synth
+
+      - name: Deploy CDK stack
+        working-directory: infra
+        run: cdk deploy --require-approval never
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "us-west-2"
