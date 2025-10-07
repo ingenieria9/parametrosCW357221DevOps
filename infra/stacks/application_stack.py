@@ -7,22 +7,22 @@ class ApplicationStack(Stack):
         super().__init__(scope, id, **kwargs)
 
         self.pipeline1 = LambdaPipelineConstruct(
-            self, f"{project_name}-PipelineCaso1",
+            self, f"{project_name}-PipelineFase1",
             bucket=bucket,
-            folder_name="caso1",
+            folder_name="Fase1",
             project_name=project_name,
         )
 
         self.pipeline2 = LambdaPipelineConstruct(
-            self, f"{project_name}-PipelineCaso2",
+            self, f"{project_name}-PipelineFase2",
             bucket=bucket,
-            folder_name="caso2",
+            folder_name="Fase2",
             project_name=project_name,
         )
 
         self.pipeline3 = LambdaPipelineConstruct(
-            self, f"{project_name}-PipelineCaso3",
+            self, f"{project_name}-PipelineFase3",
             bucket=bucket,
-            folder_name="caso3",
+            folder_name="Fase3",
             project_name=project_name,
         )
