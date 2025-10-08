@@ -12,7 +12,7 @@ class StorageStack(Stack):
             self,
             f"{project_name}-SharedBucket",
             bucket_name=f"{project_name.lower()}-bucket",
-            versioned=True,
+            versioned=False,
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True,
         )

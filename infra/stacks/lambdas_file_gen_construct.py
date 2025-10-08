@@ -8,11 +8,23 @@ class LambdasFileGenConstruct(Construct):
     def __init__(self, scope: Construct, id: str, bucket, folder_name: str, project_name: str,  db_access_lambda_arn: str,):
         super().__init__(scope, id)
 
+        # Referenciar la Layer existente (por ARN)
+        openpyxl_layer = _lambda.LayerVersion.from_layer_version_arn(
+            self,
+            f"{project_name}-OpenpyxlLayer",
+            layer_version_arn="arn:aws:lambda:us-west-2:339713063336:layer:openpyxl:3",
+        )
+        docxtpl_layer = _lambda.LayerVersion.from_layer_version_arn(
+            self,
+            f"{project_name}-DocxtplLayer",
+            layer_version_arn="arn:aws:lambda:us-west-2:339713063336:layer:docxtpl:2",
+        )
+
         # "formato" lambda
         self.formato = _lambda.Function(
             self,
             f"{project_name}-Formato-{folder_name}",
-            runtime=_lambda.Runtime.PYTHON_3_12,
+            runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
             code=_lambda.Code.from_asset(f"../src/{folder_name}/formato"),
             environment={
@@ -21,6 +33,7 @@ class LambdasFileGenConstruct(Construct):
                 "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
             },
             function_name=f"{project_name}-Formato-{folder_name}",
+            layers=[openpyxl_layer],
         )
 
         # "Informe" lambda
@@ -36,6 +49,7 @@ class LambdasFileGenConstruct(Construct):
                 "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
             },
             function_name=f"{project_name}-Informe-{folder_name}",
+            layers=[docxtpl_layer],
         )
 
         # Permisos S3

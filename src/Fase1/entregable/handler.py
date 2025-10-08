@@ -49,33 +49,16 @@ def lambda_handler(event, context):
 
     # invocar a lambda acceso base de datos (sync) 
     # revisar si el punto es el ultimo visitado del circuito
-    payload_db = f'{
+    payload_db = {
         "queryStringParameters": {
-            # seleccionar circuito de la tabla puntos_capa_principal si todos los id de tabla puntos_capa_principal estan en tabla fase_1
-            "query": """SELECT  
-                CASE 
-                    WHEN COUNT(*) = (
-                        SELECT COUNT(*) 
-                        FROM puntos_capa_principal p2
-                        WHERE p2.circuito = p1.circuito
-                        AND p2.id IN (SELECT id FROM fase_1)
-                    )
-                    THEN \'Finalizado\'
-                    ELSE \'Incompleto\'
-                END AS estado,
-                p1.circuito as circuito
-            FROM puntos_capa_principal p1
-            WHERE p1.circuito = (
-                SELECT circuito 
-                FROM puntos_capa_principal 
-                WHERE id = {id}
-            )
-            GROUP BY p1.circuito""",
+            "query": f"SELECT CASE WHEN COUNT(*) = (SELECT COUNT(*)  FROM puntos_capa_principal p2  WHERE p2.circuito = p1.circuito AND p2.id IN (SELECT id FROM fase_1))THEN 'Finalizado' ELSE 'Incompleto' END AS estado, p1.circuito as circuito FROM puntos_capa_principal p1 WHERE p1.circuito = ( SELECT circuito FROM puntos_capa_principal WHERE id = '{id}')GROUP BY p1.circuito;",
             "time_column": "fecha_creacion",
             "db_name": "parametros"
         }
-    }'
+    }
+    print(payload_db)
     response_db =invoke_lambda_db(payload_db, db_access_arn)
+    print(response_db)
     #Parsear el body 
     body = json.loads(response_db["body"])
     # xtraer el valor del campo "estado"
