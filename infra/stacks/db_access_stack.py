@@ -8,18 +8,12 @@ from aws_cdk import (
 )
 from constructs import Construct
 
-from dotenv import load_dotenv
 import os
 
-# Carga el archivo .env del mismo folder
-load_dotenv()
 
-# Obtener variables
-DB_HOST = os.getenv("LAMBDA_DB_HOST")
-DB_PASSWORD = os.getenv("LAMBDA_DB_PASSWORD")
-DB_PORT = os.getenv("LAMBDA_DB_PORT")
-DB_USER = os.getenv("LAMBDA_DB_USER")
-
+db_host = os.environ["DB_HOST"]
+db_user = os.environ["DB_USER"]
+db_password = os.environ["DB_PASSWORD"]
 
 
 class DbAccessStack(Stack):
