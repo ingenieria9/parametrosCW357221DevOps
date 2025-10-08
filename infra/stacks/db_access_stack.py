@@ -11,9 +11,9 @@ from constructs import Construct
 import os
 
 
-db_host = os.environ["DB_HOST"]
-db_user = os.environ["DB_USER"]
-db_password = os.environ["DB_PASSWORD"]
+DB_HOST = os.environ["DB_HOST"]
+DB_USER = os.environ["DB_USER"]
+DB_PASSWORD = os.environ["DB_PASSWORD"]
 
 
 class DbAccessStack(Stack):
