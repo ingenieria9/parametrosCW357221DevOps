@@ -256,18 +256,17 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-339713063336-us-east-1",
-                      "s3Key": "d82ff0444c629d5af67faa941c22b7aebfbc12edba49295b8b78d351ee25ac8e.zip"
+                      "s3Key": "b25202057d85f5d760ec850c2bf50ff6aa721a4e1b72be7db8513b46b6373ac8.zip"
                     },
                     "environment": {
                       "variables": {
-                        "DB_HOST": "your-db-host.rds.amazonaws.com",
-                        "DB_USER": "dbuser",
-                        "DB_PASSWORD": "arn:aws:secretsmanager:us-east-1:123456789012:secret:dbcreds",
-                        "ENABLE_LOGS": "false"
+                        "DB_HOST": "epm-db.cd26g82c0y8j.us-east-1.rds.amazonaws.com",
+                        "DB_USER": "it_role",
+                        "DB_PASSWORD": "it_role"
                       }
                     },
                     "functionName": "CW357221ParametrosDevOps-db-access",
-                    "handler": "db_access.lambda_handler",
+                    "handler": "lambda_function.lambda_handler",
                     "layers": [
                       "arn:aws:lambda:us-east-1:339713063336:layer:psycopg2:1"
                     ],

@@ -8,6 +8,19 @@ from aws_cdk import (
 )
 from constructs import Construct
 
+from dotenv import load_dotenv
+import os
+
+# Carga el archivo .env del mismo folder
+load_dotenv()
+
+# Obtener variables
+DB_HOST = os.getenv("LAMBDA_DB_HOST")
+DB_PASSWORD = os.getenv("LAMBDA_DB_PASSWORD")
+DB_PORT = os.getenv("LAMBDA_DB_PORT")
+DB_USER = os.getenv("LAMBDA_DB_USER")
+
+
 
 class DbAccessStack(Stack):
     def __init__(self, scope: Construct, id: str, project_name: str, vpc_id: str, psycopg2_layer_arn: str, **kwargs):
@@ -32,17 +45,16 @@ class DbAccessStack(Stack):
             self,
             f"{project_name}-DbAccessLambda",
             runtime=_lambda.Runtime.PYTHON_3_10,
-            handler="db_access.lambda_handler",
+            handler="lambda_function.lambda_handler",
             code=_lambda.Code.from_asset("../src/db_access"),
             allow_public_subnet=True,
             vpc=vpc,
             layers=[psycopg2_layer],
             function_name=f"{project_name}-db-access",
             environment={
-                "DB_HOST": "your-db-host.rds.amazonaws.com",
-                "DB_USER": "dbuser",
-                "DB_PASSWORD": "arn:aws:secretsmanager:us-east-1:123456789012:secret:dbcreds",
-                "ENABLE_LOGS": "false",  # opcional
+                "DB_HOST": DB_HOST,
+                "DB_USER": DB_USER,
+                "DB_PASSWORD": DB_PASSWORD
             },
         )
 
