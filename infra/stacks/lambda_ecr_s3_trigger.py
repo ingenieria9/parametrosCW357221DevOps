@@ -13,7 +13,7 @@ from constructs import Construct
 
 class LambdaEcrS3TriggerStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, bucket : s3.IBucket, project_name: str , **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, bucket_name: str, bucket_arn: str, project_name: str , **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Repositorio ECR existente
@@ -23,13 +23,13 @@ class LambdaEcrS3TriggerStack(Stack):
             "libreoffice-converter",  
         )
 
-        # Bucket S3 (nuevo)
-        '''bucket = s3.Bucket(
+        # Importar el bucket por nombre/ARN (no se crea relación circular)
+        bucket = s3.Bucket.from_bucket_attributes(
             self,
-            "UploadBucket",
-            removal_policy=RemovalPolicy.DESTROY,
-            auto_delete_objects=True,
-        )'''
+            "ImportedBucket",
+            bucket_name=bucket_name,
+            bucket_arn=bucket_arn,
+        )
 
         # Lambda basada en imagen ECR existente
         lambda_fn = _lambda.DockerImageFunction(

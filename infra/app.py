@@ -61,7 +61,8 @@ FileGenStack(
 )
 
 # Stack conversor docx a pdf (lambda en ECR + trigger S3)
-LambdaEcrS3TriggerStack(app, f"{PROJECT_NAME}-LambdaEcrS3TriggerStack", bucket=storage.bucket, project_name=PROJECT_NAME, env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
+LambdaEcrS3TriggerStack(app, f"{PROJECT_NAME}-LambdaEcrS3TriggerStack",     bucket_name=storage.bucket.bucket_name,
+    bucket_arn=storage.bucket.bucket_arn, project_name=PROJECT_NAME, env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
 
 
 app.synth()
