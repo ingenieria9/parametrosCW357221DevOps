@@ -4,6 +4,7 @@ from stacks.lambda_api_stack import LambdaApiStack
 from stacks.s3_storage_stack import StorageStack
 from stacks.file_gen_stack import FileGenStack
 from stacks.db_access_stack import DbAccessStack
+from stacks.lambda_ecr_s3_trigger import LambdaEcrS3TriggerStack
 
 app = cdk.App()
 
@@ -58,5 +59,9 @@ FileGenStack(
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION),
     db_access_lambda_arn=db_stack.db_access_lambda_arn
 )
+
+# Stack conversor docx a pdf (lambda en ECR + trigger S3)
+LambdaEcrS3TriggerStack(app, f"{PROJECT_NAME}-LambdaEcrS3TriggerStack", bucket=storage.bucket, project_name=PROJECT_NAME, env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
+
 
 app.synth()

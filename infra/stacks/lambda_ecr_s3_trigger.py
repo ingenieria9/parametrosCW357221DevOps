@@ -1,0 +1,67 @@
+from aws_cdk import (
+    Stack,
+    aws_lambda as _lambda,
+    aws_s3 as s3,
+    aws_s3_notifications as s3n,
+    aws_ecr as ecr,
+    RemovalPolicy,
+    Duration,
+    CfnOutput
+)
+from constructs import Construct
+
+
+class LambdaEcrS3TriggerStack(Stack):
+
+    def __init__(self, scope: Construct, construct_id: str, bucket : s3.IBucket, project_name: str , **kwargs) -> None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        # Repositorio ECR existente
+        repository = ecr.Repository.from_repository_name(
+            self,
+            "LambdaImageRepo",
+            "libreoffice-converter",  
+        )
+
+        # Bucket S3 (nuevo)
+        '''bucket = s3.Bucket(
+            self,
+            "UploadBucket",
+            removal_policy=RemovalPolicy.DESTROY,
+            auto_delete_objects=True,
+        )'''
+
+        # Lambda basada en imagen ECR existente
+        lambda_fn = _lambda.DockerImageFunction(
+            self,
+            "EcrLambda",
+            function_name=f"{project_name}-file-converter",
+            code=_lambda.DockerImageCode.from_ecr(
+                repository,
+                tag_or_digest="v5",  
+            ),
+            memory_size=512,
+            timeout=Duration.seconds(120),
+            environment={
+                "BUCKET_NAME": bucket.bucket_name,
+                "HOME": "/tmp" 
+            },
+        )
+
+        # Permisos de acceso al bucket
+        bucket.grant_read_write(lambda_fn)
+
+        # Trigger S3 → Lambda (solo para archivos DOCX en files-to-convert/)
+        notification = s3n.LambdaDestination(lambda_fn)
+        bucket.add_event_notification(
+            s3.EventType.OBJECT_CREATED_PUT,
+            notification,
+            s3.NotificationKeyFilter(
+                prefix="files/files-to-convert/",
+                suffix=".docx",
+            ),
+        )
+
+        # Outputs
+        CfnOutput(self, "BucketName", value=bucket.bucket_name)
+        CfnOutput(self, "LambdaName", value=lambda_fn.function_name)

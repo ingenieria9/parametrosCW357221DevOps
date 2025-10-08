@@ -5,21 +5,33 @@ import os
 client = boto3.client("lambda", region_name="us-east-1") 
 
 def lambda_handler(event, context):
-    
     db_access_arn = os.environ["DB_ACCESS_LAMBDA_ARN"]
 
+    payload = {
+        "queryStringParameters": {
+            "query": "INSERT INTO puntos_capa_principal (id, tipo_punto,fecha_creacion) values ('0004', 'caja_medicion', '2024-08-29 10:30:26.000' )",
+            "time_column": "fecha_creacion",
+            "db_name": "parametros"
+        }
+    }
+
+    FunctionName = db_access_arn
+    response = invoke_lambda(payload, FunctionName)
+    return response
+
+
+def invoke_lambda(payload, FunctionName):
     response = client.invoke(
-        FunctionName=db_access_arn,  # ARN completo
-        InvocationType="RequestResponse",  # o 'Event' si no quieres esperar respuesta
-        Payload=json.dumps({
-            {
-            "queryStringParameters": {
-                "query": "SELECT * FROM puntos_capa_principal",
-                "time_column": "timestamp",
-                "db_name": "parametros"
-            }
-            }
-        })
+        FunctionName=FunctionName,
+        InvocationType='RequestResponse',
+        Payload=json.dumps(payload).encode('utf-8')
     )
-    result = json.load(response)
-    return result
+    
+    # Lee el cuerpo de la respuesta
+    result = response["Payload"].read().decode("utf-8")
+    
+    # Intenta parsear a JSON si es posible
+    try:
+        return json.loads(result)
+    except json.JSONDecodeError:
+        return {"raw_response": result}
