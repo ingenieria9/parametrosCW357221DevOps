@@ -40,7 +40,7 @@ class LambdasFileGenConstruct(Construct):
         self.informe = _lambda.Function(
             self,
             f"{project_name}-Informe-{folder_name}",
-            runtime=_lambda.Runtime.PYTHON_3_12,
+            runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
             code=_lambda.Code.from_asset(f"../src/{folder_name}/informe"),
             environment={
@@ -60,7 +60,7 @@ class LambdasFileGenConstruct(Construct):
         self.entregable = _lambda.Function(
             self,
             f"{project_name}-Entregable-{folder_name}",
-            runtime=_lambda.Runtime.PYTHON_3_12,
+            runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
             code=_lambda.Code.from_asset(f"../src/{folder_name}/entregable"),
             environment={
