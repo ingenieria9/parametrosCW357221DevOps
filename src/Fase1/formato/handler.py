@@ -3,21 +3,22 @@ import json
 import os
 
 client = boto3.client("lambda", region_name="us-east-1") 
+db_access_arn = os.environ["DB_ACCESS_LAMBDA_ARN"]
 
 def lambda_handler(event, context):
-    db_access_arn = os.environ["DB_ACCESS_LAMBDA_ARN"]
-
-    payload = {
+    
+    print(event)
+    '''payload = {
         "queryStringParameters": {
             "query": "INSERT INTO puntos_capa_principal (id, tipo_punto,fecha_creacion) values ('0004', 'caja_medicion', '2024-08-29 10:30:26.000' )",
             "time_column": "fecha_creacion",
             "db_name": "parametros"
         }
-    }
+    }'''
 
-    FunctionName = db_access_arn
-    response = invoke_lambda(payload, FunctionName)
-    return response
+    #FunctionName = db_access_arn
+    #response = invoke_lambda(payload, FunctionName)
+    #return response
 
 
 def invoke_lambda(payload, FunctionName):
