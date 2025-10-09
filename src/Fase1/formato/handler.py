@@ -73,6 +73,8 @@ from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image  # para insertar imágenes
 import os
+from datetime import datetime
+
 
 s3 = boto3.client("s3")
 TMP_DIR = Path("/tmp")
@@ -80,8 +82,11 @@ TMP_DIR = Path("/tmp")
 # Parámetros de entrada (variables)
 
 bucket_name = os.environ['BUCKET_NAME']
-template_key = "files/plantillas/Fase1/formato-acueducto.xlsx"
+template_path = "files/plantillas/Fase1/"
 output_key = "files/entregables/Fase1/output03.xlsx"
+
+template_name = {"caja_medicion": "formato-acueducto.xlsx",
+                 "vrp": "formato-acueducto.xlsx", "camara": "formato-alcantarillado.xlsx"}
 
 def insert_image(ws, cellNumber, imagen_path):
     img = Image(str(imagen_path))
@@ -123,9 +128,36 @@ def normalizar_booleans(data_get):
     
     return convertir_valor(data_get)
 
+def convertir_valores_fecha(data): 
+    def convertir_fecha(valor): 
+        #convertir numero como 1758818476306 a formato de tiempo legible
+        # no es un objeto datetime sino un entero largo
+        try:
+            if isinstance(valor, int) or (isinstance(valor, str) and valor.isdigit()):
+                timestamp = int(valor) / 1000  # convertir a segundos
+                dt_object = datetime.fromtimestamp(timestamp)
+                return dt_object.strftime("%Y-%m-%d %H:%M:%S")  # formato legible 
+        except Exception as e:
+            print(f"Error al convertir fecha: {e}")
+        return valor
 
+    # Si es un dict, lo recorremos recursivamente
+    if isinstance(data, dict):
+        return {k: convertir_valores_fecha(v) for k, v in data.items()}
+    # Si es una lista, también recursivamente
+    if isinstance(data, list):
+        return [convertir_valores_fecha(v) for v in data]
+    
+    # Si es un valor individual, intentamos convertirlo
+    return convertir_fecha(data)
 
 def lambda_handler(event, context):
+
+    payload_data = event["payload"]["attributes"]
+    tipo_punto = event["payload"]["attributes"]["tipo_punto"]
+
+    #template_path + devolver de template key el value segun tipo de punto (ej para caja de medicion devuelve formato-acueducto.xlsx)
+    template_key = template_path + template_name.get(tipo_punto)
 
     # Paths locales en Lambda (/tmp)
     template_path = TMP_DIR / "plantilla.xlsx"
@@ -141,8 +173,9 @@ def lambda_handler(event, context):
     for key, path in zip(imagen_keys, imagen_paths):
         s3.download_file(bucket_name, key, str(path))
 
-    payload_data = event["payload"]["attributes"]
+
     json_data = normalizar_booleans(payload_data)
+    json_data = convertir_valores_fecha(json_data)
 
     # Cargar plantilla Excel
     wb = load_workbook(template_path)
