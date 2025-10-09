@@ -67,4 +67,4 @@ jobs:
           DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
           DB_USER: ${{ secrets.LAMBDA_DB_USER }}
           DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}  
-          IMAGE_TAG: ${{ env.IMAGE_TAG }}          
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
