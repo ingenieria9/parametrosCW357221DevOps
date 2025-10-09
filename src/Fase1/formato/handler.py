@@ -82,7 +82,7 @@ TMP_DIR = Path("/tmp")
 # Parámetros de entrada (variables)
 
 bucket_name = os.environ['BUCKET_NAME']
-template_path = "files/plantillas/Fase1/"
+template_path_s3 = "files/plantillas/Fase1/"
 output_key = "files/entregables/Fase1/output03.xlsx"
 
 template_name = {"caja_medicion": "formato-acueducto.xlsx",
@@ -156,8 +156,8 @@ def lambda_handler(event, context):
     payload_data = event["payload"]["attributes"]
     tipo_punto = event["payload"]["attributes"]["tipo_punto"]
 
-    #template_path + devolver de template key el value segun tipo de punto (ej para caja de medicion devuelve formato-acueducto.xlsx)
-    template_key = template_path + template_name.get(tipo_punto)
+    #template_path_s3 + devolver de template key el value segun tipo de punto (ej para caja de medicion devuelve formato-acueducto.xlsx)
+    template_key = template_path_s3 + template_name.get(tipo_punto)
 
     # Paths locales en Lambda (/tmp)
     template_path = TMP_DIR / "plantilla.xlsx"
