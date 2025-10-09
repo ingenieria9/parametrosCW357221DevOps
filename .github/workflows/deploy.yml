@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths-ignore:
       - 'src/file_converter_ecr_image/**' 
+      - '.github/workflows/ecr-deploy.yml'
 
 permissions:
   contents: read
