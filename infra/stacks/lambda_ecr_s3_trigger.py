@@ -9,6 +9,7 @@ from aws_cdk import (
     CfnOutput
 )
 from constructs import Construct
+from datetime import datetime
 
 
 class LambdaEcrS3TriggerStack(Stack):
@@ -38,13 +39,14 @@ class LambdaEcrS3TriggerStack(Stack):
             function_name=f"{project_name}-file-converter",
             code=_lambda.DockerImageCode.from_ecr(
                 repository,
-                tag_or_digest="v5",  
+                tag_or_digest="latest",   #antes v5
             ),
             memory_size=512,
             timeout=Duration.seconds(120),
             environment={
                 "BUCKET_NAME": bucket.bucket_name,
-                "HOME": "/tmp" 
+                "HOME": "/tmp",
+                "DEPLOY_TIME": datetime.utcnow().isoformat() #force deployment  
             },
         )
 

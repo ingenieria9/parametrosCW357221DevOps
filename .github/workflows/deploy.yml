@@ -3,6 +3,8 @@ name: Deploy CDK Stack
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'src/file_converter_ecr_image/**' 
 
 permissions:
   contents: read
