@@ -14,8 +14,10 @@ jobs:
     env:
       AWS_REGION: us-west-2        
       ECR_REPOSITORY: libreoffice-converter
-      IMAGE_TAG: latest
+      #IMAGE_TAG: latest
       CDK_STACK_NAME: CW357221ParametrosDevOps-LambdaEcrS3TriggerStack
+      IMAGE_TAG : ${{ github.sha }}
+
 
     steps:
       - name: Checkout code
@@ -53,6 +55,7 @@ jobs:
           DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
           DB_USER: ${{ secrets.LAMBDA_DB_USER }}
           DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}         
 
       - name: Deploy CDK stack
         working-directory: infra
@@ -63,4 +66,5 @@ jobs:
           AWS_DEFAULT_REGION: "us-west-2"
           DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
           DB_USER: ${{ secrets.LAMBDA_DB_USER }}
-          DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}            
+          DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}  
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}          

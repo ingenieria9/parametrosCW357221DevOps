@@ -1,3 +1,4 @@
+import os
 from aws_cdk import (
     Stack,
     aws_lambda as _lambda,
@@ -10,7 +11,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 from datetime import datetime
-
+image_tag = os.getenv("IMAGE_TAG", "latest")
 
 class LambdaEcrS3TriggerStack(Stack):
 
@@ -39,7 +40,7 @@ class LambdaEcrS3TriggerStack(Stack):
             function_name=f"{project_name}-file-converter",
             code=_lambda.DockerImageCode.from_ecr(
                 repository,
-                tag_or_digest="latest",   #antes v5
+                tag_or_digest=image_tag,
             ),
             memory_size=512,
             timeout=Duration.seconds(120),
