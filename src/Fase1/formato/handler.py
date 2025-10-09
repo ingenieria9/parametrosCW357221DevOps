@@ -128,28 +128,40 @@ def normalizar_booleans(data_get):
     
     return convertir_valor(data_get)
 
-def convertir_valores_fecha(data): 
-    def convertir_fecha(valor): 
-        #convertir numero como 1758818476306 a formato de tiempo legible
-        # no es un objeto datetime sino un entero largo
+def convertir_valores_fecha(data):
+    """
+    Convierte valores tipo timestamp (en milisegundos) a formato legible
+    solo si la clave contiene la palabra 'fecha' (insensible a mayúsculas).
+    Funciona de forma recursiva para dicts y listas.
+    """
+
+    def convertir_fecha(key, valor):
         try:
-            if isinstance(valor, int) or (isinstance(valor, str) and valor.isdigit()):
-                timestamp = int(valor) / 1000  # convertir a segundos
-                dt_object = datetime.fromtimestamp(timestamp)
-                return dt_object.strftime("%Y-%m-%d %H:%M:%S")  # formato legible 
+            if "fecha" in key.lower():
+                if isinstance(valor, (int, float)) or (isinstance(valor, str) and valor.isdigit()):
+                    timestamp = int(valor) / 1000  # convertir a segundos
+                    dt_object = datetime.fromtimestamp(timestamp)
+                    return dt_object.strftime("%Y-%m-%d %H:%M:%S")
         except Exception as e:
-            print(f"Error al convertir fecha: {e}")
+            print(f"Error al convertir fecha ({key}): {e}")
         return valor
 
-    # Si es un dict, lo recorremos recursivamente
     if isinstance(data, dict):
-        return {k: convertir_valores_fecha(v) for k, v in data.items()}
-    # Si es una lista, también recursivamente
-    if isinstance(data, list):
+        nuevo_dict = {}
+        for k, v in data.items():
+            # Si el valor es un dict o lista, seguimos bajando
+            if isinstance(v, (dict, list)):
+                nuevo_dict[k] = convertir_valores_fecha(v)
+            else:
+                nuevo_dict[k] = convertir_fecha(k, v)
+        return nuevo_dict
+
+    elif isinstance(data, list):
         return [convertir_valores_fecha(v) for v in data]
-    
-    # Si es un valor individual, intentamos convertirlo
-    return convertir_fecha(data)
+
+    else:
+        # Caso base (no hay clave asociada, solo valor suelto)
+        return data
 
 def lambda_handler(event, context):
 
