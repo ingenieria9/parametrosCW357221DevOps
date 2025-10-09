@@ -13,10 +13,10 @@ import urllib
 # Lambda function to convert DOCX to PDF using LibreOffice in an ECR image  
 s3 = boto3.client('s3')
 
-bucket = os.environ.get('BUCKET_NAME') # Nombre del bucket S3 desde variable de entorno
+
 
 def lambda_handler(event, context):
-    bucket = bucket
+    bucket = os.environ.get('BUCKET_NAME') # Nombre del bucket S3 desde variable de entorno
     #key = "output-dev.docx"
     for record in event["Records"]:
         #bucket = record["s3"]["bucket"]["name"]
