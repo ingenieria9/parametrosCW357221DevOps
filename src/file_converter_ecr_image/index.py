@@ -10,7 +10,7 @@ from urllib.parse import unquote_plus
 
 import urllib
 
-# Lambda function to convert DOCX to PDF using LibreOffice in an ECR image
+# Lambda function to convert DOCX to PDF using LibreOffice in an ECR image  
 s3 = boto3.client('s3')
 
 bucket = os.environ.get('BUCKET_NAME') # Nombre del bucket S3 desde variable de entorno
