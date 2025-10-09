@@ -56,9 +56,14 @@
       "point_type":"cajas_medicion"
    },
    "attachments":[
-      "files/temp-image-folder/ejemplo4.jpg",
       "files/temp-image-folder/ejemplo1.jpg",
-      "files/temp-image-folder/ejemplo2.jpg"
+      "files/temp-image-folder/ejemplo2.jpg",
+      "files/temp-image-folder/ejemplo3.jpg",
+      "files/temp-image-folder/ejemplo4.jpg",
+      "files/temp-image-folder/ejemplo5.jpg",
+      "files/temp-image-folder/ejemplo6.jpg",
+      "files/temp-image-folder/ejemplo7.jpg",
+      "files/temp-image-folder/ejemplo8.jpg"
    ]
 } '''
 

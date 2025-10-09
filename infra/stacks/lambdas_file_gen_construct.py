@@ -1,5 +1,5 @@
 from constructs import Construct
-from aws_cdk import aws_lambda as _lambda, aws_iam as iam
+from aws_cdk import Duration, aws_lambda as _lambda, aws_iam as iam
 
 #Constructor que crea las 3 funciones lambdas de la fase de generación de entregables
 #y les asigna los permisos necesarios para su funcionamiento
@@ -34,6 +34,7 @@ class LambdasFileGenConstruct(Construct):
             },
             function_name=f"{project_name}-Formato-{folder_name}",
             layers=[openpyxl_layer],
+            timeout=Duration.seconds(120)
         )
 
         # "Informe" lambda
@@ -50,6 +51,7 @@ class LambdasFileGenConstruct(Construct):
             },
             function_name=f"{project_name}-Informe-{folder_name}",
             layers=[docxtpl_layer],
+            timeout=Duration.seconds(120)
         )
 
         # Permisos S3

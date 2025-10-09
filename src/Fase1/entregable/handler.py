@@ -38,9 +38,9 @@ payload_prueba = {
 
 def lambda_handler(event, context):
 
-    #incoming_payload = event
+    incoming_payload = event
     #circuito = event.payload["circuito"] #obtener el circuito del evento
-    incoming_payload = payload_prueba
+    #incoming_payload = payload_prueba
     id = incoming_payload["payload"]["OBJECTID"]
     
     # invocar a lambda de generación de formato (async)
