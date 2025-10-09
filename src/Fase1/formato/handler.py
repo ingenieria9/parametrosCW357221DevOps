@@ -56,9 +56,9 @@
       "point_type":"cajas_medicion"
    },
    "attachments":[
-      "CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg",
-      "CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg",
-      "CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg"
+      "files/temp-image-folder/ejemplo4.jpg",
+      "files/temp-image-folder/ejemplo1.jpg",
+      "files/temp-image-folder/ejemplo2.jpg"
    ]
 } '''
 
