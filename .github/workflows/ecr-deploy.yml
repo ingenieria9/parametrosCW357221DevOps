@@ -41,12 +41,16 @@ jobs:
             src/file_converter_ecr_image
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
-      - name: Install dependencies
+      - name: Install CDK and dependencies
         run: |
-          pip install -r cdk/requirements.txt
+          pip install -r infra/requirements.txt
           npm install -g aws-cdk
 
+      - name: Synthesize CDK
+        working-directory: infra
+        run: cdk synth ${{ env.CDK_STACK_NAME }}       
+
       - name: Deploy CDK Stack
-        working-directory: cdk
+        working-directory: infra
         run: |
             cdk deploy ${{ env.CDK_STACK_NAME }} --require-approval never
