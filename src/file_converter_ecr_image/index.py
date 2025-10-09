@@ -13,7 +13,7 @@ import urllib
 
 s3 = boto3.client('s3')
 
-bucket = os.environ.get('BUCKET_NAME')
+bucket = os.environ.get('BUCKET_NAME') # Nombre del bucket S3 desde variable de entorno
 
 def lambda_handler(event, context):
     bucket = bucket
