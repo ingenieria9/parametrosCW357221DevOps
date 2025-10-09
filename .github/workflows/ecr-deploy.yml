@@ -48,9 +48,19 @@ jobs:
 
       - name: Synthesize CDK
         working-directory: infra
-        run: cdk synth ${{ env.CDK_STACK_NAME }}       
+        run: cdk synth ${{ env.CDK_STACK_NAME }}   
+        env:
+          DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
+          DB_USER: ${{ secrets.LAMBDA_DB_USER }}
+          DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}
 
-      - name: Deploy CDK Stack
+      - name: Deploy CDK stack
         working-directory: infra
-        run: |
-            cdk deploy ${{ env.CDK_STACK_NAME }} --require-approval never
+        run: cdk deploy ${{ env.CDK_STACK_NAME }} --require-approval never
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "us-west-2"
+          DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
+          DB_USER: ${{ secrets.LAMBDA_DB_USER }}
+          DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}            
