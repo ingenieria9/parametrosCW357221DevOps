@@ -37,6 +37,11 @@ jobs:
         run: |
           STACKS=$(cdk list | grep -v CW357221ParametrosDevOps-LambdaEcrS3TriggerStack)
           echo "stacks=$STACKS" >> $GITHUB_OUTPUT
+        env:
+          DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
+          DB_USER: ${{ secrets.LAMBDA_DB_USER }}
+          DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}          
 
 
       - name: Synthesize CDK
