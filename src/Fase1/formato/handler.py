@@ -60,7 +60,7 @@
       "CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg",
       "CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg"
    ]
-}'''
+} '''
 
 import boto3
 import json
