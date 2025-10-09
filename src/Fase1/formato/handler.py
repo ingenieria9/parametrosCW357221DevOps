@@ -74,7 +74,7 @@ from openpyxl import load_workbook
 from openpyxl.drawing.image import Image  # para insertar imágenes
 import os
 from datetime import datetime
-
+import re
 
 s3 = boto3.client("s3")
 TMP_DIR = Path("/tmp")
@@ -83,10 +83,13 @@ TMP_DIR = Path("/tmp")
 
 bucket_name = os.environ['BUCKET_NAME']
 template_path_s3 = "files/plantillas/Fase1/"
-output_key = "files/entregables/Fase1/output03.xlsx"
+output_path_s3 = "files/entregables/Fase1/"
 
 template_name = {"caja_medicion": "formato-acueducto.xlsx",
                  "vrp": "formato-acueducto.xlsx", "camara": "formato-alcantarillado.xlsx"}
+
+COD_name = {"caja_medicion": "ACU/MPH-EJ-06-01-F01-ACU-EIN-",
+            "vrp": "ACU/MPH-EJ-06-01-F01-ACU-EIN-", "camara": "ALC/MPH-EJ-06-01-F01-ALC-EIN-"}
 
 def insert_image(ws, cellNumber, imagen_path):
     img = Image(str(imagen_path))
@@ -162,6 +165,27 @@ def convertir_valores_fecha(data):
     else:
         # Caso base (no hay clave asociada, solo valor suelto)
         return data
+    
+
+def obtener_consecutivo_s3(bucket, prefix, cod_name):
+    """
+    Busca el mayor número consecutivo en los nombres de archivos dentro del prefijo dado
+    y devuelve el siguiente número disponible (formato 001, 002, etc.).
+    """
+    max_consec = 0
+    pattern = re.escape(cod_name) + r"(\d{3})\.xlsx$"
+
+    paginator = s3.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+        for obj in page.get("Contents", []):
+            key = obj["Key"]
+            match = re.search(pattern, key)
+            if match:
+                num = int(match.group(1))
+                if num > max_consec:
+                    max_consec = num
+
+    return f"{max_consec + 1:03}"
 
 def lambda_handler(event, context):
 
@@ -219,7 +243,17 @@ def lambda_handler(event, context):
 
     # Guardar archivo final
     wb.save(output_path)
+
+
     # Subir resultado a S3
+    #listar los archivos de s3 en
+    # Obtener el consecutivo siguiente en esa carpeta
+    consecutivo = obtener_consecutivo_s3(bucket_name, output_path_s3, COD_name[tipo_punto])
+
+    #Construir el nombre completo del archivo
+    output_key = f"{output_path_s3}{COD_name[tipo_punto]}{consecutivo}.xlsx"
+
+
     s3.upload_file(str(output_path), bucket_name, output_key)
 
     return {
