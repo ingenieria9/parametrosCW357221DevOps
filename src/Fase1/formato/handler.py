@@ -1,16 +1,73 @@
 #Ejemplo de payload 
 #{'payload': {'layer_id': 1, 'OBJECTID': '0002', 'geometry': 'null', 'attributes': {'OBJECTID': '0002', 'GlobalID': '3CFDE950-8AE7-440E-B1E7-310C56A35794', 'Identificador': 'PTO_0002', 'Tipo_Punto': 'VRP', 'Creador': 'central_ti_telemetrik', 'Fecha_Creacion': 1758818476306, 'Editor': 'central_ti_telemetrik', 'Fecha_Edicion': 1758829344252, 'Sí': 'Sí', 'Fugas': 'No', 'Signos_de_desgaste': 'null'}, 'point_type': 'VRP'}, 'attachments': ['CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg']}
 
+#incoming_payload = event
+#incoming_payload = {'payload': {'layer_id': 1, 'OBJECTID': '0002', 'geometry': 'null', 'attributes': {'OBJECTID': '0002', 'GlobalID': '3CFDE950-8AE7-440E-B1E7-310C56A35794', 'Identificador': 'PTO_0002', 'Tipo_Punto': 'VRP', 'Creador': 'central_ti_telemetrik', 'Fecha_Creacion': 1758818476306, 'Editor': 'central_ti_telemetrik', 'Fecha_Edicion': 1758829344252, 'Sí': 'Sí', 'Fugas': 'No', 'Signos_de_desgaste': 'null'}, 'point_type': 'VRP'}, 'attachments': ['CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg']}
+
+#ejemplo de payload 
+'''
+{
+   "payload":{
+      "layer_id":1,
+      "OBJECTID":"0002",
+      "geometry":"null",
+      "attributes":{
+         "OBJECTID":"0002",
+         "GlobalID":"3CFDE950-8AE7-440E-B1E7-310C56A35794",
+         "Creador":"central_ti_telemetrik",
+         "Fecha_Creacion":1758818476306,
+         "Editor":"central_ti_telemetrik",
+         "Fecha_Edicion":1758829344252,
+         "id" : "0002",
+         "circuito" : "tmk",
+         "tipo_punto" : "caja_medicion",
+         "vrp" : "vrp-0001",
+         "signos_desgaste" : "Si",
+         "fugas" : "Si",
+         "danios" : "No",
+         "requiere_instalacion_tapa" : "Si",
+         "requiere_limpieza" : "No",
+         "razon_limpieza" : "",
+         "requiere_clausura" : "",
+         "comentario_cond_fisica" : "Tiene una pequeña fuga y desgaste en la tapa",
+         "estado_conexion" : "Si",
+         "estado_tuberia" : "Si",
+         "accesorios_existentes" : "Si",
+         "valvula_abre" : "Si",
+         "valvula_cierra" : "Si",
+         "flujo_agua" : "Si",
+         "comentario_conexiones_hid" : "oK",
+         "ubicacion_geografica_critica" : "No",
+         "posible_expos_fraude" : "No",
+         "comentario_vuln" : "Ok",
+         "verificacion_4g" : "Si",
+         "operador_4g" : "Claro",
+         "equipos_usados" : "",
+         "conclusiones" : "",
+         "recomendaciones" : "Se debe corregir fuga y reemplazar tapa",
+         "comentario_general" : "",
+         "fecha_modificacion" : "1758818476306",
+         "direccion_referencia" : "Cra 42 #2 cerca al mall",
+         "actualizacion_ubicacion" : "No",
+         "fecha_creacion" : "1758818476306",
+         "latitud" : "37.21",
+         "longitud" : "-72.912"
+      },
+      "point_type":"cajas_medicion"
+   },
+   "attachments":[
+      "CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg",
+      "CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg",
+      "CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg"
+   ]
+}'''
+
 import boto3
 import json
 from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image  # para insertar imágenes
 import os
-
-#incoming_payload = event
-#incoming_payload = {'payload': {'layer_id': 1, 'OBJECTID': '0002', 'geometry': 'null', 'attributes': {'OBJECTID': '0002', 'GlobalID': '3CFDE950-8AE7-440E-B1E7-310C56A35794', 'Identificador': 'PTO_0002', 'Tipo_Punto': 'VRP', 'Creador': 'central_ti_telemetrik', 'Fecha_Creacion': 1758818476306, 'Editor': 'central_ti_telemetrik', 'Fecha_Edicion': 1758829344252, 'Sí': 'Sí', 'Fugas': 'No', 'Signos_de_desgaste': 'null'}, 'point_type': 'VRP'}, 'attachments': ['CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg']}
-
 
 s3 = boto3.client("s3")
 TMP_DIR = Path("/tmp")
