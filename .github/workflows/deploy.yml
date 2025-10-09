@@ -35,7 +35,7 @@ jobs:
         working-directory: infra
         id: stacks
         run: |
-          STACKS=$(cdk list | grep -v CW357221ParametrosDevOps-LambdaEcrS3TriggerStack)
+          STACKS=$(cdk list | grep -v CW357221ParametrosDevOps-LambdaEcrS3TriggerStack | tr '\n' ' ')
           echo "stacks=$STACKS" >> $GITHUB_OUTPUT
         env:
           DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
