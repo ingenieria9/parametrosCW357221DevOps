@@ -83,6 +83,7 @@ import os
 from datetime import datetime
 import re
 
+
 s3 = boto3.client("s3")
 TMP_DIR = Path("/tmp")
 
@@ -194,43 +195,57 @@ def obtener_consecutivo_s3(bucket, prefix, cod_name):
 
     return f"{max_consec + 1:03}"
 
+
 def obtener_info_de_capa_principal(bucket_name, payload_data):
-    # Construir el prefijo S3
+    # Construir el prefijo correcto
     s3_key_capa_principal = (
-        f"ArcGIS-Data/Puntos/"
-        f"{payload_data['id']}_{payload_data['tipo_punto']}/Capa_principal/"
+        f"ArcGIS-Data/Puntos/{payload_data['id']}_{payload_data['tipo_punto']}/Capa_principal/"
     )
 
     # Listar objetos en esa carpeta
     s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key_capa_principal)
+
+    if "Contents" not in s3_objects:
+        print("No hay archivos en la carpeta Capa_principal.")
+        return {}
+
+    # Filtrar SOLO archivos que terminen en .json
     json_files = [
-        obj["Key"] for obj in s3_objects.get("Contents", [])
-        if obj["Key"].endswith(".json")
+        obj for obj in s3_objects["Contents"]
+        if obj["Key"].lower().endswith(".json")
     ]
 
     if not json_files:
-        print("No se encontraron archivos JSON en la Capa_principal.")
+        print("No se encontraron archivos .json en Capa_principal.")
+        print(f"Se buscó usando Prefix: {s3_key_capa_principal}")
         return {}
 
-    # Obtener el más reciente por fecha de modificación
-    latest_json = max(
-        s3_objects["Contents"],
-        key=lambda x: x["LastModified"]
-    )["Key"]
+    # Tomar el más reciente por fecha
+    latest_json = max(json_files, key=lambda x: x["LastModified"])["Key"]
 
     print(f"Usando archivo principal: {latest_json}")
 
-    # Descargar y cargar el archivo
+    # Descargar temporalmente en /tmp
     tmp_path = TMP_DIR / "capa_principal.json"
     s3.download_file(bucket_name, latest_json, str(tmp_path))
 
+    # Leer el contenido con validación
     with open(tmp_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        contenido = f.read().strip()
+        if not contenido:
+            print(" El archivo JSON está vacío.")
+            return {}
+        try:
+            return json.loads(contenido)
+        except json.JSONDecodeError as e:
+            print(f" Error al parsear JSON {latest_json}: {e}")
+            return {}
 
 def lambda_handler(event, context):
 
     payload_data = event["payload"]["attributes"]
     tipo_punto = event["payload"]["attributes"]["tipo_punto"]
+    id = event["payload"]["attributes"]["id"]
 
     #template_path_s3 + devolver de template key el value segun tipo de punto (ej para caja de medicion devuelve formato-acueducto.xlsx)
     template_key = template_path_s3 + template_name.get(tipo_punto)
@@ -276,19 +291,6 @@ def lambda_handler(event, context):
     print(context)
 
 
-    #json_data = normalizar_booleans(payload_data)
-    #json_data = convertir_valores_fecha(json_data)
-
-    #Estos campos deben coincidir con los placeholders
-    #campos_contexto son todos los keys de payload_data  
-    #campos_contexto = list(payload_data.keys())
-
-    # Diccionario de contexto
-    #context = {f"{{{{{campo}}}}}": json_data.get(campo, "") for campo in campos_contexto}
-
-    #print(context)
-
-
     # Reemplazar variables en todas las celdas
     for row in ws.iter_rows():
         for cell in row:
@@ -311,10 +313,10 @@ def lambda_handler(event, context):
     # Subir resultado a S3
     #listar los archivos de s3 en
     # Obtener el consecutivo siguiente en esa carpeta
-    consecutivo = obtener_consecutivo_s3(bucket_name, output_path_s3, COD_name[tipo_punto])
+    #consecutivo = obtener_consecutivo_s3(bucket_name, output_path_s3, COD_name[tipo_punto])
 
     #Construir el nombre completo del archivo
-    output_key = f"{output_path_s3}{COD_name[tipo_punto]}{consecutivo}.xlsx"
+    output_key = f"{output_path_s3}{COD_name[tipo_punto]}{id}.xlsx"
 
 
     s3.upload_file(str(output_path), bucket_name, output_key)
@@ -323,5 +325,3 @@ def lambda_handler(event, context):
         "status": "ok",
         "output_file": f"s3://{bucket_name}/{output_key}"
     }
-
-
