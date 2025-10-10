@@ -124,7 +124,7 @@ def lambda_handler(event, context):
 
     contexto = {**contexto_general,  "puntos": contexto_puntos}
     print(contexto)
-    '''
+    
     doc = DocxTemplate(template_path)
     doc.render(contexto)
     doc.save(output_path)
@@ -137,7 +137,7 @@ def lambda_handler(event, context):
         "status": "ok",
         "output_file": f"s3://{bucket_name}/{output_key}"
     }
-    '''
+    
 
 def obtener_info_de_capa_principal(bucket_name, payload_data):
     # Construir el prefijo correcto
@@ -241,8 +241,12 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
             "archivo_s3": latest_key
         }
 
+        # Validamos que 'attributes' exista (info esta en attributes)
+        data_attr = json_data.get("attributes", {})
+        print(data_attr)
+
         for attr in atributos_deseados:
-            punto_filtrado[attr] = json_data.get(attr)
+            punto_filtrado[attr] = data_attr.get(attr)
 
         puntos_visitados_consolidados.append(punto_filtrado)
 

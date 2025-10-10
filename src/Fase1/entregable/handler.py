@@ -70,10 +70,7 @@ def lambda_handler(event, context):
 
     # Si es ultimo punto, invocar a lambda de generación de informe (async)
     if estado == "Finalizado":
-        payload_informe = {
-            "circuito": circuito
-        }
-        invoke_lambda(payload_informe, informe_ARN)
+        invoke_lambda(incoming_payload, informe_ARN)
         print("Invocada lambda informe")
 
     return {
