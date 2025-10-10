@@ -123,7 +123,8 @@ def lambda_handler(event, context):
     contexto_puntos = build_puntos_context(circuito_cuenca_valor, circuito_cuenca)
 
     contexto = {**contexto_general,  "puntos": contexto_puntos}
-
+    print(contexto)
+    '''
     doc = DocxTemplate(template_path)
     doc.render(contexto)
     doc.save(output_path)
@@ -131,11 +132,12 @@ def lambda_handler(event, context):
     # Subir resultado a S3
     output_key = f"{output_path_s3}{COD_name[circuito_cuenca]}{circuito_cuenca_valor}.docx"
     s3.upload_file(str(output_path), bucket_name, output_key)
-
+    
     return {
         "status": "ok",
         "output_file": f"s3://{bucket_name}/{output_key}"
     }
+    '''
 
 def obtener_info_de_capa_principal(bucket_name, payload_data):
     # Construir el prefijo correcto
@@ -190,11 +192,15 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
         FROM puntos_capa_principal 
         WHERE {circuito_cuenca} = '{circuito_cuenca_valor}'
     """
-    resultados = query_db(query)
+    print(query)
+    resultados = query_db(query, "fecha_creacion")
 
     # Extraer listas de id y tipo_punto
     lista_id = [row["id"] for row in resultados]
     lista_tipo = [row["tipo_punto"] for row in resultados]
+
+    print(lista_id)
+    print(lista_tipo)
 
     puntos_visitados_consolidados = []
 

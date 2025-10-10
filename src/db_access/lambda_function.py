@@ -1,6 +1,7 @@
 import json
 import psycopg2
 import os
+from decimal import Decimal
 
 #dbname = os.environ['DB_NAME']
 user = os.environ['DB_USER']
@@ -100,11 +101,6 @@ def convert_decimals_to_floats(row):
     Revisa si alguno de los valores en el diccionario es un decimal y lo convierte a float.
     """
     for key, value in row.items():
-        if isinstance(value, (int, float)):
-            continue  # No necesita conversión
-        try:
+        if isinstance(value, Decimal):
             row[key] = float(value)
-        except (ValueError, TypeError):
-            pass  # Si no es convertible a float, sigue con el siguiente
-    
     return row
