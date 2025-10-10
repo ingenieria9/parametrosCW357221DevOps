@@ -94,10 +94,18 @@ COD_name = {"circuito": "ACU/MPH-EJ-06-01-F01-ACU-DIA-", "cuenca": "ALC/MPH-EJ-0
 
 
 def lambda_handler(event, context):   
+    payload_data = event["payload"]["attributes"]
+    tipo_punto = event["payload"]["attributes"]["tipo_punto"]
+    id = event["payload"]["attributes"]["id"]
 
-    # extraer del payload atributo circuito o atributo cuenca
-    circuito_cuenca_valor = event["payload"]["attributes"].get("circuito") or event["payload"]["attributes"].get("cuenca")
-    circuito_cuenca = "circuito" if event["payload"]["attributes"].get("circuito") else "cuenca"
+    capa_principal_data = obtener_info_de_capa_principal(bucket_name, payload_data)
+
+    if tipo_punto == "vrp" or tipo_punto == "puntos_medicion":
+        circuito_cuenca_valor = capa_principal_data.get("circuito", "N/A")
+        circuito_cuenca = "circuito"
+    else:
+        circuito_cuenca_valor = capa_principal_data.get("cuenca", "N/A")
+        circuito_cuenca = "cuenca"
 
     print(circuito_cuenca, circuito_cuenca_valor)
 
@@ -124,6 +132,51 @@ def lambda_handler(event, context):
         "status": "ok",
         "output_file": f"s3://{bucket_name}/{output_key}"
     }
+
+def obtener_info_de_capa_principal(bucket_name, payload_data):
+    # Construir el prefijo correcto
+    s3_key_capa_principal = (
+        f"ArcGIS-Data/Puntos/{payload_data['id']}_{payload_data['tipo_punto']}/Capa_principal/"
+    )
+
+    # Listar objetos en esa carpeta
+    s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key_capa_principal)
+
+    if "Contents" not in s3_objects:
+        print("No hay archivos en la carpeta Capa_principal.")
+        return {}
+
+    # Filtrar SOLO archivos que terminen en .json
+    json_files = [
+        obj for obj in s3_objects["Contents"]
+        if obj["Key"].lower().endswith(".json")
+    ]
+
+    if not json_files:
+        print("No se encontraron archivos .json en Capa_principal.")
+        print(f"Se buscó usando Prefix: {s3_key_capa_principal}")
+        return {}
+
+    # Tomar el más reciente por fecha
+    latest_json = max(json_files, key=lambda x: x["LastModified"])["Key"]
+
+    print(f"Usando archivo principal: {latest_json}")
+
+    # Descargar temporalmente en /tmp
+    tmp_path = TMP_DIR / "capa_principal.json"
+    s3.download_file(bucket_name, latest_json, str(tmp_path))
+
+    # Leer el contenido con validación
+    with open(tmp_path, "r", encoding="utf-8") as f:
+        contenido = f.read().strip()
+        if not contenido:
+            print(" El archivo JSON está vacío.")
+            return {}
+        try:
+            return json.loads(contenido)
+        except json.JSONDecodeError as e:
+            print(f" Error al parsear JSON {latest_json}: {e}")
+            return {}
 
 
 def build_general_context(circuito_cuenca_valor, circuito_cuenca):
