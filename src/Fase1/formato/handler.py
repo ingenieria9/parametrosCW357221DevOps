@@ -19,9 +19,7 @@
          "Editor":"central_ti_telemetrik",
          "Fecha_Edicion":1758829344252,
          "id" : "0002",
-         "circuito" : "tmk",
-         "tipo_punto" : "caja_medicion",
-         "vrp" : "vrp-0001",
+         "tipo_punto" : "puntos_medicion",
          "signos_desgaste" : "Si",
          "fugas" : "Si",
          "danios" : "No",
@@ -47,7 +45,6 @@
          "recomendaciones" : "Se debe corregir fuga y reemplazar tapa",
          "comentario_general" : "",
          "fecha_modificacion" : "1758818476306",
-         "direccion_referencia" : "Cra 42 #2 cerca al mall",
          "actualizacion_ubicacion" : "No",
          "fecha_creacion" : "1758818476306",
          "latitud" : "37.21",
@@ -65,7 +62,17 @@
       "files/temp-image-folder/ejemplo7.jpg",
       "files/temp-image-folder/ejemplo8.jpg"
    ]
-} '''
+} 
+
+Variables que vienen de la capa principal y no del payload:
+circuito, subcircuito, cuenca, direccion_referencia, vrp
+"circuito" : "tmk",
+"direccion_referencia" : "Cra 42 #2 cerca al mall",
+"vrp" : "vrp-0001",
+
+key s3 de capa principal 
+ArcGIS-Data/Puntos/{ID}_{tipo_punto}/Capa_principal/{latest-timestamp}.json
+'''
 
 import boto3
 import json
@@ -85,10 +92,10 @@ bucket_name = os.environ['BUCKET_NAME']
 template_path_s3 = "files/plantillas/Fase1/"
 output_path_s3 = "files/entregables/Fase1/"
 
-template_name = {"caja_medicion": "formato-acueducto.xlsx",
+template_name = {"puntos_medicion": "formato-acueducto.xlsx",
                  "vrp": "formato-acueducto.xlsx", "camara": "formato-alcantarillado.xlsx"}
 
-COD_name = {"caja_medicion": "ACU/MPH-EJ-06-01-F01-ACU-EIN-",
+COD_name = {"puntos_medicion": "ACU/MPH-EJ-06-01-F01-ACU-EIN-",
             "vrp": "ACU/MPH-EJ-06-01-F01-ACU-EIN-", "camara": "ALC/MPH-EJ-06-01-F01-ALC-EIN-"}
 
 def insert_image(ws, cellNumber, imagen_path):
@@ -187,6 +194,39 @@ def obtener_consecutivo_s3(bucket, prefix, cod_name):
 
     return f"{max_consec + 1:03}"
 
+def obtener_info_de_capa_principal(bucket_name, payload_data):
+    # Construir el prefijo S3
+    s3_key_capa_principal = (
+        f"ArcGIS-Data/Puntos/"
+        f"{payload_data['id']}_{payload_data['tipo_punto']}/Capa_principal/"
+    )
+
+    # Listar objetos en esa carpeta
+    s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key_capa_principal)
+    json_files = [
+        obj["Key"] for obj in s3_objects.get("Contents", [])
+        if obj["Key"].endswith(".json")
+    ]
+
+    if not json_files:
+        print("No se encontraron archivos JSON en la Capa_principal.")
+        return {}
+
+    # Obtener el más reciente por fecha de modificación
+    latest_json = max(
+        s3_objects["Contents"],
+        key=lambda x: x["LastModified"]
+    )["Key"]
+
+    print(f"Usando archivo principal: {latest_json}")
+
+    # Descargar y cargar el archivo
+    tmp_path = TMP_DIR / "capa_principal.json"
+    s3.download_file(bucket_name, latest_json, str(tmp_path))
+
+    with open(tmp_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 def lambda_handler(event, context):
 
     payload_data = event["payload"]["attributes"]
@@ -209,22 +249,45 @@ def lambda_handler(event, context):
     for key, path in zip(imagen_keys, imagen_paths):
         s3.download_file(bucket_name, key, str(path))
 
-
-    json_data = normalizar_booleans(payload_data)
-    json_data = convertir_valores_fecha(json_data)
-
     # Cargar plantilla Excel
     wb = load_workbook(template_path)
     ws = wb.active  # hoja específica con wb["NombreHoja"] o activa con wb.active
 
-    #Estos campos deben coincidir con los placeholders
-    #campos_contexto son todos los keys de payload_data  
-    campos_contexto = list(payload_data.keys())
 
-    # Diccionario de contexto
-    context = {f"{{{{{campo}}}}}": json_data.get(campo, "") for campo in campos_contexto}
+    # Leer datos adicionales desde S3
+    capa_principal_data = obtener_info_de_capa_principal(bucket_name, payload_data)
+
+    # Unir ambos diccionarios (payload tiene prioridad si hay claves iguales)
+    combined_data = {**capa_principal_data, **payload_data}
+
+    #  Normalizar
+    json_data = normalizar_booleans(combined_data)
+    json_data = convertir_valores_fecha(json_data)
+
+    # Campos para placeholders
+    campos_contexto = list(combined_data.keys())
+
+    # Construir contexto final
+    context = {
+        f"{{{{{campo}}}}}": json_data.get(campo, "")
+        for campo in campos_contexto
+    }
 
     print(context)
+
+
+    #json_data = normalizar_booleans(payload_data)
+    #json_data = convertir_valores_fecha(json_data)
+
+    #Estos campos deben coincidir con los placeholders
+    #campos_contexto son todos los keys de payload_data  
+    #campos_contexto = list(payload_data.keys())
+
+    # Diccionario de contexto
+    #context = {f"{{{{{campo}}}}}": json_data.get(campo, "") for campo in campos_contexto}
+
+    #print(context)
+
 
     # Reemplazar variables en todas las celdas
     for row in ws.iter_rows():
