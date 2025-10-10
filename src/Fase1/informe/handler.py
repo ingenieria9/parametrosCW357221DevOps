@@ -118,7 +118,11 @@ def lambda_handler(event, context):
     # Descargar archivos desde S3
     s3.download_file(bucket_name, template_key, str(template_path))
 
-    contexto = build_general_context(circuito_cuenca_valor, circuito_cuenca)
+    contexto_general = build_general_context(circuito_cuenca_valor, circuito_cuenca)
+
+    contexto_puntos = build_puntos_context(circuito_cuenca_valor, circuito_cuenca)
+
+    contexto = {**contexto_general,  "puntos": contexto_puntos}
 
     doc = DocxTemplate(template_path)
     doc.render(contexto)
@@ -138,6 +142,7 @@ def obtener_info_de_capa_principal(bucket_name, payload_data):
     s3_key_capa_principal = (
         f"ArcGIS-Data/Puntos/{payload_data['id']}_{payload_data['tipo_punto']}/Capa_principal/"
     )
+    print(s3_key_capa_principal)
 
     # Listar objetos en esa carpeta
     s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key_capa_principal)
@@ -178,6 +183,65 @@ def obtener_info_de_capa_principal(bucket_name, payload_data):
             print(f" Error al parsear JSON {latest_json}: {e}")
             return {}
 
+def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
+    # 1. Obtener lista de id y tipo_punto
+    query = f"""
+        SELECT id, tipo_punto 
+        FROM puntos_capa_principal 
+        WHERE {circuito_cuenca} = '{circuito_cuenca_valor}'
+    """
+    resultados = query_db(query)
+
+    # Extraer listas de id y tipo_punto
+    lista_id = [row["id"] for row in resultados]
+    lista_tipo = [row["tipo_punto"] for row in resultados]
+
+    puntos_visitados_consolidados = []
+
+    for punto, tipo_punto in zip(lista_id, lista_tipo):
+        key_s3_prefix = f"ArcGIS-Data/Puntos/{punto}_{tipo_punto}/Fase1/"
+        s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=key_s3_prefix)
+
+        # Filtrar archivos JSON
+        json_files = [
+            obj for obj in s3_objects.get("Contents", [])
+            if obj["Key"].endswith(".json")
+        ]
+
+        if not json_files:
+            continue  # No hay archivos para este punto, saltamos
+
+        # 2. Seleccionar el archivo más reciente por fecha de modificación
+        json_files.sort(key=lambda x: x["LastModified"], reverse=True)
+        latest_key = json_files[0]["Key"]
+
+        # 3. Descargar y cargar el contenido JSON
+        obj_s3 = s3.get_object(Bucket=bucket_name, Key=latest_key)
+        json_data = json.loads(obj_s3["Body"].read().decode("utf-8"))
+
+        # 4. Extraer solo los atributos deseados
+        atributos_deseados = [
+            "comentario_cond_fisica",
+            "comentario_conexiones_hid",
+            "comentario_vuln",
+            "conclusiones",
+            "recomendaciones",
+            "punto_habilitado_medicion"
+        ]
+
+        punto_filtrado = {
+            "id": punto,
+            "tipo_punto": tipo_punto,
+            "archivo_s3": latest_key
+        }
+
+        for attr in atributos_deseados:
+            punto_filtrado[attr] = json_data.get(attr)
+
+        puntos_visitados_consolidados.append(punto_filtrado)
+
+    return puntos_visitados_consolidados
+
 
 def build_general_context(circuito_cuenca_valor, circuito_cuenca):
 
@@ -202,74 +266,111 @@ def build_general_context(circuito_cuenca_valor, circuito_cuenca):
 
 def get_general_data_circuito(circuito):
     query = f"""
+    WITH puntos_filtrados AS (
+        SELECT id, tipo_punto
+        FROM puntos_capa_principal
+        WHERE circuito = '{circuito}'
+    )
+
     SELECT
         -- Totales por tipo desde puntos_capa_principal
         (SELECT COUNT(*) 
-         FROM puntos_capa_principal 
-         WHERE circuito = '{circuito}' 
-           AND tipo_punto = 'puntos_medicion') AS numero_puntos_medicion_totales,
+        FROM puntos_capa_principal 
+        WHERE circuito = '{circuito}'
+        AND tipo_punto = 'puntos_medicion') AS numero_puntos_medicion_totales,
 
         (SELECT COUNT(*) 
-         FROM puntos_capa_principal 
-         WHERE circuito = '{circuito}' 
-           AND tipo_punto = 'vrp') AS numero_vrp_totales,
+        FROM puntos_capa_principal 
+        WHERE circuito = '{circuito}'
+        AND tipo_punto = 'vrp') AS numero_vrp_totales,
 
-        -- Visitas en fase_1
-        COUNT(DISTINCT CASE WHEN tipo_punto = 'puntos_medicion' THEN id END) AS numero_puntos_medicion_visitadas,
-        COUNT(DISTINCT CASE WHEN tipo_punto = 'vrp' THEN id END) AS numero_vrp_visitadas,
-
+        -- Visitas en fase_1 (JOIN con ids del circuito)
+        COUNT(DISTINCT CASE WHEN p.tipo_punto = 'puntos_medicion' THEN f.id END) AS numero_puntos_medicion_visitadas,
+        COUNT(DISTINCT CASE WHEN p.tipo_punto = 'vrp' THEN f.id END) AS numero_vrp_visitadas,
+        
         -- Fechas mínima y máxima
-        MIN(fecha_creacion) AS fecha_primera_visita,
-        MAX(fecha_creacion) AS fecha_ultima_visita,
+
 
         -- Vulnerables
-        COUNT(*) FILTER (WHERE tipo_punto = 'puntos_medicion' AND vulnerabilidad = 1) AS puntos_vulnerables,
-        COUNT(*) FILTER (WHERE tipo_punto = 'vrp' AND vulnerabilidad = 1) AS vrp_vulnerables,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.vulnerabilidades = 1) AS puntos_vulnerables,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.vulnerabilidades = 1) AS vrp_vulnerables,
 
         -- Clausura
-        COUNT(*) FILTER (WHERE tipo_punto = 'puntos_medicion' AND requiere_clausura = 1) AS puntos_clausurar,
-        COUNT(*) FILTER (WHERE tipo_punto = 'vrp' AND requiere_clausura = 1) AS vrp_clausurar,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.requiere_clausura = 1) AS puntos_clausurar,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.requiere_clausura = 1) AS vrp_clausurar,
 
         -- Condición física OK
-        COUNT(*) FILTER (WHERE tipo_punto = 'puntos_medicion' AND condicion_fisica_general = 0) AS puntos_cond_ok,
-        COUNT(*) FILTER (WHERE tipo_punto = 'vrp' AND condicion_fisica_general = 0) AS vrp_cond_ok,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.condicion_fisica_general = 0) AS puntos_cond_ok,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.condicion_fisica_general = 0) AS vrp_cond_ok,
 
         -- Conexiones hidráulicas OK
-        COUNT(*) FILTER (WHERE tipo_punto = 'puntos_medicion' AND conexiones_hidraulicas = 0) AS puntos_hid_ok,
-        COUNT(*) FILTER (WHERE tipo_punto = 'vrp' AND conexiones_hidraulicas = 0) AS vrp_hid_ok,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.conexiones_hidraulicas = 0) AS puntos_hid_ok,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.conexiones_hidraulicas = 0) AS vrp_hid_ok,
 
         -- Habilitado medición OK
-        COUNT(*) FILTER (WHERE tipo_punto = 'puntos_medicion' AND habilitado_medicion = 1) AS puntos_ok,
-        COUNT(*) FILTER (WHERE tipo_punto = 'vrp' AND habilitado_medicion = 1) AS vrp_ok,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.habilitado_medicion = 1) AS puntos_ok,
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.habilitado_medicion = 1) AS vrp_ok,
 
         -- Instalación tapa
-        COUNT(*) FILTER (WHERE tipo_punto = 'puntos_medicion' AND requiere_instalacion_tapa = 1) AS puntos_tapa
+        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.requiere_instalacion_tapa = 1) AS puntos_tapa
 
-    FROM fase_1
-    WHERE circuito = '{circuito}';
+    FROM fase_1 f
+    INNER JOIN puntos_filtrados p ON f.id = p.id;
     """
 
     # --- UNA SOLA LLAMADA A LA LAMBDA ---
-    result = query_db(query)[0]
+    result = query_db(query, "fecha_creacion")[0]
     print(result)
 
+    #fecha primera visita 
+    query_primera_visita = f"""
+    WITH puntos_filtrados AS (
+    SELECT id, tipo_punto
+    FROM puntos_capa_principal
+    WHERE circuito = '{circuito}'
+    )
+    SELECT
+        MIN(f.fecha_modificacion) AS fecha_primera_visita
+    FROM fase_1 f
+    INNER JOIN puntos_filtrados p ON f.id = p.id;"""
+
+    fecha_primera_visita = query_db(query_primera_visita, "fecha_primera_visita")[0]["fecha_primera_visita"]
+    print(fecha_primera_visita)
+
+    #fecha ultima visita 
+    query_ultima_visita = f"""
+    WITH puntos_filtrados AS (
+    SELECT id, tipo_punto
+    FROM puntos_capa_principal
+    WHERE circuito = '{circuito}'
+    )
+    SELECT
+        MAX(f.fecha_modificacion) AS fecha_ultima_visita
+    FROM fase_1 f
+    INNER JOIN puntos_filtrados p ON f.id = p.id;"""
+
+    fecha_ultima_visita = query_db(query_ultima_visita, "fecha_ultima_visita")[0]["fecha_ultima_visita"]
+    print(fecha_ultima_visita)
+
+
     # Procesamiento de fechas
-    fecha_primera_visita_ts = result["fecha_primera_visita"]
-    fecha_ultima_visita_ts = result["fecha_ultima_visita"]
+    #fecha_primera_visita_ts = result["fecha_primera_visita"]
+    #fecha_ultima_visita_ts = result["fecha_ultima_visita"]
 
-    fecha_primera_visita = (
-        datetime.fromtimestamp(fecha_primera_visita_ts / 1000).strftime('%d/%m/%Y')
-        if fecha_primera_visita_ts else "N/A"
-    )
+    #calculo-dias
+    formato = "%Y-%m-%d %H:%M:%S"
 
-    fecha_ultima_visita = (
-        datetime.fromtimestamp(fecha_ultima_visita_ts / 1000).strftime('%d/%m/%Y')
-        if fecha_ultima_visita_ts else "N/A"
-    )
+    if fecha_primera_visita and fecha_ultima_visita:
+        try:
+            f_min = datetime.strptime(fecha_primera_visita, formato)
+            f_max = datetime.strptime(fecha_ultima_visita, formato)
 
-    # Cálculo de días totales
-    if fecha_primera_visita_ts and fecha_ultima_visita_ts:
-        total_dias = (fecha_ultima_visita_ts - fecha_primera_visita_ts) // (1000 * 60 * 60 * 24)
+            diferencia = f_max - f_min
+            total_dias = round(diferencia.total_seconds() / 86400)  # 86400 segundos en un día
+
+        except Exception as e:
+            print(f"Error al procesar fechas: {e}")
+            total_dias = 0
     else:
         total_dias = 0
 
@@ -281,14 +382,17 @@ def get_general_data_circuito(circuito):
     puntos_intervencion = numero_puntos_medicion_visitadas - result["puntos_ok"]
     vrp_intervencion = numero_vrp_visitadas - result["vrp_ok"]
 
+    fecha_primera_visita_date = formatear_fecha(fecha_primera_visita)
+    fecha_ultima_visita_date = formatear_fecha(fecha_ultima_visita)
+    
     return {
         "nombre_circuito": circuito,
         "numero_puntos_medicion_totales": result["numero_puntos_medicion_totales"],
         "numero_vrp_totales": result["numero_vrp_totales"],
         "numero_puntos_medicion_visitadas": numero_puntos_medicion_visitadas,
         "numero_vrp_visitadas": numero_vrp_visitadas,
-        "fecha_primera_visita": fecha_primera_visita,
-        "fecha_ultima_visita": fecha_ultima_visita,
+        "fecha_primera_visita": fecha_primera_visita_date,
+        "fecha_ultima_visita": fecha_ultima_visita_date,
         "total_dias": total_dias,
         "numero_total_visitas": numero_total_visitas,
         "puntos_ok": result["puntos_ok"],
@@ -306,17 +410,27 @@ def get_general_data_circuito(circuito):
         "puntos_tapa": result["puntos_tapa"]
     }
 
+def formatear_fecha(fecha_str):
+    if not fecha_str:
+        return ""
+    try:
+        fecha_dt = datetime.strptime(fecha_str, "%Y-%m-%d %H:%M:%S")
+        return fecha_dt.strftime("%Y-%m-%d")  # Solo fecha
+    except Exception as e:
+        print(f"Error al formatear fecha: {e}")
+        return ""
 
-def query_db(query):
+def query_db(query, time_column):
     payload_db = {
         "queryStringParameters": {
             "query": query,
-            "time_column": "fecha_creacion",
+            "time_column": time_column,
             "db_name": "parametros"
         }
     }
     response_db = invoke_lambda_db(payload_db, db_access_arn)
     body = json.loads(response_db["body"])
+    print(body)
     return body
 
 
