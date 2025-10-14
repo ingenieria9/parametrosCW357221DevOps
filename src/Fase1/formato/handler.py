@@ -196,10 +196,10 @@ def obtener_consecutivo_s3(bucket, prefix, cod_name):
     return f"{max_consec + 1:03}"
 
 
-def obtener_info_de_capa_principal(bucket_name, payload_data):
+def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID):
     # Construir el prefijo correcto
     s3_key_capa_principal = (
-        f"ArcGIS-Data/Puntos/{payload_data['id']}_{payload_data['tipo_punto']}/Capa_principal/"
+        f"ArcGIS-Data/Puntos/{GlobalID}_{tipo_punto}/Capa_principal/"
     )
 
     # Listar objetos en esa carpeta
@@ -246,6 +246,8 @@ def lambda_handler(event, context):
     payload_data = event["payload"]["attributes"]
     tipo_punto = event["payload"]["attributes"]["tipo_punto"]
     id = event["payload"]["attributes"]["id"]
+    GlobalID = event["payload"]["attributes"]["relation_id"] #id uuid global 
+
 
     #template_path_s3 + devolver de template key el value segun tipo de punto (ej para caja de medicion devuelve formato-acueducto.xlsx)
     template_key = template_path_s3 + template_name.get(tipo_punto)
@@ -270,7 +272,7 @@ def lambda_handler(event, context):
 
 
     # Leer datos adicionales desde S3
-    capa_principal_data = obtener_info_de_capa_principal(bucket_name, payload_data)
+    capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID)
 
     # Unir ambos diccionarios (payload tiene prioridad si hay claves iguales)
     combined_data = {**capa_principal_data, **payload_data}
@@ -300,7 +302,7 @@ def lambda_handler(event, context):
                         cell.value = cell.value.replace(placeholder, str(value))
 
     # Insertar imágenes (en celdas específicas)
-    celdas_imagenes = ["B39", "C39", "D39", "E39", "B40", "C40", "D40", "E40", "B41", "C41", "D41", "E41", "B42", "C42", "D42", "E42"]
+    celdas_imagenes = ["B38", "C38", "D38", "E38","B39", "C39", "D39", "E39", "B40", "C40", "D40", "E40"]
 
     #Ciclo para insertar las imagenes en las celdas disponibles
     for celda, imagen_path in zip(celdas_imagenes, imagen_paths):

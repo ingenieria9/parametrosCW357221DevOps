@@ -97,8 +97,9 @@ def lambda_handler(event, context):
     payload_data = event["payload"]["attributes"]
     tipo_punto = event["payload"]["attributes"]["tipo_punto"]
     id = event["payload"]["attributes"]["id"]
+    GlobalID = event["payload"]["attributes"]["relation_id"]
 
-    capa_principal_data = obtener_info_de_capa_principal(bucket_name, payload_data)
+    capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID)
 
     if tipo_punto == "vrp" or tipo_punto == "puntos_medicion":
         circuito_cuenca_valor = capa_principal_data.get("circuito", "N/A")
@@ -139,12 +140,11 @@ def lambda_handler(event, context):
     }
     
 
-def obtener_info_de_capa_principal(bucket_name, payload_data):
+def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID):
     # Construir el prefijo correcto
     s3_key_capa_principal = (
-        f"ArcGIS-Data/Puntos/{payload_data['id']}_{payload_data['tipo_punto']}/Capa_principal/"
+        f"ArcGIS-Data/Puntos/{GlobalID}_{tipo_punto}/Capa_principal/"
     )
-    print(s3_key_capa_principal)
 
     # Listar objetos en esa carpeta
     s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key_capa_principal)
@@ -185,10 +185,11 @@ def obtener_info_de_capa_principal(bucket_name, payload_data):
             print(f" Error al parsear JSON {latest_json}: {e}")
             return {}
 
+
 def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
     # 1. Obtener lista de id y tipo_punto
     query = f"""
-        SELECT id, tipo_punto 
+        SELECT "GlobalID", tipo_punto 
         FROM puntos_capa_principal 
         WHERE {circuito_cuenca} = '{circuito_cuenca_valor}'
     """
@@ -196,7 +197,7 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
     resultados = query_db(query, "fecha_creacion")
 
     # Extraer listas de id y tipo_punto
-    lista_id = [row["id"] for row in resultados]
+    lista_id = [row["GlobalID"] for row in resultados]
     lista_tipo = [row["tipo_punto"] for row in resultados]
 
     print(lista_id)
@@ -277,21 +278,21 @@ def build_general_context(circuito_cuenca_valor, circuito_cuenca):
 def get_general_data_circuito(circuito):
     query = f"""
     WITH puntos_filtrados AS (
-        SELECT id, tipo_punto
+        SELECT "GlobalID", tipo_punto
         FROM puntos_capa_principal
-        WHERE circuito = '{circuito}'
+        WHERE "CIRCUITO_1" = '{circuito}'
     )
 
     SELECT
         -- Totales por tipo desde puntos_capa_principal
         (SELECT COUNT(*) 
         FROM puntos_capa_principal 
-        WHERE circuito = '{circuito}'
+        WHERE "CIRCUITO_1" = '{circuito}'
         AND tipo_punto = 'puntos_medicion') AS numero_puntos_medicion_totales,
 
         (SELECT COUNT(*) 
         FROM puntos_capa_principal 
-        WHERE circuito = '{circuito}'
+        WHERE "CIRCUITO_1" = '{circuito}'
         AND tipo_punto = 'vrp') AS numero_vrp_totales,
 
         -- Visitas en fase_1 (JOIN con ids del circuito)
@@ -325,7 +326,7 @@ def get_general_data_circuito(circuito):
         COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.requiere_instalacion_tapa = 1) AS puntos_tapa
 
     FROM fase_1 f
-    INNER JOIN puntos_filtrados p ON f.id = p.id;
+    INNER JOIN puntos_filtrados p ON f.relation_id  = p."GlobalID";
     """
 
     # --- UNA SOLA LLAMADA A LA LAMBDA ---
@@ -335,14 +336,14 @@ def get_general_data_circuito(circuito):
     #fecha primera visita 
     query_primera_visita = f"""
     WITH puntos_filtrados AS (
-    SELECT id, tipo_punto
+    SELECT "GlobaID", tipo_punto
     FROM puntos_capa_principal
     WHERE circuito = '{circuito}'
     )
     SELECT
         MIN(f.fecha_modificacion) AS fecha_primera_visita
     FROM fase_1 f
-    INNER JOIN puntos_filtrados p ON f.id = p.id;"""
+    INNER JOIN puntos_filtrados p ON f.relation_id = p."GlobaID";"""
 
     fecha_primera_visita = query_db(query_primera_visita, "fecha_primera_visita")[0]["fecha_primera_visita"]
     print(fecha_primera_visita)
@@ -350,14 +351,14 @@ def get_general_data_circuito(circuito):
     #fecha ultima visita 
     query_ultima_visita = f"""
     WITH puntos_filtrados AS (
-    SELECT id, tipo_punto
+    SELECT "GlobalID", tipo_punto
     FROM puntos_capa_principal
     WHERE circuito = '{circuito}'
     )
     SELECT
         MAX(f.fecha_modificacion) AS fecha_ultima_visita
     FROM fase_1 f
-    INNER JOIN puntos_filtrados p ON f.id = p.id;"""
+    INNER JOIN puntos_filtrados p ON f.relation_id = p."GlobalID";"""
 
     fecha_ultima_visita = query_db(query_ultima_visita, "fecha_ultima_visita")[0]["fecha_ultima_visita"]
     print(fecha_ultima_visita)
