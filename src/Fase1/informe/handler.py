@@ -37,7 +37,7 @@
          "conclusiones" : "",
          "recomendaciones" : "Se debe corregir fuga y reemplazar tapa",
          "comentario_general" : "",
-         "fecha_modificacion" : "1758818476306",
+         "fecha_edicion" : "1758818476306",
          "actualizacion_ubicacion" : "No",
          "fecha_creacion" : "1758818476306",
          "latitud" : "37.21",
@@ -95,17 +95,17 @@ COD_name = {"circuito": "ACU/MPH-EJ-06-01-F01-ACU-DIA-", "cuenca": "ALC/MPH-EJ-0
 
 def lambda_handler(event, context):   
     payload_data = event["payload"]["attributes"]
-    tipo_punto = event["payload"]["attributes"]["tipo_punto"]
+    tipo_punto = event["payload"]["attributes"]["tipo_punto_1"]
     id = event["payload"]["attributes"]["id"]
     GlobalID = event["payload"]["attributes"]["relation_id"]
 
     capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID)
 
     if tipo_punto == "vrp" or tipo_punto == "puntos_medicion":
-        circuito_cuenca_valor = capa_principal_data.get("circuito", "N/A")
+        circuito_cuenca_valor = capa_principal_data.get("CIRCUITO_1", "N/A")
         circuito_cuenca = "circuito"
     else:
-        circuito_cuenca_valor = capa_principal_data.get("cuenca", "N/A")
+        circuito_cuenca_valor = capa_principal_data.get("CUENCA", "N/A")
         circuito_cuenca = "cuenca"
 
     print(circuito_cuenca, circuito_cuenca_valor)
@@ -121,7 +121,11 @@ def lambda_handler(event, context):
 
     contexto_general = build_general_context(circuito_cuenca_valor, circuito_cuenca)
 
+    print("contexto_general", contexto_general)
+
     contexto_puntos = build_puntos_context(circuito_cuenca_valor, circuito_cuenca)
+
+    print("contexto_puntos", contexto_puntos)
 
     contexto = {**contexto_general,  "puntos": contexto_puntos}
     print(contexto)
@@ -187,11 +191,16 @@ def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID):
 
 
 def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
+    if circuito_cuenca == "circuito":
+        circuito_cuenca = "CIRCUITO_1"
+    else: 
+        circuito_cuenca = "CUENCA"
+
     # 1. Obtener lista de id y tipo_punto
     query = f"""
         SELECT "GlobalID", tipo_punto 
         FROM puntos_capa_principal 
-        WHERE {circuito_cuenca} = '{circuito_cuenca_valor}'
+        WHERE "{circuito_cuenca}" = '{circuito_cuenca_valor}'
     """
     print(query)
     resultados = query_db(query, "fecha_creacion")
@@ -228,6 +237,7 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
 
         # 4. Extraer solo los atributos deseados
         atributos_deseados = [
+            "id",
             "comentario_cond_fisica",
             "comentario_conexiones_hid",
             "comentario_vuln",
@@ -237,7 +247,6 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
         ]
 
         punto_filtrado = {
-            "id": punto,
             "tipo_punto": tipo_punto,
             "archivo_s3": latest_key
         }
@@ -336,14 +345,14 @@ def get_general_data_circuito(circuito):
     #fecha primera visita 
     query_primera_visita = f"""
     WITH puntos_filtrados AS (
-    SELECT "GlobaID", tipo_punto
+    SELECT "GlobalID", tipo_punto
     FROM puntos_capa_principal
-    WHERE circuito = '{circuito}'
+    WHERE "CIRCUITO_1" = '{circuito}'
     )
     SELECT
-        MIN(f.fecha_modificacion) AS fecha_primera_visita
+        MIN(f.fecha_edicion) AS fecha_primera_visita
     FROM fase_1 f
-    INNER JOIN puntos_filtrados p ON f.relation_id = p."GlobaID";"""
+    INNER JOIN puntos_filtrados p ON f.relation_id = P."GlobalID";"""
 
     fecha_primera_visita = query_db(query_primera_visita, "fecha_primera_visita")[0]["fecha_primera_visita"]
     print(fecha_primera_visita)
@@ -353,10 +362,10 @@ def get_general_data_circuito(circuito):
     WITH puntos_filtrados AS (
     SELECT "GlobalID", tipo_punto
     FROM puntos_capa_principal
-    WHERE circuito = '{circuito}'
+    WHERE "CIRCUITO_1" = '{circuito}'
     )
     SELECT
-        MAX(f.fecha_modificacion) AS fecha_ultima_visita
+        MAX(f.fecha_edicion) AS fecha_ultima_visita
     FROM fase_1 f
     INNER JOIN puntos_filtrados p ON f.relation_id = p."GlobalID";"""
 

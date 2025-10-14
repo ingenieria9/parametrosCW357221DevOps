@@ -244,7 +244,7 @@ def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID):
 def lambda_handler(event, context):
 
     payload_data = event["payload"]["attributes"]
-    tipo_punto = event["payload"]["attributes"]["tipo_punto"]
+    tipo_punto = event["payload"]["attributes"]["tipo_punto_1"]
     id = event["payload"]["attributes"]["id"]
     GlobalID = event["payload"]["attributes"]["relation_id"] #id uuid global 
 
