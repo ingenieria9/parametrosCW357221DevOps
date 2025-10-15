@@ -93,11 +93,13 @@ bucket_name = os.environ['BUCKET_NAME']
 template_path_s3 = "files/plantillas/Fase1/"
 output_path_s3 = "files/entregables/Fase1/"
 
+
 template_name = {"puntos_medicion": "formato-acueducto.xlsx",
                  "vrp": "formato-acueducto.xlsx", "camara": "formato-alcantarillado.xlsx"}
 
-COD_name = {"puntos_medicion": "ACU/MPH-EJ-06-01-F01-ACU-EIN-",
-            "vrp": "ACU/MPH-EJ-06-01-F01-ACU-EIN-", "camara": "ALC/MPH-EJ-06-01-F01-ALC-EIN-"}
+#MPH-EJ-0601-{CIR_COD}-F01-{ACU/ALC}-EIN-{FID}
+COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{CIR_COD}-F01-ACU-EIN-",
+            "vrp": "ACU/VRP/MPH-EJ-0601-{CIR_COD}-F01-ACU-EIN-", "camara": "ALC/MPH-EJ-0601-{CUE_COD}-F01-ALC-EIN-"}
 
 def insert_image(ws, cellNumber, imagen_path):
     img = Image(str(imagen_path))
@@ -317,8 +319,34 @@ def lambda_handler(event, context):
     # Obtener el consecutivo siguiente en esa carpeta
     #consecutivo = obtener_consecutivo_s3(bucket_name, output_path_s3, COD_name[tipo_punto])
 
+    #obtener de S3 el archivo json que contiene el codigo del circuito para construir el archivo
+    # Descargar temporalmente en /tmp
+    tmp_path_code = TMP_DIR / "code.json"
+    if tipo_punto == "camara":
+        code_file = "files/epm_codes/CODE_ALC_CUE.json"
+    else:
+        code_file = "files/epm_codes/CODE_ACU_CIR.json"
+    s3.download_file(bucket_name, code_file, str(tmp_path_code))
+
+    # Leer el contenido con validación
+    with open(tmp_path_code, "r", encoding="utf-8") as f:
+        contenido = f.read().strip()
+        if not contenido:
+            print(" El archivo JSON está vacío.")
+        try:
+            code_json =  json.loads(contenido)
+        except json.JSONDecodeError as e:
+            print(f" Error al parsear JSON {code_file}: {e}")
+    
+    code_data = code_json[capa_principal_data["CIRCUITO_1"]]
+
+    if not code_data:
+        code_data = capa_principal_data["CIRCUITO_1"]
+
+    file_name = COD_name[tipo_punto].format(COD=code_data)
+
     #Construir el nombre completo del archivo
-    output_key = f"{output_path_s3}{COD_name[tipo_punto]}{id}.xlsx"
+    output_key = f"{output_path_s3}{file_name}{id}.xlsx"
 
 
     s3.upload_file(str(output_path), bucket_name, output_key)

@@ -26,7 +26,7 @@ class LambdasFileGenConstruct(Construct):
             f"{project_name}-Formato-{folder_name}",
             runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
-            code=_lambda.Code.from_asset(f"../src/{folder_name}/formato"),
+            code=_lambda.Code.from_asset(f"../src/generacionEntregables/{folder_name}/formato"),
             environment={
                 "BUCKET_NAME": bucket.bucket_name,
                 "FOLDER_NAME": folder_name,
@@ -43,7 +43,7 @@ class LambdasFileGenConstruct(Construct):
             f"{project_name}-Informe-{folder_name}",
             runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
-            code=_lambda.Code.from_asset(f"../src/{folder_name}/informe"),
+            code=_lambda.Code.from_asset(f"../src/generacionEntregables/{folder_name}/informe"),
             environment={
                 "BUCKET_NAME": bucket.bucket_name,
                 "FOLDER_NAME": folder_name,
@@ -64,7 +64,7 @@ class LambdasFileGenConstruct(Construct):
             f"{project_name}-Entregable-{folder_name}",
             runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
-            code=_lambda.Code.from_asset(f"../src/{folder_name}/entregable"),
+            code=_lambda.Code.from_asset(f"../src/generacionEntregables/{folder_name}/entregable"),
             environment={
                 "formato_ARN": self.formato.function_arn,
                 "informe_ARN": self.informe.function_arn,
@@ -99,4 +99,4 @@ class LambdasFileGenConstruct(Construct):
         self.informe.add_to_role_policy(invoke_policy)
 
         #output arn lambda entregable
-        
+
