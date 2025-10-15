@@ -97,3 +97,6 @@ class LambdasFileGenConstruct(Construct):
         self.formato.add_to_role_policy(invoke_policy)
         self.entregable.add_to_role_policy(invoke_policy)
         self.informe.add_to_role_policy(invoke_policy)
+
+        #output arn lambda entregable
+        

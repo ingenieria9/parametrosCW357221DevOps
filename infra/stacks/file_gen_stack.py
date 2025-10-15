@@ -13,6 +13,8 @@ class FileGenStack(Stack):
             project_name=project_name,
             db_access_lambda_arn = db_access_lambda_arn
         )
+        
+        self.entregable_fase1_lambda = self.pipeline1.entregable 
 
         '''
         self.pipeline2 = LambdasFileGenConstruct(

@@ -5,6 +5,7 @@ from stacks.s3_storage_stack import StorageStack
 from stacks.file_gen_stack import FileGenStack
 from stacks.db_access_stack import DbAccessStack
 from stacks.lambda_ecr_s3_trigger import LambdaEcrS3TriggerStack
+from stacks.arcgis_integration_stack import ArcGISIntStack
 
 app = cdk.App()
 
@@ -64,5 +65,20 @@ FileGenStack(
 LambdaEcrS3TriggerStack(app, f"{PROJECT_NAME}-LambdaEcrS3TriggerStack",     bucket_name=storage.bucket.bucket_name,
     bucket_arn=storage.bucket.bucket_arn, project_name=PROJECT_NAME, env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
 
+# Stack para etapa 3 "integración ArcGIS" 
+
+ArcGISIntStack(
+    app,  f"{PROJECT_NAME}-ArcGISIntStack",
+    bucket_name=storage.bucket.bucket_name,
+    bucket_arn=storage.bucket.bucket_arn, 
+    project_name=PROJECT_NAME,
+    db_access_lambda_arn=db_stack.db_access_lambda_arn,
+    entregables_fase_x=[
+        FileGenStack.entregable_fase1_lambda.function_arn,
+    ],
+    env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION)
+)
+
+ArcGISIntStack.add_dependency(FileGenStack)
 
 app.synth()
