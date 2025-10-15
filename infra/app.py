@@ -52,7 +52,7 @@ db_stack = DbAccessStack(
 storage = StorageStack(app, f"{PROJECT_NAME}-StorageStack", project_name=PROJECT_NAME, env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
 
 # Stack para etapa 2 "Generación de entregables" para Fase I, II  y III.A
-FileGenStack(
+filegen_stack = FileGenStack(
     app,
     f"{PROJECT_NAME}-FileGenStack",
     bucket=storage.bucket,
@@ -74,7 +74,7 @@ ArcGISIntStack(
     project_name=PROJECT_NAME,
     db_access_lambda_arn=db_stack.db_access_lambda_arn,
     entregables_fase_x=[
-        FileGenStack.entregable_fase1_lambda.function_arn,
+        filegen_stack.entregable_fase1_lambda.function_arn
     ],
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION)
 )
