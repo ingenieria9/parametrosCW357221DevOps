@@ -153,8 +153,7 @@ class ArcGISIntStack(Stack):
                         "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
                         "ARCGIS_CLIENT_ID" : ARCGIS_CLIENT_ID,
                         "ARCGIS_CLIENT_SECRET" : ARCGIS_CLIENT_SECRET
-                        },
-            function_name=f"{project_name}-webhook"
+                        }
         )
 
         # Acceso al bucket
