@@ -104,8 +104,7 @@ class ArcGISIntStack(Stack):
                         "LAMBDA_INFO_UPDATE": info_update_lambda.function_arn,
                         "ARCGIS_CLIENT_ID" : ARCGIS_CLIENT_ID,
                         "ARCGIS_CLIENT_SECRET" : ARCGIS_CLIENT_SECRET
-                        },
-            function_name=f"{project_name}-webhook"
+                        }
         )
 
         # acceso al bucket
