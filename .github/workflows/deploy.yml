@@ -41,6 +41,8 @@ jobs:
           DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
           DB_USER: ${{ secrets.LAMBDA_DB_USER }}
           DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}
+          ARCGIS_CLIENT_ID : ${{secrets.ARCGIS_CLIENT_ID}}
+          ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}          
           IMAGE_TAG: ${{ env.IMAGE_TAG }}          
 
 
@@ -51,6 +53,8 @@ jobs:
           DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
           DB_USER: ${{ secrets.LAMBDA_DB_USER }}
           DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}
+          ARCGIS_CLIENT_ID : ${{secrets.ARCGIS_CLIENT_ID}}
+          ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
 
       - name: Deploy CDK stack
@@ -63,4 +67,6 @@ jobs:
           DB_HOST: ${{ secrets.LAMBDA_DB_HOST }}
           DB_USER: ${{ secrets.LAMBDA_DB_USER }}
           DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}
+          ARCGIS_CLIENT_ID : ${{secrets.ARCGIS_CLIENT_ID}}
+          ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
