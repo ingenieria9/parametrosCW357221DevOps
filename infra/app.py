@@ -67,7 +67,7 @@ LambdaEcrS3TriggerStack(app, f"{PROJECT_NAME}-LambdaEcrS3TriggerStack",     buck
 
 # Stack para etapa 3 "integración ArcGIS" 
 
-ArcGISIntStack(
+arcgis_int_Stack = ArcGISIntStack(
     app,  f"{PROJECT_NAME}-ArcGISIntStack",
     bucket_name=storage.bucket.bucket_name,
     bucket_arn=storage.bucket.bucket_arn, 
@@ -79,6 +79,6 @@ ArcGISIntStack(
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION)
 )
 
-ArcGISIntStack.add_dependency(FileGenStack)
+arcgis_int_Stack.add_dependency(filegen_stack)
 
 app.synth()
