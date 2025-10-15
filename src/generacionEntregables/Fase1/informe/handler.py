@@ -90,7 +90,10 @@ output_path_s3 = "files/entregables/Fase1/"
 template_name = {"circuito": "informe-acueducto.docx",
                  "cuenca": "informe-alcantarillado.docx"}
 
-COD_name = {"circuito": "ACU/MPH-EJ-06-01-F01-ACU-DIA-", "cuenca": "ALC/MPH-EJ-06-01-F01-ALC-DIA-"}
+#COD_name = {"circuito": "ACU/MPH-EJ-06-01-F01-ACU-DIA-", "cuenca": "ALC/MPH-EJ-06-01-F01-ALC-DIA-"}
+
+COD_name = {"circuito": "ACU/CIR/MPH-EJ-0601-{COD}-F01-ACU-DIA",
+            "cuenca": "ALC/CUE/MPH-EJ-0601-{COD}-F01-ALC-DIA"}
 
 
 def lambda_handler(event, context):   
@@ -135,7 +138,33 @@ def lambda_handler(event, context):
     doc.save(output_path)
 
     # Subir resultado a S3
-    output_key = f"{output_path_s3}{COD_name[circuito_cuenca]}{circuito_cuenca_valor}.docx"
+    #obtener de S3 el archivo json que contiene el codigo del circuito para construir el archivo
+    # Descargar temporalmente en /tmp
+    tmp_path_code = TMP_DIR / "code.json"
+    if tipo_punto == "camara":
+        code_file = "files/epm_codes/CODE_ALC_CUE.json"
+    else:
+        code_file = "files/epm_codes/CODE_ACU_CIR.json"
+    s3.download_file(bucket_name, code_file, str(tmp_path_code))
+
+    # Leer el contenido con validación
+    with open(tmp_path_code, "r", encoding="utf-8") as f:
+        contenido = f.read().strip()
+        if not contenido:
+            print(" El archivo JSON está vacío.")
+        try:
+            code_json =  json.loads(contenido)
+        except json.JSONDecodeError as e:
+            print(f" Error al parsear JSON {code_file}: {e}")
+
+    code_data = code_json[circuito_cuenca_valor]
+
+    if not code_data:
+        code_data = circuito_cuenca_valor
+
+    file_name = COD_name[tipo_punto].format(COD=code_data)
+
+    output_key = f"{output_path_s3}{file_name}.docx"
     s3.upload_file(str(output_path), bucket_name, output_key)
     
     return {

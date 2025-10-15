@@ -98,8 +98,8 @@ template_name = {"puntos_medicion": "formato-acueducto.xlsx",
                  "vrp": "formato-acueducto.xlsx", "camara": "formato-alcantarillado.xlsx"}
 
 #MPH-EJ-0601-{CIR_COD}-F01-{ACU/ALC}-EIN-{FID}
-COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{CIR_COD}-F01-ACU-EIN-",
-            "vrp": "ACU/VRP/MPH-EJ-0601-{CIR_COD}-F01-ACU-EIN-", "camara": "ALC/MPH-EJ-0601-{CUE_COD}-F01-ALC-EIN-"}
+COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F01-ACU-EIN-",
+            "vrp": "ACU/VRP/MPH-EJ-0601-{COD}-F01-ACU-EIN-", "camara": "ALC/MPH-EJ-0601-{COD}-F01-ALC-EIN-"}
 
 def insert_image(ws, cellNumber, imagen_path):
     img = Image(str(imagen_path))
