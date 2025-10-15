@@ -18,8 +18,14 @@ payload = 0
 # Definir el cliente de Lambda
 lambda_client = boto3.client('lambda')
 
+# Definir cliente s3
+s3 = boto3.client('s3')
+
 client_id = os.environ["ARCGIS_CLIENT_ID"]
 client_secret = os.environ["ARCGIS_CLIENT_SECRET"]
+BUCKET_NAME = os.environ["BUCKET_NAME"]
+DB_ACCESS_LAMBDA_ARN = os.environ["DB_ACCESS_LAMBDA_ARN"] #No se usa en esta lambda
+LAMBDA_INFO_UPDATE = os.environ["LAMBDA_INFO_UPDATE"]
 
 
 # 1. Del json recibido por el evento: 
@@ -97,7 +103,7 @@ def get_urls_by_id(data):
 
 def invoke_decoder_lambda(payload):
     response = lambda_client.invoke(
-        FunctionName="dev-InfoUpdate",
+        FunctionName=LAMBDA_INFO_UPDATE,
         InvocationType='Event',  # async
         Payload=json.dumps(payload).encode('utf-8')  #  convierte a JSON y luego a bytes
     )
@@ -212,9 +218,8 @@ def lambda_handler(event, context):
     nombre_archivo = f"changes_{timestamp}.json"
 
     # 3. Configurar el cliente de S3
-    s3 = boto3.client('s3')
-    bucket_name = "cw357221"  
-    s3_route = f"CW357221-ArcGIS-Data/Changes/{nombre_archivo}" # Opcional: define una carpeta
+    bucket_name = BUCKET_NAME 
+    s3_route = f"ArcGIS-Data/Changes/{nombre_archivo}" # Opcional: define una carpeta
 
 
     # 3. Subir el archivo a S3
