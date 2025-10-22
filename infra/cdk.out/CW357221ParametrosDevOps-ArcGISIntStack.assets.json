@@ -61,16 +61,16 @@
         }
       }
     },
-    "7c1906438a1127351f345cddd598898e3fdb384777e9a0a8087121714ce8a140": {
+    "0c72b43852729590e1e83fd09aa08ff6cd647ca95c6b31322d9e2a1c89112490": {
       "displayName": "CW357221ParametrosDevOps-ArcGISIntStack Template",
       "source": {
         "path": "CW357221ParametrosDevOps-ArcGISIntStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "339713063336-us-west-2-cf1d9bfc": {
+        "339713063336-us-west-2-057b56b8": {
           "bucketName": "cdk-hnb659fds-assets-339713063336-us-west-2",
-          "objectKey": "7c1906438a1127351f345cddd598898e3fdb384777e9a0a8087121714ce8a140.json",
+          "objectKey": "0c72b43852729590e1e83fd09aa08ff6cd647ca95c6b31322d9e2a1c89112490.json",
           "region": "us-west-2",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-file-publishing-role-339713063336-us-west-2"
         }

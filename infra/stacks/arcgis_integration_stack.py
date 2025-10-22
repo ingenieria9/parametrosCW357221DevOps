@@ -38,15 +38,15 @@ ARCGIS_CLIENT_SECRET = os.environ["ARCGIS_CLIENT_SECRET"]
 
 class ArcGISIntStack(Stack):
     # bucket, project_name: str, db_access_lambda_arn, lambdas_gen_files (list)
-    def __init__(self, scope: Construct, id: str, bucket_name: str, bucket_arn:str , project_name: str, db_access_lambda_arn: str, entregables_fase_x: list, **kwargs):
+    def __init__(self, scope: Construct, id: str, bucket_name: str, bucket_arn:str , project_name: str, db_access_lambda_arn: str, entregables_fase_x: list, request_layer: _lambda.ILayerVersion, **kwargs):
         super().__init__(scope, id, **kwargs)
 
         # Referenciar la Layer existente (por ARN)
-        request_layer = _lambda.LayerVersion.from_layer_version_arn(
+        '''request_layer = _lambda.LayerVersion.from_layer_version_arn(
             self,
             f"{project_name}-request_layer",
             layer_version_arn="arn:aws:lambda:us-west-2:339713063336:layer:request_libraryforHTTP:1",
-        )
+        )'''
 
         # Importar el bucket por nombre/ARN (no se crea relación circular)
         bucket = s3.Bucket.from_bucket_attributes(

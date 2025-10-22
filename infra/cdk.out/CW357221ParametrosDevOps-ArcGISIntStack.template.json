@@ -139,7 +139,9 @@
     "FunctionName": "CW357221ParametrosDevOps-infoUpdate",
     "Handler": "handler.lambda_handler",
     "Layers": [
-     "arn:aws:lambda:us-west-2:339713063336:layer:request_libraryforHTTP:1"
+     {
+      "Fn::ImportValue": "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsrequestsLayer4A7F77A5353CDF8A"
+     }
     ],
     "Role": {
      "Fn::GetAtt": [
@@ -742,7 +744,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11OQW6DQAx8S+6LW+CUY1Kpam+IPCByNi51gV2EvUEI7d+rXVqp6mlm7PF4KqjKIzwfcJHC3vti4BtsF0Xbm5bEh9mSwUWum9RwDrYnPaOQGXC83RG21+Cssnfm5cP95Q3NI4uwd9EwjrC1fqC0yNj4ge2afZlFI/UVRUgFTgkMTtyh0oLro4LtTXU6TZwOEiR5Uexy4E7SqPVBd/bulLoZf8v8k9kXDT3IqcDWhp9mYaAYTf6fQtl10TSrfnr3VENZwvHwJczFHJzySNDu+A24mFaoQQEAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/12OwW6DQAxEvyX3xS1wyjGpVLU3RD4gcjYudYFdhL1BCO2/V7u0UtXTG9vj0VRQlUd4PuAihb33xcA32C6Ktje4yHWTGs7B9qRnFDIDjrc7wvYanFX2zrx8uL+6oXlkEfYuGsYRttYPlA6ZjR/YrtmXVTRSX1GEVOCUYHDiDpUWXB8VbG+q02ni9JCQxotilwN3kVatD7qrd6fUzfhb5t+YfdHQg5wKbG34aRYGitG0JD7MlkwuktLZddE0q35691RDWcLx8CXMxRyc8kjQ7vwGRImYA0EBAAA="
    },
    "Metadata": {
     "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/CDKMetadata/Default"

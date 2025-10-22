@@ -108,7 +108,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-deploy-role-339713063336-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-cfn-exec-role-339713063336-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/6443fb8fc0ab3a23b6912e89fce0f376949323489259e05a0ee72ea3d3f0a9b2.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/48dd6eaca11583d042db1ddfd661f31309494752a4bb182eeac70f1e182f54c3.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -176,6 +176,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "ExportsOutputRefCW357221ParametrosDevOpsDocxtplLayer1DBD86B9D558AC25"
+          }
+        ],
+        "/CW357221ParametrosDevOps-LayersStack/Exports/Output{\"Ref\":\"CW357221ParametrosDevOpsrequestsLayer4A7F77A5\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefCW357221ParametrosDevOpsrequestsLayer4A7F77A5353CDF8A"
           }
         ],
         "/CW357221ParametrosDevOps-LayersStack/BootstrapVersion": [
@@ -428,7 +434,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-deploy-role-339713063336-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-cfn-exec-role-339713063336-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/f403d0d5a80b1411074e3171689c8075177cc0b16d276c62f6d43eb35eb7acb7.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/8a3ed8734594d8b51f95d69c195f0a0ef1ba15352ce758cf35a6117bc5b43e95.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -543,7 +549,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-deploy-role-339713063336-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-cfn-exec-role-339713063336-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/7c1906438a1127351f345cddd598898e3fdb384777e9a0a8087121714ce8a140.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-339713063336-us-west-2/0c72b43852729590e1e83fd09aa08ff6cd647ca95c6b31322d9e2a1c89112490.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -558,6 +564,7 @@
       "dependencies": [
         "CW357221ParametrosDevOps-FileGenStack",
         "CW357221ParametrosDevOps-StorageStack",
+        "CW357221ParametrosDevOps-LayersStack",
         "CW357221ParametrosDevOps-ArcGISIntStack.assets"
       ],
       "metadata": {

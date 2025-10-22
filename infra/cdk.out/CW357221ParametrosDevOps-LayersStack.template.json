@@ -101,6 +101,14 @@
    "Export": {
     "Name": "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsDocxtplLayer1DBD86B9D558AC25"
    }
+  },
+  "ExportsOutputRefCW357221ParametrosDevOpsrequestsLayer4A7F77A5353CDF8A": {
+   "Value": {
+    "Ref": "CW357221ParametrosDevOpsrequestsLayer4A7F77A5"
+   },
+   "Export": {
+    "Name": "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsrequestsLayer4A7F77A5353CDF8A"
+   }
   }
  },
  "Parameters": {

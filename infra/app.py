@@ -83,8 +83,8 @@ arcgis_int_Stack = ArcGISIntStack(
     entregables_fase_x=[
         filegen_stack.entregable_fase1_lambda.function_arn
     ],
+    request_layer = layers_stack.requests_layer,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 
-    request_layer = layers_stack.requests_layer
 )
 
 arcgis_int_Stack.add_dependency(filegen_stack)
