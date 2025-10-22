@@ -6,6 +6,7 @@ from stacks.file_gen_stack import FileGenStack
 from stacks.db_access_stack import DbAccessStack
 from stacks.lambda_ecr_s3_trigger import LambdaEcrS3TriggerStack
 from stacks.arcgis_integration_stack import ArcGISIntStack
+from stacks.lambda_layers import LayersStack
 
 app = cdk.App()
 
@@ -44,6 +45,10 @@ db_stack = DbAccessStack(
     env=cdk.Environment(account=ACCOUNT, region="us-east-1"),
 )
 
+#Stack layers 
+layers_stack = LayersStack(app, f"{PROJECT_NAME}-LayersStack", project_name=PROJECT_NAME, env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
+
+
 #output de stack: Lambda ARN
 #db_stack.db_access_lambda_arn
 
@@ -58,7 +63,9 @@ filegen_stack = FileGenStack(
     bucket=storage.bucket,
     project_name=PROJECT_NAME,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION),
-    db_access_lambda_arn=db_stack.db_access_lambda_arn
+    db_access_lambda_arn=db_stack.db_access_lambda_arn, 
+    openpyxl_layer=layers_stack.openpyxl_layer,
+    docxtpl_layer=layers_stack.docxtpl_layer
 )
 
 # Stack conversor docx a pdf (lambda en ECR + trigger S3)
@@ -76,7 +83,8 @@ arcgis_int_Stack = ArcGISIntStack(
     entregables_fase_x=[
         filegen_stack.entregable_fase1_lambda.function_arn
     ],
-    env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION)
+    env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 
+    request_layer = layers_stack.requests_layer
 )
 
 arcgis_int_Stack.add_dependency(filegen_stack)

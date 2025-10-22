@@ -1,0 +1,140 @@
+{
+ "Resources": {
+  "CW357221ParametrosDevOpsOpenpyxlLayerD45504B2": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "CompatibleRuntimes": [
+     "python3.13"
+    ],
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
+     "S3Key": "40dfbb25e391aec9c5dc19d31e73ec407212e4757d7d4624dc1c5e45259d730d.zip"
+    },
+    "Description": "Layer con OpenpyXL desde ZIP",
+    "LayerName": "CW357221ParametrosDevOps-openpyxl"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-LayersStack/CW357221ParametrosDevOps-OpenpyxlLayer/Resource",
+    "aws:asset:path": "asset.40dfbb25e391aec9c5dc19d31e73ec407212e4757d7d4624dc1c5e45259d730d.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
+  "CW357221ParametrosDevOpsDocxtplLayer1DBD86B9": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "CompatibleRuntimes": [
+     "python3.13"
+    ],
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
+     "S3Key": "56e9eb0c27beec5c1db086b5132f278967fcb9abc1b67ce97dc9a606939d8f06.zip"
+    },
+    "Description": "Layer con DocxTpl desde ZIP",
+    "LayerName": "CW357221ParametrosDevOps-docxtpl"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-LayersStack/CW357221ParametrosDevOps-DocxtplLayer/Resource",
+    "aws:asset:path": "asset.56e9eb0c27beec5c1db086b5132f278967fcb9abc1b67ce97dc9a606939d8f06.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
+  "CW357221ParametrosDevOpsrequestsLayer4A7F77A5": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "CompatibleRuntimes": [
+     "python3.13"
+    ],
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
+     "S3Key": "f2ef5968fee80a74c1da352e32ea7eaa6efcdb1cd4b937ae4ee9e6e39ab832de.zip"
+    },
+    "Description": "Layer con requests desde ZIP",
+    "LayerName": "CW357221ParametrosDevOps-requests"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-LayersStack/CW357221ParametrosDevOps-requestsLayer/Resource",
+    "aws:asset:path": "asset.f2ef5968fee80a74c1da352e32ea7eaa6efcdb1cd4b937ae4ee9e6e39ab832de.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/02LsQ6CMBBAv4X9egpMjOJqIpHElRxQsRaK6V1DSMO/G3RxenkveRlmaYHHhBZWXW/VaFqMtVBngRZu4khT2xPGC63a37VnMzs4P9y/b8B5Q8xaGE87gHMsQ2e1lMR6g2+shQbjhn2+BnkH2aBa5Tm7Q45pikXyYmOUD07MpPH24wexiMLgnwAAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-LayersStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "OpenpyxlLayerArn": {
+   "Value": {
+    "Ref": "CW357221ParametrosDevOpsOpenpyxlLayerD45504B2"
+   }
+  },
+  "DocxtplLayerArn": {
+   "Value": {
+    "Ref": "CW357221ParametrosDevOpsDocxtplLayer1DBD86B9"
+   }
+  },
+  "RequestsLayerArn": {
+   "Value": {
+    "Ref": "CW357221ParametrosDevOpsrequestsLayer4A7F77A5"
+   }
+  },
+  "ExportsOutputRefCW357221ParametrosDevOpsOpenpyxlLayerD45504B2401284F7": {
+   "Value": {
+    "Ref": "CW357221ParametrosDevOpsOpenpyxlLayerD45504B2"
+   },
+   "Export": {
+    "Name": "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsOpenpyxlLayerD45504B2401284F7"
+   }
+  },
+  "ExportsOutputRefCW357221ParametrosDevOpsDocxtplLayer1DBD86B9D558AC25": {
+   "Value": {
+    "Ref": "CW357221ParametrosDevOpsDocxtplLayer1DBD86B9"
+   },
+   "Export": {
+    "Name": "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsDocxtplLayer1DBD86B9D558AC25"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

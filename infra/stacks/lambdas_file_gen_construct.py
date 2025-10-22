@@ -5,10 +5,13 @@ from aws_cdk import Duration, aws_lambda as _lambda, aws_iam as iam
 #y les asigna los permisos necesarios para su funcionamiento
 
 class LambdasFileGenConstruct(Construct):
-    def __init__(self, scope: Construct, id: str, bucket, folder_name: str, project_name: str,  db_access_lambda_arn: str,):
+    def __init__(self, scope: Construct, id: str, bucket, folder_name: str, project_name: str,  db_access_lambda_arn: str,   openpyxl_layer: _lambda.ILayerVersion,
+        docxtpl_layer: _lambda.ILayerVersion):
         super().__init__(scope, id)
 
         # Referenciar la Layer existente (por ARN)
+        
+        '''
         openpyxl_layer = _lambda.LayerVersion.from_layer_version_arn(
             self,
             f"{project_name}-OpenpyxlLayer",
@@ -18,7 +21,7 @@ class LambdasFileGenConstruct(Construct):
             self,
             f"{project_name}-DocxtplLayer",
             layer_version_arn="arn:aws:lambda:us-west-2:339713063336:layer:docxtpl:2",
-        )
+        )'''
 
         # "formato" lambda
         self.formato = _lambda.Function(

@@ -104,7 +104,8 @@ class ArcGISIntStack(Stack):
                         "LAMBDA_INFO_UPDATE": info_update_lambda.function_arn,
                         "ARCGIS_CLIENT_ID" : ARCGIS_CLIENT_ID,
                         "ARCGIS_CLIENT_SECRET" : ARCGIS_CLIENT_SECRET
-                        }
+                        },
+            timeout=Duration.seconds(20)                        
         )
 
         # acceso al bucket
@@ -152,7 +153,8 @@ class ArcGISIntStack(Stack):
                         "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
                         "ARCGIS_CLIENT_ID" : ARCGIS_CLIENT_ID,
                         "ARCGIS_CLIENT_SECRET" : ARCGIS_CLIENT_SECRET
-                        }
+                        },
+            timeout=Duration.seconds(300)                       
         )
 
         # Acceso al bucket
@@ -175,7 +177,8 @@ class ArcGISIntStack(Stack):
             handler="handler.lambda_handler",
             code=_lambda.Code.from_asset(f"../src/integracionArcGIS/updateCron"),
             environment={"BUCKET_NAME": bucket.bucket_name},
-            function_name=f"{project_name}-updateCron"
+            function_name=f"{project_name}-updateCron",
+            timeout=Duration.seconds(20)
         )
 
         # Acceso al bucket

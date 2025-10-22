@@ -162,7 +162,7 @@ def lambda_handler(event, context):
     if not code_data:
         code_data = circuito_cuenca_valor
 
-    file_name = COD_name[tipo_punto].format(COD=code_data)
+    file_name = COD_name[circuito_cuenca].format(COD=code_data)
 
     output_key = f"{output_path_s3}{file_name}.docx"
     s3.upload_file(str(output_path), bucket_name, output_key)

@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "f403d0d5a80b1411074e3171689c8075177cc0b16d276c62f6d43eb35eb7acb7": {
+      "displayName": "CW357221ParametrosDevOps-LambdaEcrS3TriggerStack Template",
+      "source": {
+        "path": "CW357221ParametrosDevOps-LambdaEcrS3TriggerStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "339713063336-us-west-2-d5191d8c": {
+          "bucketName": "cdk-hnb659fds-assets-339713063336-us-west-2",
+          "objectKey": "f403d0d5a80b1411074e3171689c8075177cc0b16d276c62f6d43eb35eb7acb7.json",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::339713063336:role/cdk-hnb659fds-file-publishing-role-339713063336-us-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

@@ -9,10 +9,7 @@
       "Key": "aws-cdk:auto-delete-objects",
       "Value": "true"
      }
-    ],
-    "VersioningConfiguration": {
-     "Status": "Enabled"
-    }
+    ]
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete",
@@ -138,7 +135,7 @@
       "Arn"
      ]
     },
-    "Runtime": "nodejs20.x",
+    "Runtime": "nodejs22.x",
     "Description": {
      "Fn::Join": [
       "",
@@ -164,7 +161,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WJQQ6CMBBFz8K+jAJh4VK4AIEDmFpGHIE26UwlhHB3Y2pCXL33/8shK0s4J3rh1PRjOtEdtk60GZVe+MYFbFUwI4qqH/ZnEY2byKzHHfeu6sDi5hbZBW/w2w//S413b+rRV5pRXZlROtED2WFXzSpPZ08FZBlckhcTpT5YoRmhjfwAKp5G+LgAAAA="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WJQQ6CMBBFz8K+jAIrlsIFCByA1DLiCLRJZyohhLsbUxPi6r3/Xw55VsI10SunZpjSme6wd6LNpPTKPRewV8FMKKp+2J9FNG4ms5133IeqA4tbWmQXvMFvP/0vNd69aUBfaUZ1Y0bpRI9kx0M1mzydvRSQZVAmLyZKfbBCC0Ib+QFZdLvmuAAAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "CW357221ParametrosDevOps-StorageStack/CDKMetadata/Default"

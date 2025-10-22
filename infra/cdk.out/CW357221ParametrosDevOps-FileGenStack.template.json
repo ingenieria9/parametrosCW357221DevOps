@@ -105,7 +105,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-     "S3Key": "4cc46fd79c62c270ca52ed4c3c92b2d3d3c78068f14860944e1db7f45acfa4bc.zip"
+     "S3Key": "6899cadbeeb7604fb65a6e4e6536b1d14f932e038e09a782fef2a62b05b56775.zip"
     },
     "Environment": {
      "Variables": {
@@ -129,13 +129,19 @@
     },
     "FunctionName": "CW357221ParametrosDevOps-Formato-Fase1",
     "Handler": "handler.lambda_handler",
+    "Layers": [
+     {
+      "Fn::ImportValue": "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsOpenpyxlLayerD45504B2401284F7"
+     }
+    ],
     "Role": {
      "Fn::GetAtt": [
       "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1ServiceRole0A066096",
       "Arn"
      ]
     },
-    "Runtime": "python3.12"
+    "Runtime": "python3.13",
+    "Timeout": 120
    },
    "DependsOn": [
     "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsFormatoFase1ServiceRoleDefaultPolicy89297315",
@@ -143,7 +149,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Formato-Fase1/Resource",
-    "aws:asset:path": "asset.4cc46fd79c62c270ca52ed4c3c92b2d3d3c78068f14860944e1db7f45acfa4bc",
+    "aws:asset:path": "asset.6899cadbeeb7604fb65a6e4e6536b1d14f932e038e09a782fef2a62b05b56775",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -253,7 +259,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+     "S3Key": "40cef2be19e632b9f89f1b9116a8740297db9362953329023ffdac0efeee7a07.zip"
     },
     "Environment": {
      "Variables": {
@@ -277,13 +283,19 @@
     },
     "FunctionName": "CW357221ParametrosDevOps-Informe-Fase1",
     "Handler": "handler.lambda_handler",
+    "Layers": [
+     {
+      "Fn::ImportValue": "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsDocxtplLayer1DBD86B9D558AC25"
+     }
+    ],
     "Role": {
      "Fn::GetAtt": [
       "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1ServiceRole795C2DAA",
       "Arn"
      ]
     },
-    "Runtime": "python3.12"
+    "Runtime": "python3.13",
+    "Timeout": 120
    },
    "DependsOn": [
     "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsInformeFase1ServiceRoleDefaultPolicyA32701B8",
@@ -291,7 +303,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Informe-Fase1/Resource",
-    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:path": "asset.40cef2be19e632b9f89f1b9116a8740297db9362953329023ffdac0efeee7a07",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -422,7 +434,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
-     "S3Key": "f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760.zip"
+     "S3Key": "beaa9b3dab81519b3f63eb233b4c7d2ae4dd99b853f44ae824d2c02f17a8d47f.zip"
     },
     "Environment": {
      "Variables": {
@@ -464,7 +476,7 @@
       "Arn"
      ]
     },
-    "Runtime": "python3.12"
+    "Runtime": "python3.13"
    },
    "DependsOn": [
     "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase1ServiceRoleDefaultPolicy003B1C53",
@@ -472,7 +484,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "CW357221ParametrosDevOps-FileGenStack/CW357221ParametrosDevOps-fileGenFase1/CW357221ParametrosDevOps-Entregable-Fase1/Resource",
-    "aws:asset:path": "asset.f7677064c91baa1be2011135f510e17b6b3055f1432a1ba627b2b47d9c769760",
+    "aws:asset:path": "asset.beaa9b3dab81519b3f63eb233b4c7d2ae4dd99b853f44ae824d2c02f17a8d47f",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -480,10 +492,23 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/z2MzQqDMBCEn8V73NaKhx5roWfRB5A1pnZrfsBNEAm+e1Hbnr5vmGEukBUFnBOcOZX9mGrqIDYe5Shw5jZqNF2PEB/BSk/OivvT/v0nJbJaBaGBWDutts3OymmSyxYPWwXnLTIrz3DbIDiHMshR+eOiVuzCJJXY28bjQHbY777FKqrFv5w95ZBlcE3eTJROwXoyCuqDH2NRbmLTAAAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/z2MwQqDMBBEv6X3uK168lgLPYt+gKwxtVtjAu4GkeC/F5X29N4ww2SQpQXcLrhwovsxsdRBbAT1qHDhNlqcuh4hPoPTQt6px8v9/SclstkU4QSx9tbsm4OVt6TXPZ62Kc5bZDbCcN+hOIcy6NHIeVEb9mHWRh1tIziQGzZVrfL27ppDmkJx+TBRMgcnNBmoT34BeXeNg8cAAAA="
    },
    "Metadata": {
     "aws:cdk:path": "CW357221ParametrosDevOps-FileGenStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "ExportsOutputFnGetAttCW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase16F765A89ArnC1A5C9FF": {
+   "Value": {
+    "Fn::GetAtt": [
+     "CW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase16F765A89",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "CW357221ParametrosDevOps-FileGenStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase16F765A89ArnC1A5C9FF"
    }
   }
  },

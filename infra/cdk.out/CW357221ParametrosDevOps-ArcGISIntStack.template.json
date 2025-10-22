@@ -1,0 +1,786 @@
+{
+ "Resources": {
+  "InfoUpdateLambdaServiceRole37ECE5A1": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/InfoUpdateLambda/ServiceRole/Resource"
+   }
+  },
+  "InfoUpdateLambdaServiceRoleDefaultPolicyFE2A0BB1": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+          ]
+         ]
+        },
+        {
+         "Fn::ImportValue": "CW357221ParametrosDevOps-FileGenStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase16F765A89ArnC1A5C9FF"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "InfoUpdateLambdaServiceRoleDefaultPolicyFE2A0BB1",
+    "Roles": [
+     {
+      "Ref": "InfoUpdateLambdaServiceRole37ECE5A1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/InfoUpdateLambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "InfoUpdateLambdaB1863DEB": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
+     "S3Key": "8dc714668e5f60aaa09a5c230d4a495eb220df779495ed996154ce1166078370.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": {
+       "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsSharedBucket2B2D0922E35C415C"
+      },
+      "DB_ACCESS_LAMBDA_ARN": {
+       "Fn::Join": [
+        "",
+        [
+         "arn:",
+         {
+          "Ref": "AWS::Partition"
+         },
+         ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+        ]
+       ]
+      },
+      "ENTREGABLES_FASE_X": {
+       "Fn::ImportValue": "CW357221ParametrosDevOps-FileGenStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsfileGenFase1CW357221ParametrosDevOpsEntregableFase16F765A89ArnC1A5C9FF"
+      },
+      "ARCGIS_CLIENT_ID": "PnsjxmDyxzamU2bf",
+      "ARCGIS_CLIENT_SECRET": "71d6e31ffdd647dfbe84dc3bd199185f"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-infoUpdate",
+    "Handler": "handler.lambda_handler",
+    "Layers": [
+     "arn:aws:lambda:us-west-2:339713063336:layer:request_libraryforHTTP:1"
+    ],
+    "Role": {
+     "Fn::GetAtt": [
+      "InfoUpdateLambdaServiceRole37ECE5A1",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.13",
+    "Timeout": 20
+   },
+   "DependsOn": [
+    "InfoUpdateLambdaServiceRoleDefaultPolicyFE2A0BB1",
+    "InfoUpdateLambdaServiceRole37ECE5A1"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/InfoUpdateLambda/Resource",
+    "aws:asset:path": "asset.8dc714668e5f60aaa09a5c230d4a495eb220df779495ed996154ce1166078370",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "WebhookLambdaServiceRoleDB3A5765": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/WebhookLambda/ServiceRole/Resource"
+   }
+  },
+  "WebhookLambdaServiceRoleDefaultPolicyFD29FE73": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "InfoUpdateLambdaB1863DEB",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "InfoUpdateLambdaB1863DEB",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "WebhookLambdaServiceRoleDefaultPolicyFD29FE73",
+    "Roles": [
+     {
+      "Ref": "WebhookLambdaServiceRoleDB3A5765"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/WebhookLambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "WebhookLambda118EFE5D": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
+     "S3Key": "b4071b9ea11cac4f9af50e220ad0c93e377a2326e1d549b9ad2d3844cc6d8ab2.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": {
+       "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsSharedBucket2B2D0922E35C415C"
+      },
+      "DB_ACCESS_LAMBDA_ARN": {
+       "Fn::Join": [
+        "",
+        [
+         "arn:",
+         {
+          "Ref": "AWS::Partition"
+         },
+         ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+        ]
+       ]
+      },
+      "LAMBDA_INFO_UPDATE": {
+       "Fn::GetAtt": [
+        "InfoUpdateLambdaB1863DEB",
+        "Arn"
+       ]
+      },
+      "ARCGIS_CLIENT_ID": "PnsjxmDyxzamU2bf",
+      "ARCGIS_CLIENT_SECRET": "71d6e31ffdd647dfbe84dc3bd199185f"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-ArcGISWebhook",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "WebhookLambdaServiceRoleDB3A5765",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.13",
+    "Timeout": 20
+   },
+   "DependsOn": [
+    "WebhookLambdaServiceRoleDefaultPolicyFD29FE73",
+    "WebhookLambdaServiceRoleDB3A5765"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/WebhookLambda/Resource",
+    "aws:asset:path": "asset.b4071b9ea11cac4f9af50e220ad0c93e377a2326e1d549b9ad2d3844cc6d8ab2",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "WebhookHttpApi2FBA184F": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "Name": "CW357221ParametrosDevOps-webhook-api",
+    "ProtocolType": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/WebhookHttpApi/Resource"
+   }
+  },
+  "WebhookHttpApiDefaultStage7496535D": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "WebhookHttpApi2FBA184F"
+    },
+    "AutoDeploy": true,
+    "StageName": "$default"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/WebhookHttpApi/DefaultStage/Resource"
+   }
+  },
+  "WebhookHttpApiPOSTupdateWebhookIntegration5E565874": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "WebhookHttpApi2FBA184F"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "WebhookLambda118EFE5D",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/WebhookHttpApi/POST--update/WebhookIntegration/Resource"
+   }
+  },
+  "WebhookHttpApiPOSTupdateWebhookIntegrationPermission84BE9A72": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "WebhookLambda118EFE5D",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:339713063336:",
+       {
+        "Ref": "WebhookHttpApi2FBA184F"
+       },
+       "/*/*/update"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/WebhookHttpApi/POST--update/WebhookIntegration-Permission"
+   }
+  },
+  "WebhookHttpApiPOSTupdateAB51AEBA": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "WebhookHttpApi2FBA184F"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "POST /update",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "WebhookHttpApiPOSTupdateWebhookIntegration5E565874"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/WebhookHttpApi/POST--update/Resource"
+   }
+  },
+  "loteInicialServiceRole2D290BF4": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/loteInicial/ServiceRole/Resource"
+   }
+  },
+  "loteInicialServiceRoleDefaultPolicyA74A9714": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "loteInicialServiceRoleDefaultPolicyA74A9714",
+    "Roles": [
+     {
+      "Ref": "loteInicialServiceRole2D290BF4"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/loteInicial/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "loteInicial9DC2E24C": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
+     "S3Key": "f866b0ba9ef083f495115a781e0257b5e471a7a10d6835688c36472649a13b1a.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": {
+       "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsSharedBucket2B2D0922E35C415C"
+      },
+      "DB_ACCESS_LAMBDA_ARN": {
+       "Fn::Join": [
+        "",
+        [
+         "arn:",
+         {
+          "Ref": "AWS::Partition"
+         },
+         ":lambda:us-east-1:339713063336:function:CW357221ParametrosDevOps-db-access"
+        ]
+       ]
+      },
+      "ARCGIS_CLIENT_ID": "PnsjxmDyxzamU2bf",
+      "ARCGIS_CLIENT_SECRET": "71d6e31ffdd647dfbe84dc3bd199185f"
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-loteInicial",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "loteInicialServiceRole2D290BF4",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.13",
+    "Timeout": 300
+   },
+   "DependsOn": [
+    "loteInicialServiceRoleDefaultPolicyA74A9714",
+    "loteInicialServiceRole2D290BF4"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/loteInicial/Resource",
+    "aws:asset:path": "asset.f866b0ba9ef083f495115a781e0257b5e471a7a10d6835688c36472649a13b1a",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "updateCronLambdaServiceRole39599909": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/updateCronLambda/ServiceRole/Resource"
+   }
+  },
+  "updateCronLambdaServiceRoleDefaultPolicy50D0E677": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputFnGetAttCW357221ParametrosDevOpsSharedBucket2B2D0922Arn32F31146"
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "updateCronLambdaServiceRoleDefaultPolicy50D0E677",
+    "Roles": [
+     {
+      "Ref": "updateCronLambdaServiceRole39599909"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/updateCronLambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "updateCronLambda8176B4A2": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-339713063336-us-west-2",
+     "S3Key": "65fe1c40686064dbe06ca74cbd897a223990da26381a9cec63c469edab985d0f.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": {
+       "Fn::ImportValue": "CW357221ParametrosDevOps-StorageStack:ExportsOutputRefCW357221ParametrosDevOpsSharedBucket2B2D0922E35C415C"
+      }
+     }
+    },
+    "FunctionName": "CW357221ParametrosDevOps-updateCron",
+    "Handler": "handler.lambda_handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "updateCronLambdaServiceRole39599909",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.13",
+    "Timeout": 20
+   },
+   "DependsOn": [
+    "updateCronLambdaServiceRoleDefaultPolicy50D0E677",
+    "updateCronLambdaServiceRole39599909"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/updateCronLambda/Resource",
+    "aws:asset:path": "asset.65fe1c40686064dbe06ca74cbd897a223990da26381a9cec63c469edab985d0f",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "updateArcgisInfoFF9585F4": {
+   "Type": "AWS::Events::Rule",
+   "Properties": {
+    "Name": "CW357221ParametrosDevOps-updateArcgisInfo",
+    "ScheduleExpression": "rate(7 days)",
+    "State": "ENABLED",
+    "Targets": [
+     {
+      "Arn": {
+       "Fn::GetAtt": [
+        "updateCronLambda8176B4A2",
+        "Arn"
+       ]
+      },
+      "Id": "Target0"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/updateArcgisInfo/Resource"
+   }
+  },
+  "updateArcgisInfoAllowEventRuleCW357221ParametrosDevOpsArcGISIntStackupdateCronLambdaB01F469584D26544": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "updateCronLambda8176B4A2",
+      "Arn"
+     ]
+    },
+    "Principal": "events.amazonaws.com",
+    "SourceArn": {
+     "Fn::GetAtt": [
+      "updateArcgisInfoFF9585F4",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/updateArcgisInfo/AllowEventRuleCW357221ParametrosDevOpsArcGISIntStackupdateCronLambdaB01F4695"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11OQW6DQAx8S+6LW+CUY1Kpam+IPCByNi51gV2EvUEI7d+rXVqp6mlm7PF4KqjKIzwfcJHC3vti4BtsF0Xbm5bEh9mSwUWum9RwDrYnPaOQGXC83RG21+Cssnfm5cP95Q3NI4uwd9EwjrC1fqC0yNj4ge2afZlFI/UVRUgFTgkMTtyh0oLro4LtTXU6TZwOEiR5Uexy4E7SqPVBd/bulLoZf8v8k9kXDT3IqcDWhp9mYaAYTf6fQtl10TSrfnr3VENZwvHwJczFHJzySNDu+A24mFaoQQEAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "CW357221ParametrosDevOps-ArcGISIntStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
