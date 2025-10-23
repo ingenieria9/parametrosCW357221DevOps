@@ -178,7 +178,8 @@ class ArcGISIntStack(Stack):
             code=_lambda.Code.from_asset(f"../src/integracionArcGIS/updateCron"),
             environment={"BUCKET_NAME": bucket.bucket_name},
             function_name=f"{project_name}-updateCron",
-            timeout=Duration.seconds(20)
+            timeout=Duration.seconds(20),
+            layers=[request_layer]
         )
 
         # Acceso al bucket

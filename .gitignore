@@ -1,1 +1,9 @@
-.env
+# Ignorar todos los archivos .env
+*.env
+
+# Ignorar todos los archivos NO ZIP en infra/layers
+infra/layers/*
+!infra/layers/*.zip
+
+# Ignorar todos los archivos en infra/cdk.out
+infra/cdk.out/
