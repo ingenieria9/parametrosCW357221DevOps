@@ -1,11 +1,13 @@
 name: Build and Deploy Lambda Image to ECR
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-        - 'src/file_converter_ecr_image/**'
+  workflow_dispatch:
+#on:
+#  push:
+#    branches:
+#      - main
+#    paths:
+#        - 'src/file_converter_ecr_image/**'
 
 jobs:
   build-and-deploy:

@@ -1,11 +1,14 @@
 name: Deploy CDK Stack
 
+#on:
+#  push:
+    #branches: [ main ]
+    #paths-ignore:
+    #  - 'src/file_converter_ecr_image/**' 
+    #  - '.github/workflows/**'
+
 on:
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - 'src/file_converter_ecr_image/**' 
-      - '.github/workflows/**'
+  workflow_dispatch:
 
 permissions:
   contents: read

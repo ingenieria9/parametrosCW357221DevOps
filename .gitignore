@@ -1,5 +1,6 @@
 # Ignorar todos los archivos .env
 *.env
+*.env*
 
 # Ignorar todos los archivos NO ZIP en infra/layers
 infra/layers/*
