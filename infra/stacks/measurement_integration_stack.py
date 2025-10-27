@@ -28,14 +28,13 @@ class MeasurementIntStack(Stack):
         )
 
         # ======================================================
-        # Parámetro: Service Account JSON (SecureString)
+        # Parámetro: Service Account JSON
         # ======================================================
         service_account_param = ssm.StringParameter(
             self,
             "DriveServiceAccountParam",
             parameter_name=f"/{project_name}/drive/service_account_key",
             string_value="x",
-            type=ssm.ParameterType.SECURE_STRING,
             description="Google Service Account JSON for Drive integration"
         )
 
@@ -47,7 +46,6 @@ class MeasurementIntStack(Stack):
             "DriveStartTokenParam",
             parameter_name=f"/{project_name}/drive/start_page_token",
             string_value="x",
-            type=ssm.ParameterType.STRING,
             description="Drive startPageToken used for incremental sync"
         )
 
