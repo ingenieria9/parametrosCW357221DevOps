@@ -48,7 +48,20 @@ class LayersStack(Stack):
                 _lambda.Runtime.PYTHON_3_13
             ],
             description="Layer con requests desde ZIP",
-        )        
+        )     
+
+        # Google Layer (desde ZIP)
+        google_zip_path = os.path.join(layers_path, "google.zip")
+        self.google_layer = _lambda.LayerVersion(
+            self,
+            f"{project_name}-googleLayer",
+            layer_version_name=f"{project_name}-google",
+            code=_lambda.Code.from_asset(google_zip_path),
+            compatible_runtimes=[
+                _lambda.Runtime.PYTHON_3_13
+            ],
+            description="Layer con google desde ZIP",
+        )               
 
         # Exponer los ARNs como outputs (para usar desde otros stacks)
         from aws_cdk import CfnOutput
@@ -56,3 +69,4 @@ class LayersStack(Stack):
         CfnOutput(self, "OpenpyxlLayerArn", value=self.openpyxl_layer.layer_version_arn)
         CfnOutput(self, "DocxtplLayerArn", value=self.docxtpl_layer.layer_version_arn)
         CfnOutput(self, "RequestsLayerArn", value=self.requests_layer.layer_version_arn)
+        CfnOutput(self, "GoogleLayerArn", value=self.google_layer.layer_version_arn)

@@ -13,6 +13,7 @@ $layersMap = @{
     "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsOpenpyxlLayerD45504B2401284F7" = "../../layers/openpyxl"
     "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsDocxtplLayer1DBD86B9D558AC25"   = "../../layers/docxtpl"
     "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsrequestsLayer4A7F77A5353CDF8A" = "../../layers/requests"
+    "CW357221ParametrosDevOps-LayersStack:ExportsOutputRefCW357221ParametrosDevOpsgoogleLayer2681B514AEF58F30" = "../../layers/google"
 }
 
 # --- Paso 1: Ejecutar CDK Synth ---

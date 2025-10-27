@@ -7,6 +7,7 @@ from stacks.db_access_stack import DbAccessStack
 from stacks.lambda_ecr_s3_trigger import LambdaEcrS3TriggerStack
 from stacks.arcgis_integration_stack import ArcGISIntStack
 from stacks.lambda_layers import LayersStack
+from stacks.measurement_integration_stack import MeasurementIntStack
 
 app = cdk.App()
 
@@ -88,5 +89,15 @@ arcgis_int_Stack = ArcGISIntStack(
 )
 
 arcgis_int_Stack.add_dependency(filegen_stack)
+
+
+measurement_int_Stack = MeasurementIntStack(
+    app,  f"{PROJECT_NAME}-MeasurementIntStack",
+    bucket_name=storage.bucket.bucket_name,
+    bucket_arn=storage.bucket.bucket_arn, 
+    project_name=PROJECT_NAME,
+    drive_layer = layers_stack.google_layer,
+    env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 
+)
 
 app.synth()
