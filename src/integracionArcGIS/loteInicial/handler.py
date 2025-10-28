@@ -8,32 +8,31 @@ DB_ACCESS_LAMBDA_ARN = os.environ["DB_ACCESS_LAMBDA_ARN"]
 
 json_test =  ''' {
     "features" : [
-    {
       "attributes" : {
         "OBJECTID" : 1, 
-        "MUNICIPIO_ACU" : "RIONEGRO", 
-        "CIRCUITO_ACU" : "FONTIBON", 
-        "TIPO_ELEM_AYA" : "VALVULA SECUNDARIA", 
-        "IPID_ELEM_ACU" : "10338841", 
-        "FID_ELEM_ACU" : "10338841", 
-        "IPID_TUB_ACU" : "10338873", 
-        "DIAME_mm_ACU" : 125, 
-        "MATERIAL_ACU" : "POLIETILENO ALTA DENSIDAD", 
-        "SUBCIRCUITO_ACU" : "29200", 
-        "DIRECCION_AYA" : "CL 51 CR 59 A -15 (AP 201 )", 
-        "OBSERVACION_ACU" : "PROYECTADA", 
-        "CRITERIO_ACU" : "PUNTO ALEJADO DE LA RED", 
-        "X_m_ACU" : 855936.173465, 
-        "Y_m_ACU" : 1172905.737964, 
-        "TIPO_PUNTO_AYA" : "puntos_medicion", 
-        "PUNTO_EXISTENTE_AYA" : "Si", 
-        "G3E_FID_ALC" : null, 
+        "FID_ELEM" : 15257, 
+        "PUNTO_EXISTENTE" : "No", 
+        "TIPO_PUNTO" : "puntos_medicion", 
+        "FASE_INICIAL" : "fase2", 
+        "VARIABLE_A_MEDIR" : "presion", 
+        "CODIGO_CAJA_ACU" : null, 
+        "SUBCIRCUIT_ACU" : 16002, 
+        "CUENCA_ALC" : null, 
+        "CIRCUITO_ACU" : "ITAGUI", 
+        "DIRECCION_ACU" : "CR 52 CL 44 -3", 
+        "OBSERV_ACU" : "PUNTO DE MEDICION PROYECTADO", 
+        "CRITERIO_ACU" : "MEDICION DE PRESION", 
+        "MUNICIPIO_ACU" : "ITAGUI", 
+        "TIPO_ELEM_ACU" : "NODO", 
+        "IPID_ELEM_ACU" : 2069372, 
+        "IPID_TUB_ACU" : 2069443, 
+        "DIAME_mm_ACU" : 75, 
+        "MATERIAL_ACU" : "PVC", 
+        "x" : -75.614342552, 
+        "y" : 6.17164153200002, 
         "TIPO_RED_ALC" : null, 
         "PROPIETARI_ALC" : null, 
         "TIPO_AGUA_ALC" : null, 
-        "CUENCA_ALC" : null, 
-        "COOR_X_ALC" : null, 
-        "COOR_Y_ALC" : null, 
         "IPID_ALC" : null, 
         "ETAPA_ALC" : null, 
         "FECHA_INI_ALC" : null, 
@@ -44,49 +43,46 @@ json_test =  ''' {
         "DIAMETRO_ALC" : null, 
         "PENDIENTE_ALC" : null, 
         "EST_SIATA_ALC" : null, 
-        "IPID_ELEM_AYA" : "10338841", 
-        "X_m_AYA" : 855936.173465, 
-        "Y_m_AYA" : 1172905.737964, 
+        "X_m" : 829903.6738794, 
+        "Y_m" : 1174449.39284835, 
+        "GlobalID" : "0bfc161b-9eec-440c-8a34-fdd34b22df5b", 
         "USUARIO_CREACION" : null, 
         "FECHA_CREACION" : null, 
-        "USUARIO_EDICION" : "central_ti_telemetrik", 
-        "FECHA_EDICION" : 1760963909642, 
-        "GlobalID" : "d1dd9f03-db73-44c5-b9c9-20284ef35818", 
-        "FID_AYA" : "10338841", 
-        "CODIGO_CAJA" : null
+        "USUARIO_EDICION" : "USER", 
+        "FECHA_EDICION" : 1761315126000
       }, 
       "geometry" : 
       {
-        "x" : 855936.1735, 
-        "y" : 1172905.738
+        "x" : -75.614342551999982, 
+        "y" : 6.1716415320000237
       }
     }, 
     {
       "attributes" : {
         "OBJECTID" : 2, 
-        "MUNICIPIO_ACU" : "RIONEGRO", 
-        "CIRCUITO_ACU" : "FONTIBON", 
-        "TIPO_ELEM_AYA" : "VALVULA SECUNDARIA", 
-        "IPID_ELEM_ACU" : "10226718", 
-        "FID_ELEM_ACU" : "10226718", 
-        "IPID_TUB_ACU" : "10226744", 
-        "DIAME_mm_ACU" : 180, 
-        "MATERIAL_ACU" : "POLIETILENO ALTA DENSIDAD", 
-        "SUBCIRCUITO_ACU" : "29200", 
-        "DIRECCION_AYA" : "CL 67 CR 54 -365", 
-        "OBSERVACION_ACU" : "PROYECTADA", 
-        "CRITERIO_ACU" : "VERIFICAR FUNCIONAMIENTO DE LA RED", 
-        "X_m_ACU" : 855250.609008, 
-        "Y_m_ACU" : 1173820.738949, 
-        "TIPO_PUNTO_AYA" : "puntos_medicion", 
-        "PUNTO_EXISTENTE_AYA" : "Si", 
-        "G3E_FID_ALC" : null, 
+        "FID_ELEM" : 15450, 
+        "PUNTO_EXISTENTE" : "No", 
+        "TIPO_PUNTO" : "puntos_medicion", 
+        "FASE_INICIAL" : "fase2", 
+        "VARIABLE_A_MEDIR" : "presion", 
+        "CODIGO_CAJA_ACU" : null, 
+        "SUBCIRCUIT_ACU" : 16005, 
+        "CUENCA_ALC" : null, 
+        "CIRCUITO_ACU" : "ITAGUI", 
+        "DIRECCION_ACU" : "CR 56D CL 44", 
+        "OBSERV_ACU" : "PUNTO DE MEDICION PROYECTADO", 
+        "CRITERIO_ACU" : "MEDICION DE PRESION", 
+        "MUNICIPIO_ACU" : "ITAGUI", 
+        "TIPO_ELEM_ACU" : "NODO", 
+        "IPID_ELEM_ACU" : 4614371, 
+        "IPID_TUB_ACU" : 4614372, 
+        "DIAME_mm_ACU" : 75, 
+        "MATERIAL_ACU" : "PVC", 
+        "x" : -75.616507407, 
+        "y" : 6.17470936300002, 
         "TIPO_RED_ALC" : null, 
         "PROPIETARI_ALC" : null, 
         "TIPO_AGUA_ALC" : null, 
-        "CUENCA_ALC" : null, 
-        "COOR_X_ALC" : null, 
-        "COOR_Y_ALC" : null, 
         "IPID_ALC" : null, 
         "ETAPA_ALC" : null, 
         "FECHA_INI_ALC" : null, 
@@ -97,21 +93,18 @@ json_test =  ''' {
         "DIAMETRO_ALC" : null, 
         "PENDIENTE_ALC" : null, 
         "EST_SIATA_ALC" : null, 
-        "IPID_ELEM_AYA" : "10226718", 
-        "X_m_AYA" : 855250.609008, 
-        "Y_m_AYA" : 1173820.738949, 
+        "X_m" : 829664.046916928, 
+        "Y_m" : 1174788.75993623, 
+        "GlobalID" : "1497f238-9e64-4fc2-94b9-ae35c39aa020", 
         "USUARIO_CREACION" : null, 
         "FECHA_CREACION" : null, 
-        "USUARIO_EDICION" : "central_ti_telemetrik", 
-        "FECHA_EDICION" : 1760963910442, 
-        "GlobalID" : "f42e6e69-e331-4548-a19c-d4c643cd4a23", 
-        "FID_AYA" : "10226718", 
-        "CODIGO_CAJA" : null
+        "USUARIO_EDICION" : null, 
+        "FECHA_EDICION" : null
       }, 
       "geometry" : 
       {
-        "x" : 855250.609, 
-        "y" : 1173820.7389
+        "x" : -75.616507406999972, 
+        "y" : 6.1747093630000336
       }
     }
   ]
@@ -167,9 +160,9 @@ def formatear_timestamp_para_sql(fecha_dt):
 
 def lambda_handler(event, context):
     batch_size = 10
-    puntos_capa_principal_fields = ["GlobalID","TIPO_PUNTO_AYA","FECHA_CREACION","FECHA_EDICION","CIRCUITO_ACU",
-                                    "SUBCIRCUITO_ACU","CUENCA_ALC","FID_AYA","DIRECCION_AYA","CODIGO_CAJA_ACU",
-                                    "X_m_AYA","Y_m_AYA","PUNTO_EXISTENTE_AYA","IPID_ELEM_AYA"]
+    puntos_capa_principal_fields = ["GlobalID","TIPO_PUNTO","FECHA_CREACION","FECHA_EDICION","CIRCUITO_ACU","SUBCIRCUITO_ACU",
+                                    "CUENCA_ALC","FID_ELEM","DIRECCION_ACU","CODIGO_CAJA_ACU","x","y","PUNTO_EXISTENTE","IPID_ELEM_ACU",
+                                    "IPID_ALC","FASE_INICIAL","VARIABLE_A_MEDIR"]
 
     insert_values = []
 

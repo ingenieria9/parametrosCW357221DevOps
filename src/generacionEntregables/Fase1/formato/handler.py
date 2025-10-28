@@ -94,12 +94,15 @@ template_path_s3 = "files/plantillas/Fase1/"
 output_path_s3 = "files/entregables/Fase1/"
 
 
-template_name = {"puntos_medicion": "formato-acueducto.xlsx",
-                 "vrp": "formato-acueducto.xlsx", "camara": "formato-alcantarillado.xlsx"}
+template_name = {"puntos_medicion": "formato-acueducto-pm.xlsx",
+                 "vrp": "formato-acueducto-vrp.xlsx", "camara": "formato-alcantarillado.xlsx"}
 
 #MPH-EJ-0601-{CIR_COD}-F01-{ACU/ALC}-EIN-{FID}
 COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F01-ACU-EIN-",
             "vrp": "ACU/VRP/MPH-EJ-0601-{COD}-F01-ACU-EIN-", "camara": "ALC/MPH-EJ-0601-{COD}-F01-ALC-EIN-"}
+
+celdas_imagenes_plantilla = {"puntos_medicion": ["B40", "C40", "D40", "E40","B41", "C41", "D41", "E41", "B42", "C42", "D42", "E42"],
+                             "vrp": [], "camara": []}
 
 def insert_image(ws, cellNumber, imagen_path):
     img = Image(str(imagen_path))
@@ -246,9 +249,9 @@ def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID):
 def lambda_handler(event, context):
 
     payload_data = event["payload"]["attributes"]
-    tipo_punto = event["payload"]["attributes"]["tipo_punto_1"]
-    id = event["payload"]["attributes"]["id"]
-    GlobalID = event["payload"]["attributes"]["relation_id"] #id uuid global 
+    tipo_punto = event["payload"]["attributes"]["TIPO_PUNTO"]
+    FID_ELEM = event["payload"]["attributes"]["FID_ELEM"]
+    GlobalID = event["payload"]["attributes"]["PARENT_ID"] #id uuid global 
 
 
     #template_path_s3 + devolver de template key el value segun tipo de punto (ej para caja de medicion devuelve formato-acueducto.xlsx)
@@ -304,7 +307,8 @@ def lambda_handler(event, context):
                         cell.value = cell.value.replace(placeholder, str(value))
 
     # Insertar imágenes (en celdas específicas)
-    celdas_imagenes = ["B38", "C38", "D38", "E38","B39", "C39", "D39", "E39", "B40", "C40", "D40", "E40"]
+    #celdas_imagenes = ["B40", "C40", "D40", "E40","B41", "C41", "D41", "E41", "B42", "C42", "D42", "E42"]
+    celdas_imagenes = celdas_imagenes_plantilla.get(tipo_punto)
 
     #Ciclo para insertar las imagenes en las celdas disponibles
     for celda, imagen_path in zip(celdas_imagenes, imagen_paths):
@@ -338,10 +342,10 @@ def lambda_handler(event, context):
         except json.JSONDecodeError as e:
             print(f" Error al parsear JSON {code_file}: {e}")
     
-    code_data = code_json[capa_principal_data["CIRCUITO_1"]]
+    code_data = code_json[capa_principal_data["CIRCUITO_ACU"]]
 
     if not code_data:
-        code_data = capa_principal_data["CIRCUITO_1"]
+        code_data = capa_principal_data["CIRCUITO_ACU"]
 
     file_name = COD_name[tipo_punto].format(COD=code_data)
 

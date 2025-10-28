@@ -82,8 +82,8 @@ def lambda_handler(event, context):
     incoming_payload = event
     #circuito = event.payload["circuito"] #obtener el circuito del evento
     #incoming_payload = payload_prueba
-    id = incoming_payload["payload"]["attributes"]["id"] #id epm
-    GlobalID = incoming_payload["payload"]["attributes"]["relation_id"] #id uuid global  relation_id de fase 1 = GlobalID capa principal
+    FID_ELEM = incoming_payload["payload"]["attributes"]["FID_ELEM"] #FID
+    GlobalID = incoming_payload["payload"]["attributes"]["PARENT_ID"] #PARENT_ID de fase 1 = GlobalID capa principal
     
     # invocar a lambda de generación de formato (async)
     invoke_lambda(incoming_payload, formato_ARN)
@@ -91,9 +91,12 @@ def lambda_handler(event, context):
 
     # invocar a lambda acceso base de datos (sync) 
     # revisar si el punto es el ultimo visitado del circuito
+
+    #f"""SELECT CASE WHEN COUNT(*) = (SELECT COUNT(*)  FROM puntos_capa_principal p2 WHERE p2."CIRCUITO_ACU" = p1."CIRCUITO_ACU" AND p2."FID_ELEM" IN (SELECT "FID_ELEM" FROM fase_1))THEN 'Finalizado' ELSE 'Incompleto' END AS estado, p1."CIRCUITO_ACU" as "CIRCUITO_ACU" FROM puntos_capa_principal p1 WHERE p1."CIRCUITO_ACU" = ( SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID"  = '{GlobalID}')GROUP BY p1."CIRCUITO_ACU";"""
+
     payload_db = {
         "queryStringParameters": {
-            "query": f"""SELECT CASE WHEN COUNT(*) = (SELECT COUNT(*)  FROM puntos_capa_principal p2  WHERE p2."CIRCUITO_1" = p1."CIRCUITO_1" AND p2.id IN (SELECT id FROM fase_1))THEN 'Finalizado' ELSE 'Incompleto' END AS estado, p1."CIRCUITO_1" as "CIRCUITO_1" FROM puntos_capa_principal p1 WHERE p1."CIRCUITO_1" = ( SELECT "CIRCUITO_1" FROM puntos_capa_principal WHERE "GlobalID"  = '{GlobalID}')GROUP BY p1."CIRCUITO_1";""",
+            "query": f"""SELECT CASE WHEN COUNT(*) = (SELECT COUNT(*)  FROM puntos_capa_principal p2 WHERE p2."CIRCUITO_ACU" = p1."CIRCUITO_ACU" AND p2."FID_ELEM" IN (SELECT "FID_ELEM" FROM fase_1))THEN 'Finalizado' ELSE 'Incompleto' END AS estado, p1."CIRCUITO_ACU" as "CIRCUITO_ACU" FROM puntos_capa_principal p1 WHERE p1."CIRCUITO_ACU" = ( SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID"  = '{GlobalID}')GROUP BY p1."CIRCUITO_ACU";""",
             "time_column": "fecha_creacion",
             "db_name": "parametros"
         }
@@ -103,9 +106,9 @@ def lambda_handler(event, context):
     print(response_db)
     #Parsear el body 
     body = json.loads(response_db["body"])
-    # xtraer el valor del campo "estado"
+    # Extraer el valor del campo "estado"
     estado = body[0]["estado"]
-    circuito = body[0]["CIRCUITO_1"]
+    circuito = body[0]["CIRCUITO_ACU"]
 
     print(estado)
     print(circuito)
