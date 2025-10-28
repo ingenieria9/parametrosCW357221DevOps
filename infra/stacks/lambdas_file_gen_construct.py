@@ -6,7 +6,7 @@ from aws_cdk import Duration, aws_lambda as _lambda, aws_iam as iam
 
 class LambdasFileGenConstruct(Construct):
     def __init__(self, scope: Construct, id: str, bucket, folder_name: str, project_name: str,  db_access_lambda_arn: str,   openpyxl_layer: _lambda.ILayerVersion,
-        docxtpl_layer: _lambda.ILayerVersion):
+        docxtpl_layer: _lambda.ILayerVersion, requests_layer: _lambda.ILayerVersion):
         super().__init__(scope, id)
 
         # Referenciar la Layer existente (por ARN)
@@ -53,7 +53,7 @@ class LambdasFileGenConstruct(Construct):
                 "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
             },
             function_name=f"{project_name}-Informe-{folder_name}",
-            layers=[docxtpl_layer],
+            layers=[docxtpl_layer, requests_layer],
             timeout=Duration.seconds(120)
         )
 

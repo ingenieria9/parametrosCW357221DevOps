@@ -75,6 +75,7 @@ from docxtpl import DocxTemplate, InlineImage
 from datetime import datetime
 from docx.shared import Cm
 import os
+import requests
 
 
 client_lambda_db = boto3.client("lambda", region_name="us-east-1") 
@@ -122,6 +123,12 @@ def lambda_handler(event, context):
     # Descargar archivos desde S3
     s3.download_file(bucket_name, template_key, str(template_path))
 
+    response = obtener_imagenes_grafana(circuito_cuenca_valor)
+    #obtener imagenes grafana 
+    img_path = "/tmp/grafico_fase_siguiente_puntos.png"
+    with open(img_path, "wb") as f:
+        f.write(response.content)
+
     contexto_general = build_general_context(circuito_cuenca_valor, circuito_cuenca)
 
     print("contexto_general", contexto_general)
@@ -130,12 +137,18 @@ def lambda_handler(event, context):
 
     print("contexto_puntos", contexto_puntos)
 
-    contexto = {**contexto_general,  "puntos": contexto_puntos}
+    imagenes ={
+    "grafico_fase_siguiente_puntos": InlineImage(doc, img_path)
+    }
+    
+
+    contexto = {**contexto_general,  "puntos": contexto_puntos, **imagenes}
     print(contexto)
     
     doc = DocxTemplate(template_path)
     doc.render(contexto)
     doc.save(output_path)
+
 
     # Subir resultado a S3
     #obtener de S3 el archivo json que contiene el codigo del circuito para construir el archivo
@@ -171,6 +184,10 @@ def lambda_handler(event, context):
         "status": "ok",
         "output_file": f"s3://{bucket_name}/{output_key}"
     }
+
+def obtener_imagenes_grafana(circuito):
+    response = "hello"
+    return response
     
 
 def obtener_info_de_capa_principal(bucket_name, TIPO_PUNTO, GlobalID):
