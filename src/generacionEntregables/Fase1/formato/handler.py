@@ -102,15 +102,15 @@ COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F01-ACU-EIN-",
             "vrp": "ACU/VRP/MPH-EJ-0601-{COD}-F01-ACU-EIN-", "camara": "ALC/MPH-EJ-0601-{COD}-F01-ALC-EIN-"}
 
 celdas_imagenes_plantilla = {"puntos_medicion": ["B40", "C40", "D40", "E40","B41", "C41", "D41", "E41", "B42", "C42", "D42", "E42"],
-                             "vrp": [], "camara": []}
+                             "vrp": ["B48", "C48", "D48", "E48","B49", "C49", "D49", "E49", "B50", "C50", "D50", "E50"], "camara": []}
 
 def insert_image(ws, cellNumber, imagen_path):
     img = Image(str(imagen_path))
     cell = ws[cellNumber]
 
     # Medidas de la celda
-    col_width = ws.column_dimensions[cell.column_letter].width or 8   # ancho columna en unidades de Excel
-    row_height = ws.row_dimensions[cell.row].height or 15             # alto fila en puntos
+    col_width = ws.column_dimensions[cell.column_letter].width   # ancho columna en unidades de Excel
+    row_height = ws.row_dimensions[cell.row].height             # alto fila en puntos
 
     # Conversión aproximada a píxeles
     max_width = col_width * 7
@@ -126,6 +126,8 @@ def insert_image(ws, cellNumber, imagen_path):
 
 def normalizar_booleans(data_get):
     def convertir_valor(valor):
+        if valor is None:  # convertir None a cadena vacía
+            return ""
         if isinstance(valor, bool):  # True/False nativos de Python
             return "Si" if valor else "No"
         if isinstance(valor, str):  # "true"/"false" como string
@@ -275,7 +277,12 @@ def lambda_handler(event, context):
     wb = load_workbook(template_path)
     ws = wb.active  # hoja específica con wb["NombreHoja"] o activa con wb.active
 
-
+    # ajustar ancho columnas
+    for col in ['B', 'C', 'D', 'E']:
+        #print(f"Columna {col}: {ws.column_dimensions[col].width}")
+        ws.column_dimensions[col].width = 40
+        #print(f"Columna {col}: {ws.column_dimensions[col].width}")
+    
     # Leer datos adicionales desde S3
     capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID)
 
@@ -350,7 +357,7 @@ def lambda_handler(event, context):
     file_name = COD_name[tipo_punto].format(COD=code_data)
 
     #Construir el nombre completo del archivo
-    output_key = f"{output_path_s3}{file_name}{id}.xlsx"
+    output_key = f"{output_path_s3}{file_name}{FID_ELEM}.xlsx"
 
 
     s3.upload_file(str(output_path), bucket_name, output_key)

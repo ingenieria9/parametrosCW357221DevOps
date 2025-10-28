@@ -12,7 +12,7 @@
          "Editor":"central_ti_telemetrik",
          "Fecha_Edicion":1758829344252,
          "id" : "0002",
-         "tipo_punto" : "puntos_medicion",
+         "TIPO_PUNTO" : "puntos_medicion",
          "signos_desgaste" : "Si",
          "fugas" : "Si",
          "danios" : "No",
@@ -64,7 +64,7 @@ circuito, subcircuito, cuenca, direccion_referencia, vrp
 "vrp" : "vrp-0001",
 
 key s3 de capa principal 
-ArcGIS-Data/Puntos/{ID}_{tipo_punto}/Capa_principal/{latest-timestamp}.json
+ArcGIS-Data/Puntos/{ID}_{TIPO_PUNTO}/Capa_principal/{latest-timestamp}.json
 '''
 
 
@@ -98,17 +98,17 @@ COD_name = {"circuito": "ACU/CIR/MPH-EJ-0601-{COD}-F01-ACU-DIA",
 
 def lambda_handler(event, context):   
     payload_data = event["payload"]["attributes"]
-    tipo_punto = event["payload"]["attributes"]["tipo_punto_1"]
-    id = event["payload"]["attributes"]["id"]
-    GlobalID = event["payload"]["attributes"]["relation_id"]
+    TIPO_PUNTO = event["payload"]["attributes"]["TIPO_PUNTO"]
+    FID_ELEM = event["payload"]["attributes"]["FID_ELEM"]
+    GlobalID = event["payload"]["attributes"]["PARENT_ID"]
 
-    capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID)
+    capa_principal_data = obtener_info_de_capa_principal(bucket_name, TIPO_PUNTO, GlobalID)
 
-    if tipo_punto == "vrp" or tipo_punto == "puntos_medicion":
-        circuito_cuenca_valor = capa_principal_data.get("CIRCUITO_1", "N/A")
+    if TIPO_PUNTO == "vrp" or TIPO_PUNTO == "puntos_medicion":
+        circuito_cuenca_valor = capa_principal_data.get("CIRCUITO_ACU", "N/A")
         circuito_cuenca = "circuito"
     else:
-        circuito_cuenca_valor = capa_principal_data.get("CUENCA", "N/A")
+        circuito_cuenca_valor = capa_principal_data.get("CUENCA_ALC", "N/A")
         circuito_cuenca = "cuenca"
 
     print(circuito_cuenca, circuito_cuenca_valor)
@@ -141,7 +141,7 @@ def lambda_handler(event, context):
     #obtener de S3 el archivo json que contiene el codigo del circuito para construir el archivo
     # Descargar temporalmente en /tmp
     tmp_path_code = TMP_DIR / "code.json"
-    if tipo_punto == "camara":
+    if TIPO_PUNTO == "camara":
         code_file = "files/epm_codes/CODE_ALC_CUE.json"
     else:
         code_file = "files/epm_codes/CODE_ACU_CIR.json"
@@ -173,10 +173,10 @@ def lambda_handler(event, context):
     }
     
 
-def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID):
+def obtener_info_de_capa_principal(bucket_name, TIPO_PUNTO, GlobalID):
     # Construir el prefijo correcto
     s3_key_capa_principal = (
-        f"ArcGIS-Data/Puntos/{GlobalID}_{tipo_punto}/Capa_principal/"
+        f"ArcGIS-Data/Puntos/{GlobalID}_{TIPO_PUNTO}/Capa_principal/"
     )
 
     # Listar objetos en esa carpeta
@@ -221,30 +221,30 @@ def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID):
 
 def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
     if circuito_cuenca == "circuito":
-        circuito_cuenca = "CIRCUITO_1"
+        circuito_cuenca = "CIRCUITO_ACU"
     else: 
-        circuito_cuenca = "CUENCA"
+        circuito_cuenca = "CUENCA_ALC"
 
-    # 1. Obtener lista de id y tipo_punto
+    # 1. Obtener lista de id y TIPO_PUNTO
     query = f"""
-        SELECT "GlobalID", tipo_punto 
+        SELECT "GlobalID", TIPO_PUNTO 
         FROM puntos_capa_principal 
         WHERE "{circuito_cuenca}" = '{circuito_cuenca_valor}'
     """
     print(query)
     resultados = query_db(query, "fecha_creacion")
 
-    # Extraer listas de id y tipo_punto
+    # Extraer listas de id y TIPO_PUNTO
     lista_id = [row["GlobalID"] for row in resultados]
-    lista_tipo = [row["tipo_punto"] for row in resultados]
+    lista_tipo = [row["TIPO_PUNTO"] for row in resultados]
 
     print(lista_id)
     print(lista_tipo)
 
     puntos_visitados_consolidados = []
 
-    for punto, tipo_punto in zip(lista_id, lista_tipo):
-        key_s3_prefix = f"ArcGIS-Data/Puntos/{punto}_{tipo_punto}/Fase1/"
+    for punto, TIPO_PUNTO in zip(lista_id, lista_tipo):
+        key_s3_prefix = f"ArcGIS-Data/Puntos/{punto}_{TIPO_PUNTO}/Fase1/"
         s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=key_s3_prefix)
 
         # Filtrar archivos JSON
@@ -266,17 +266,17 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
 
         # 4. Extraer solo los atributos deseados
         atributos_deseados = [
-            "id",
-            "comentario_cond_fisica",
-            "comentario_conexiones_hid",
-            "comentario_vuln",
-            "conclusiones",
-            "recomendaciones",
-            "punto_habilitado_medicion"
+            "FID_ELEM",
+            "COMENT_COND_FISICA_ACU",
+            "COMENT_GENERAL_CONEX_HIDRAU_ACU",
+            "Comentarios_adicionales_acerca_",
+            "Conclusiones",
+            "Recomendaciones",
+            "PUNTOS_HABILITADO_FASE3"
         ]
 
         punto_filtrado = {
-            "tipo_punto": tipo_punto,
+            "TIPO_PUNTO": TIPO_PUNTO,
             "archivo_s3": latest_key
         }
 
@@ -316,55 +316,52 @@ def build_general_context(circuito_cuenca_valor, circuito_cuenca):
 def get_general_data_circuito(circuito):
     query = f"""
     WITH puntos_filtrados AS (
-        SELECT "GlobalID", tipo_punto
+        SELECT "GlobalID", "TIPO_PUNTO"
         FROM puntos_capa_principal
-        WHERE "CIRCUITO_1" = '{circuito}'
+        WHERE "CIRCUITO_ACU" = '{circuito}'
     )
 
     SELECT
         -- Totales por tipo desde puntos_capa_principal
         (SELECT COUNT(*) 
         FROM puntos_capa_principal 
-        WHERE "CIRCUITO_1" = '{circuito}'
-        AND tipo_punto = 'puntos_medicion') AS numero_puntos_medicion_totales,
+        WHERE "CIRCUITO_ACU" = '{circuito}'
+        AND "TIPO_PUNTO" = 'puntos_medicion') AS numero_puntos_medicion_totales,
 
         (SELECT COUNT(*) 
         FROM puntos_capa_principal 
-        WHERE "CIRCUITO_1" = '{circuito}'
-        AND tipo_punto = 'vrp') AS numero_vrp_totales,
+        WHERE "CIRCUITO_ACU" = '{circuito}'
+        AND "TIPO_PUNTO" = 'vrp') AS numero_vrp_totales,
 
         -- Visitas en fase_1 (JOIN con ids del circuito)
-        COUNT(DISTINCT CASE WHEN p.tipo_punto = 'puntos_medicion' THEN f.id END) AS numero_puntos_medicion_visitadas,
-        COUNT(DISTINCT CASE WHEN p.tipo_punto = 'vrp' THEN f.id END) AS numero_vrp_visitadas,
+        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'puntos_medicion' THEN f."FID_ELEM" END) AS numero_puntos_medicion_visitadas,
+        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'vrp' THEN f."FID_ELEM" END) AS numero_vrp_visitadas,
         
         -- Fechas mínima y máxima
 
 
         -- Vulnerables
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.vulnerabilidades = 1) AS puntos_vulnerables,
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.vulnerabilidades = 1) AS vrp_vulnerables,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.vulnerabilidades = 1) AS puntos_vulnerables,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f.vulnerabilidades = 1) AS vrp_vulnerables,
 
-        -- Clausura
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.requiere_clausura = 1) AS puntos_clausurar,
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.requiere_clausura = 1) AS vrp_clausurar,
 
         -- Condición física OK
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.condicion_fisica_general = 0) AS puntos_cond_ok,
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.condicion_fisica_general = 0) AS vrp_cond_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.condicion_fisica_general = 0) AS puntos_cond_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f.condicion_fisica_general = 0) AS vrp_cond_ok,
 
         -- Conexiones hidráulicas OK
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.conexiones_hidraulicas = 0) AS puntos_hid_ok,
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.conexiones_hidraulicas = 0) AS vrp_hid_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.conexiones_hidraulicas = 0) AS puntos_hid_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f.conexiones_hidraulicas = 0) AS vrp_hid_ok,
 
         -- Habilitado medición OK
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.habilitado_medicion = 1) AS puntos_ok,
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'vrp' AND f.habilitado_medicion = 1) AS vrp_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.habilitado_medicion = 1) AS puntos_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f.habilitado_medicion = 1) AS vrp_ok,
 
         -- Instalación tapa
-        COUNT(*) FILTER (WHERE p.tipo_punto = 'puntos_medicion' AND f.requiere_instalacion_tapa = 1) AS puntos_tapa
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.requiere_instalacion_tapa = 1) AS puntos_tapa
 
     FROM fase_1 f
-    INNER JOIN puntos_filtrados p ON f.relation_id  = p."GlobalID";
+    INNER JOIN puntos_filtrados p ON f."PARENT_ID"  = p."GlobalID";
     """
 
     # --- UNA SOLA LLAMADA A LA LAMBDA ---
@@ -374,14 +371,14 @@ def get_general_data_circuito(circuito):
     #fecha primera visita 
     query_primera_visita = f"""
     WITH puntos_filtrados AS (
-    SELECT "GlobalID", tipo_punto
+    SELECT "GlobalID", "TIPO_PUNTO"
     FROM puntos_capa_principal
-    WHERE "CIRCUITO_1" = '{circuito}'
+    WHERE "CIRCUITO_ACU" = '{circuito}'
     )
     SELECT
-        MIN(f.fecha_edicion) AS fecha_primera_visita
+        MIN(f."FECHA_EDICION") AS fecha_primera_visita
     FROM fase_1 f
-    INNER JOIN puntos_filtrados p ON f.relation_id = P."GlobalID";"""
+    INNER JOIN puntos_filtrados p ON f."PARENT_ID" = P."GlobalID";"""
 
     fecha_primera_visita = query_db(query_primera_visita, "fecha_primera_visita")[0]["fecha_primera_visita"]
     print(fecha_primera_visita)
@@ -389,14 +386,14 @@ def get_general_data_circuito(circuito):
     #fecha ultima visita 
     query_ultima_visita = f"""
     WITH puntos_filtrados AS (
-    SELECT "GlobalID", tipo_punto
+    SELECT "GlobalID", "TIPO_PUNTO"
     FROM puntos_capa_principal
-    WHERE "CIRCUITO_1" = '{circuito}'
+    WHERE "CIRCUITO_ACU" = '{circuito}'
     )
     SELECT
-        MAX(f.fecha_edicion) AS fecha_ultima_visita
+        MAX(f."FECHA_EDICION") AS fecha_ultima_visita
     FROM fase_1 f
-    INNER JOIN puntos_filtrados p ON f.relation_id = p."GlobalID";"""
+    INNER JOIN puntos_filtrados p ON f."PARENT_ID" = p."GlobalID";"""
 
     fecha_ultima_visita = query_db(query_ultima_visita, "fecha_ultima_visita")[0]["fecha_ultima_visita"]
     print(fecha_ultima_visita)

@@ -6,80 +6,31 @@ import os
 client_lambda_db = boto3.client("lambda", region_name="us-east-1") 
 DB_ACCESS_LAMBDA_ARN = os.environ["DB_ACCESS_LAMBDA_ARN"]
 
-json_test =  ''' {
-    "features" : [
-      "attributes" : {
-        "OBJECTID" : 1, 
-        "FID_ELEM" : 15257, 
-        "PUNTO_EXISTENTE" : "No", 
-        "TIPO_PUNTO" : "puntos_medicion", 
-        "FASE_INICIAL" : "fase2", 
-        "VARIABLE_A_MEDIR" : "presion", 
-        "CODIGO_CAJA_ACU" : null, 
-        "SUBCIRCUIT_ACU" : 16002, 
-        "CUENCA_ALC" : null, 
-        "CIRCUITO_ACU" : "ITAGUI", 
-        "DIRECCION_ACU" : "CR 52 CL 44 -3", 
-        "OBSERV_ACU" : "PUNTO DE MEDICION PROYECTADO", 
-        "CRITERIO_ACU" : "MEDICION DE PRESION", 
-        "MUNICIPIO_ACU" : "ITAGUI", 
-        "TIPO_ELEM_ACU" : "NODO", 
-        "IPID_ELEM_ACU" : 2069372, 
-        "IPID_TUB_ACU" : 2069443, 
-        "DIAME_mm_ACU" : 75, 
-        "MATERIAL_ACU" : "PVC", 
-        "x" : -75.614342552, 
-        "y" : 6.17164153200002, 
-        "TIPO_RED_ALC" : null, 
-        "PROPIETARI_ALC" : null, 
-        "TIPO_AGUA_ALC" : null, 
-        "IPID_ALC" : null, 
-        "ETAPA_ALC" : null, 
-        "FECHA_INI_ALC" : null, 
-        "FECHA_FIN_ALC" : null, 
-        "QPROM_ALC" : null, 
-        "QMAX_ALC" : null, 
-        "QMIN_ALC" : null, 
-        "DIAMETRO_ALC" : null, 
-        "PENDIENTE_ALC" : null, 
-        "EST_SIATA_ALC" : null, 
-        "X_m" : 829903.6738794, 
-        "Y_m" : 1174449.39284835, 
-        "GlobalID" : "0bfc161b-9eec-440c-8a34-fdd34b22df5b", 
-        "USUARIO_CREACION" : null, 
-        "FECHA_CREACION" : null, 
-        "USUARIO_EDICION" : "USER", 
-        "FECHA_EDICION" : 1761315126000
-      }, 
-      "geometry" : 
-      {
-        "x" : -75.614342551999982, 
-        "y" : 6.1716415320000237
-      }
-    }, 
+json_test =  '''{
+  "features" : [
     {
       "attributes" : {
-        "OBJECTID" : 2, 
-        "FID_ELEM" : 15450, 
-        "PUNTO_EXISTENTE" : "No", 
-        "TIPO_PUNTO" : "puntos_medicion", 
-        "FASE_INICIAL" : "fase2", 
-        "VARIABLE_A_MEDIR" : "presion", 
+        "OBJECTID" : 32, 
+        "FID_ELEM" : 71115, 
+        "PUNTO_EXISTENTE" : "Si", 
+        "TIPO_PUNTO" : "vrp", 
+        "FASE_INICIAL" : "fase1", 
+        "VARIABLE_A_MEDIR" : "caudal", 
         "CODIGO_CAJA_ACU" : null, 
-        "SUBCIRCUIT_ACU" : 16005, 
+        "SUBCIRCUIT_ACU" : 16001, 
         "CUENCA_ALC" : null, 
         "CIRCUITO_ACU" : "ITAGUI", 
-        "DIRECCION_ACU" : "CR 56D CL 44", 
-        "OBSERV_ACU" : "PUNTO DE MEDICION PROYECTADO", 
-        "CRITERIO_ACU" : "MEDICION DE PRESION", 
+        "DIRECCION_ACU" : "CL48 CL47C", 
+        "OBSERV_ACU" : "VRP, DIAGNOSTICAR", 
+        "CRITERIO_ACU" : "MEDICION DE CAUDAL", 
         "MUNICIPIO_ACU" : "ITAGUI", 
-        "TIPO_ELEM_ACU" : "NODO", 
-        "IPID_ELEM_ACU" : 4614371, 
-        "IPID_TUB_ACU" : 4614372, 
-        "DIAME_mm_ACU" : 75, 
-        "MATERIAL_ACU" : "PVC", 
-        "x" : -75.616507407, 
-        "y" : 6.17470936300002, 
+        "TIPO_ELEM_ACU" : "VRP", 
+        "IPID_ELEM_ACU" : 4659881, 
+        "IPID_TUB_ACU" : 10217263, 
+        "DIAME_mm_ACU" : 600, 
+        "MATERIAL_ACU" : "ACERO", 
+        "x" : -75.6120618000001, 
+        "y" : 6.17799329999999, 
         "TIPO_RED_ALC" : null, 
         "PROPIETARI_ALC" : null, 
         "TIPO_AGUA_ALC" : null, 
@@ -93,9 +44,9 @@ json_test =  ''' {
         "DIAMETRO_ALC" : null, 
         "PENDIENTE_ALC" : null, 
         "EST_SIATA_ALC" : null, 
-        "X_m" : 829664.046916928, 
-        "Y_m" : 1174788.75993623, 
-        "GlobalID" : "1497f238-9e64-4fc2-94b9-ae35c39aa020", 
+        "X_m" : 830156.226295278, 
+        "Y_m" : 1175151.96232507, 
+        "GlobalID" : "07550520-ec9c-462e-9086-c66bfccf2cf3", 
         "USUARIO_CREACION" : null, 
         "FECHA_CREACION" : null, 
         "USUARIO_EDICION" : null, 
@@ -103,10 +54,10 @@ json_test =  ''' {
       }, 
       "geometry" : 
       {
-        "x" : -75.616507406999972, 
-        "y" : 6.1747093630000336
+        "x" : -75.612061799999935, 
+        "y" : 6.1779933000000256
       }
-    }
+    }    
   ]
 }'''
 
