@@ -137,15 +137,17 @@ def lambda_handler(event, context):
 
     print("contexto_puntos", contexto_puntos)
 
+
+    doc = DocxTemplate(template_path)
+    
     imagenes ={
-    "grafico_fase_siguiente_puntos": InlineImage(doc, img_path)
+    "grafico_fase_siguiente_puntos": InlineImage(doc, img_path,width=Cm(10),height=Cm(5))
     }
     
-
     contexto = {**contexto_general,  "puntos": contexto_puntos, **imagenes}
     print(contexto)
     
-    doc = DocxTemplate(template_path)
+    
     doc.render(contexto)
     doc.save(output_path)
 
@@ -186,7 +188,17 @@ def lambda_handler(event, context):
     }
 
 def obtener_imagenes_grafana(circuito):
-    response = "hello"
+    GRAFANA_URL = "https://iot-grupoepm.teleprocess.co"
+    var =  os.environ["GRAFANA_API_ACCESS"]
+    render_url = f"https://iot-grupoepm.teleprocess.co/render/d-solo/3b0bc7f5-c3ff-4728-a365-ebc795591190/graficos-informe?orgId=9&panelId=2&var-circuito={circuito}"
+    print(render_url)
+
+    headers = {"Authorization": f"Bearer {var}"}
+    response = requests.get(render_url, headers=headers)
+    response.raise_for_status()
+    print("HTTP status:", response.status_code)
+    print("Content-Type:", response.headers.get("Content-Type"))
+    print(response)
     return response
     
 
@@ -244,7 +256,7 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
 
     # 1. Obtener lista de id y TIPO_PUNTO
     query = f"""
-        SELECT "GlobalID", TIPO_PUNTO 
+        SELECT "GlobalID", "TIPO_PUNTO" 
         FROM puntos_capa_principal 
         WHERE "{circuito_cuenca}" = '{circuito_cuenca_valor}'
     """
@@ -462,8 +474,6 @@ def get_general_data_circuito(circuito):
         "vrp_ok": result["vrp_ok"],
         "puntos_vulnerables": result["puntos_vulnerables"],
         "vrp_vulnerables": result["vrp_vulnerables"],
-        "puntos_clausurar": result["puntos_clausurar"],
-        "vrp_clausurar": result["vrp_clausurar"],
         "puntos_cond_ok": result["puntos_cond_ok"],
         "vrp_cond_ok": result["vrp_cond_ok"],
         "puntos_hid_ok": result["puntos_hid_ok"],

@@ -45,7 +45,8 @@ jobs:
           DB_USER: ${{ secrets.LAMBDA_DB_USER }}
           DB_PASSWORD: ${{ secrets.LAMBDA_DB_PASSWORD }}
           ARCGIS_CLIENT_ID : ${{secrets.ARCGIS_CLIENT_ID}}
-          ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}          
+          ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}  
+          GRAFANA_API_ACCESS : ${{secrets.GRAFANA_API_ACCESS}}   
           IMAGE_TAG: ${{ env.IMAGE_TAG }}          
 
 
@@ -59,6 +60,7 @@ jobs:
           ARCGIS_CLIENT_ID : ${{secrets.ARCGIS_CLIENT_ID}}
           ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          GRAFANA_API_ACCESS : ${{secrets.GRAFANA_API_ACCESS}}
 
       - name: Deploy CDK stack
         working-directory: infra
@@ -73,3 +75,4 @@ jobs:
           ARCGIS_CLIENT_ID : ${{secrets.ARCGIS_CLIENT_ID}}
           ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          GRAFANA_API_ACCESS : ${{secrets.GRAFANA_API_ACCESS}}

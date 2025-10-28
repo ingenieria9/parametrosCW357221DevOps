@@ -1,11 +1,14 @@
 from constructs import Construct
 from aws_cdk import Duration, aws_lambda as _lambda, aws_iam as iam
+import os
 
 #Constructor que crea las 3 funciones lambdas de la fase de generación de entregables
 #y les asigna los permisos necesarios para su funcionamiento
 
+grafana_api_access = os.environ["GRAFANA_API_ACCESS"]
+
 class LambdasFileGenConstruct(Construct):
-    def __init__(self, scope: Construct, id: str, bucket, folder_name: str, project_name: str,  db_access_lambda_arn: str,   openpyxl_layer: _lambda.ILayerVersion,
+    def __init__(self, scope: Construct, id: str, bucket, folder_name: str, project_name: str,  db_access_lambda_arn: str, openpyxl_layer: _lambda.ILayerVersion,
         docxtpl_layer: _lambda.ILayerVersion, requests_layer: _lambda.ILayerVersion):
         super().__init__(scope, id)
 
@@ -51,6 +54,7 @@ class LambdasFileGenConstruct(Construct):
                 "BUCKET_NAME": bucket.bucket_name,
                 "FOLDER_NAME": folder_name,
                 "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
+                "GRAFANA_API_ACCESS" : grafana_api_access
             },
             function_name=f"{project_name}-Informe-{folder_name}",
             layers=[docxtpl_layer, requests_layer],

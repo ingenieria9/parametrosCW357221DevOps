@@ -4,7 +4,7 @@ from aws_cdk import aws_lambda as _lambda
 from .lambdas_file_gen_construct import LambdasFileGenConstruct
 
 class FileGenStack(Stack):
-    def __init__(self, scope: Construct, id: str, bucket, project_name: str, db_access_lambda_arn: str,   openpyxl_layer: _lambda.ILayerVersion,
+    def __init__(self, scope: Construct, id: str, bucket, project_name: str, db_access_lambda_arn: str,  openpyxl_layer: _lambda.ILayerVersion,
         docxtpl_layer: _lambda.ILayerVersion, requests_layer: _lambda.ILayerVersion, **kwargs):
         super().__init__(scope, id, **kwargs)
 
