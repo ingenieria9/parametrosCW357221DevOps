@@ -111,6 +111,7 @@ file_send_stack = FileSendStack(
     project_name=PROJECT_NAME,
     db_access_lambda_arn=db_stack.db_access_lambda_arn,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION),
+    request_layer = layers_stack.requests_layer,
 )
 
 app.synth()
