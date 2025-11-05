@@ -11,9 +11,6 @@ Stack que tiene:
 - Eventbridge scheduler trigger todos los dias 4pm
 '''
 
-GMAIL_EMAIL_PASSWORD = os.getenv("GMAIL_EMAIL_PASSWORD", "")
-#GMAIL_ORIGIN_EMAIL = os.getenv("GMAIL_ORIGIN_EMAIL", "")
-#GMAIL_RECIPIENT_EMAIL = os.getenv("GMAIL_RECIPIENT_EMAIL", "")
 
 from aws_cdk import (
     Stack,
@@ -28,6 +25,11 @@ from aws_cdk import (
 )
 from constructs import Construct
 import os
+
+GMAIL_EMAIL_PASSWORD = os.getenv("GMAIL_EMAIL_PASSWORD", "")
+#GMAIL_ORIGIN_EMAIL = os.getenv("GMAIL_ORIGIN_EMAIL", "")
+#GMAIL_RECIPIENT_EMAIL = os.getenv("GMAIL_RECIPIENT_EMAIL", "")
+
 
 class FileSendStack(Stack):
     # bucket, project_name: str, db_access_lambda_arn, lambdas_gen_files (list)
