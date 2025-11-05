@@ -65,8 +65,11 @@ def get_attachments(data):
                 if url:
                                        
                     #Tomando metadatos
-                    parent_id = att.get("parentGlobalId")
+                    parent = att.get("parentGlobalId")
+                    # Eliminar cualquier paréntesis o llave (por si acaso)
+                    parent_id = re.sub(r"[{}]", "", parent)
                     contentType = att.get("contentType")
+                    attachment_id = att.get("attachmentId")
 
                     
                     #Diccionario con metadata del attachment
@@ -74,9 +77,10 @@ def get_attachments(data):
                         "layer_id"      : layer_id,
                         "parent_id"     : parent_id,
                         "contentType"   : contentType,
-                        "url"           : url
+                        "url"           : url,
+                        "attachment_id" : attachment_id
                     })
-    print(urls)               
+                   
     return urls
                                         
                                  
@@ -101,7 +105,9 @@ def get_feature_jsons(data):
             for feat in features.get(action, []):
                 
                 attrs = feat.get("attributes", {})
-                Global_ID = attrs.get("GlobalID")
+                Global = attrs.get("GlobalID")
+                # Eliminar cualquier paréntesis o llave (por si acaso)
+                Global_ID = re.sub(r"[{}]", "", Global)
                 identificador = attrs.get("OBJECTID") 
                 point_type = attrs.get("TIPO_PUNTO")
                 geometry = feat.get("geometry")
@@ -153,11 +159,11 @@ def lambda_handler(event, context):
         if layer_id == 0:
             key = f"{base_prefix}Capa_principal/{filename}"
         elif layer_id == 1:
-            key = f"{base_prefix}Fase1/{filename}.json"
+            key = f"{base_prefix}Fase1/{filename}"
         elif layer_id == 2:
-            key = f"{base_prefix}Fase2/{filename}.json"
+            key = f"{base_prefix}Fase2/{filename}"
         elif layer_id == 3:
-            key = f"{base_prefix}Fase3/{filename}.json"
+            key = f"{base_prefix}Fase3/{filename}"
         else:
             continue  # ignora ids fuera de rango
 
@@ -186,73 +192,61 @@ def lambda_handler(event, context):
         layer_id      = attach["layer_id"]
         contentType   = attach["contentType"]
         parent_id     = attach["parent_id"]
+        attachment_id = attach["attachment_id"]
         
         #Identificar el formato de la imagen
         contentType_parts = contentType.split('/')
         imageType = contentType_parts[1]
         url = attach["url"]
         
+    # Paso 1: listar los circuitos dentro de "Puntos/"
+    base_attach_prefix = "ArcGIS-Data/Puntos/"
+    response = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=base_attach_prefix, Delimiter='/')
+
+    # Paso 2: buscar la subcarpeta que contiene el GlobalID
+    found_prefix = None
+    for prefix_info in response.get('CommonPrefixes', []):
+        prefix = prefix_info['Prefix']  # ej: "ArcGIS-Data/Puntos/1402/"
         
-        # Paso 1: listar los circuitos dentro de "Puntos/"
-        base_attach_prefix = "ArcGIS-Data/Puntos/"
-        response = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=base_attach_prefix, Delimiter='/')
+        # listar subcarpetas dentro de ese circuito
+        sub_response = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=prefix, Delimiter='/')
+        
+        for sub_prefix_info in sub_response.get('CommonPrefixes', []):
+            sub_prefix = sub_prefix_info['Prefix']  # ej: "ArcGIS-Data/Puntos/1402/0bfc161b9eec440c8a34fdd34b22df5b_VRP/"
+            pattern = rf"Puntos/.*/({parent_id})_"
+            if re.search(pattern, sub_prefix):
+                found_prefix = sub_prefix
+                break  # sale del bucle interno
+        if found_prefix:
+            break  # sale también del bucle externo
 
-        # Paso 2: buscar la subcarpeta que contiene el GlobalID
-        found_prefix = None
-        for prefix_info in response.get('CommonPrefixes', []):
-            prefix = prefix_info['Prefix']  # ej: "ArcGIS-Data/Puntos/1402/"
-            
-            # listar subcarpetas dentro de ese circuito
-            sub_response = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=prefix, Delimiter='/')
-            
-            for sub_prefix_info in sub_response.get('CommonPrefixes', []):
-                sub_prefix = sub_prefix_info['Prefix']  # ej: "ArcGIS-Data/Puntos/1402/0bfc161b9eec440c8a34fdd34b22df5b_VRP/"
-                pattern = rf"Puntos/.*/({GlobalID})_"
-                if re.search(pattern, sub_prefix):
-                    found_prefix = sub_prefix
-                    break
-                    if found_prefix:
-                        break
+    if found_prefix:
+        print("Carpeta encontrada:", found_prefix)
 
-                if found_prefix:
-                    
-                    print("Carpeta encontrada:", found_prefix)
-                    
-                    # Determinar ruta de destino según id
-                    if layer_id == 0:
-                        key = f"{found_prefix}Capa_principal/attachment__{GlobalID}__{safe_point_type}__{parent_id}.{imageType}"
-
-                    elif layer_id == 1:
-                        key = f"{found_prefix}Fase1/attachment__{GlobalID}__{safe_point_type}__{parent_id}.{imageType}"
-                        
-                    elif layer_id == 2:
-                        key = f"{found_prefix}Fase2/attachment__{GlobalID}__{safe_point_type}__{parent_id}.{imageType}"
-                        
-                    elif layer_id == 3:
-                        key = f"{found_prefix}Fase3/attachment__{GlobalID}__{safe_point_type}__{parent_id}.{imageType}"
-                else:
-                    print("No se encontró ninguna carpeta para ese GlobalID.")
-                    continue  # ignora ids fuera de rango
-
-
-    
-            #Descargando la imagen
-            response_result = requests.get(url,params={"token": token})
-            
-            # Ejemplo de subida
-            s3.put_object(
-                Bucket=BUCKET_NAME,
-                Key=key,
-                Body=response_result.content,
-                ContentType=contentType
-            )
-            print("Archivo subido correctamente a:", key)
+        # Determinar ruta de destino según id
+        if layer_id == 0:
+            attach_key = f"{found_prefix}Capa_principal/attachment__{parent_id}_{attachment_id}.{imageType}"
+        elif layer_id == 1:
+            attach_key = f"{found_prefix}Fase1/attachment__{parent_id}_{attachment_id}.{imageType}"
+        elif layer_id == 2:
+            attach_key = f"{found_prefix}Fase2/attachment__{parent_id}_{attachment_id}.{imageType}"
+        elif layer_id == 3:
+            attach_key = f"{found_prefix}Fase3/attachment__{parent_id}_{attachment_id}.{imageType}"
         else:
-            print(f"No se encontró ninguna carpeta que coincida con el tipo '{point_type}'.")
+            print("Layer ID desconocido")
 
-             
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps({"message": "Carga completada", "features_subidas": len(features)})
-    }
+        # Descargando la imagen
+        response_result = requests.get(url, params={"token": token})
+        
+        # Subiendo el archivo a S3
+        s3.put_object(
+            Bucket=BUCKET_NAME,
+            Key=attach_key,
+            Body=response_result.content,
+            ContentType=contentType
+        )
+        print("Archivo subido correctamente a:", attach_key)
+    else:
+        print("No se encontró ninguna carpeta para ese GlobalID.")
+            

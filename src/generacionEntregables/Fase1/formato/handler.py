@@ -92,6 +92,7 @@ TMP_DIR = Path("/tmp")
 bucket_name = os.environ['BUCKET_NAME']
 template_path_s3 = "files/plantillas/Fase1/"
 output_path_s3 = "files/entregables/Fase1/"
+output_path_s3_for_convert = "files/files-to-convert/Fase1/"
 
 
 template_name = {"puntos_medicion": "formato-acueducto-pm.xlsx",
@@ -359,8 +360,10 @@ def lambda_handler(event, context):
 
     #Construir el nombre completo del archivo
     output_key = f"{output_path_s3}{file_name}{FID_ELEM}.xlsx"
+    convert_output_key = f"{output_path_s3_for_convert}{file_name}{FID_ELEM}.xlsx"
 
-
+    #Subir a carpeta entregables y a files_to_convert
+    s3.upload_file(str(output_path), bucket_name, convert_output_key)
     s3.upload_file(str(output_path), bucket_name, output_key)
 
     return {
