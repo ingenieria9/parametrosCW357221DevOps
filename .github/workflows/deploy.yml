@@ -48,6 +48,7 @@ jobs:
           ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}  
           GRAFANA_API_ACCESS : ${{secrets.GRAFANA_API_ACCESS}}   
           IMAGE_TAG: ${{ env.IMAGE_TAG }}          
+          GMAIL_EMAIL_PASSWORD : ${{secrets.GMAIL_EMAIL_PASSWORD}}
 
 
       - name: Synthesize CDK
@@ -61,6 +62,7 @@ jobs:
           ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           GRAFANA_API_ACCESS : ${{secrets.GRAFANA_API_ACCESS}}
+          GMAIL_EMAIL_PASSWORD : ${{secrets.GMAIL_EMAIL_PASSWORD}}
 
       - name: Deploy CDK stack
         working-directory: infra
@@ -76,3 +78,4 @@ jobs:
           ARCGIS_CLIENT_SECRET : ${{secrets.ARCGIS_CLIENT_SECRET}}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           GRAFANA_API_ACCESS : ${{secrets.GRAFANA_API_ACCESS}}
+          GMAIL_EMAIL_PASSWORD : ${{secrets.GMAIL_EMAIL_PASSWORD}}

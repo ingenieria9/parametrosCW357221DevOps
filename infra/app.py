@@ -8,6 +8,8 @@ from stacks.lambda_ecr_s3_trigger import LambdaEcrS3TriggerStack
 from stacks.arcgis_integration_stack import ArcGISIntStack
 from stacks.lambda_layers import LayersStack
 from stacks.measurement_integration_stack import MeasurementIntStack
+from stacks.file_send_stack import FileSendStack
+
 
 app = cdk.App()
 
@@ -99,6 +101,16 @@ measurement_int_Stack = MeasurementIntStack(
     project_name=PROJECT_NAME,
     drive_layer = layers_stack.google_layer,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 
+)
+
+file_send_stack = FileSendStack(
+    app,
+    f"{PROJECT_NAME}-FileSendStack",
+    bucket_name=storage.bucket.bucket_name,
+    bucket_arn=storage.bucket.bucket_arn,
+    project_name=PROJECT_NAME,
+    db_access_lambda_arn=db_stack.db_access_lambda_arn,
+    env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION),
 )
 
 app.synth()
