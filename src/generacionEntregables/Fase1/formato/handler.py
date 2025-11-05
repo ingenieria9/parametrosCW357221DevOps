@@ -80,7 +80,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image  # para insertar imágenes
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import re
 
 
@@ -150,6 +150,7 @@ def convertir_valores_fecha(data):
     """
     Convierte valores tipo timestamp (en milisegundos) a formato legible
     solo si la clave contiene la palabra 'fecha' (insensible a mayúsculas).
+    Interpreta el timestamp como UTC y lo convierte a UTC-5.
     Funciona de forma recursiva para dicts y listas.
     """
 
@@ -158,8 +159,10 @@ def convertir_valores_fecha(data):
             if "fecha" in key.lower():
                 if isinstance(valor, (int, float)) or (isinstance(valor, str) and valor.isdigit()):
                     timestamp = int(valor) / 1000  # convertir a segundos
-                    dt_object = datetime.fromtimestamp(timestamp)
-                    return dt_object.strftime("%Y-%m-%d %H:%M:%S")
+                    # Interpretar en UTC y convertir a UTC-5
+                    dt_utc = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                    dt_utc_minus_5 = dt_utc.astimezone(timezone(timedelta(hours=-5)))
+                    return dt_utc_minus_5.strftime("%Y-%m-%d %H:%M:%S")
         except Exception as e:
             print(f"Error al convertir fecha ({key}): {e}")
         return valor
@@ -167,7 +170,6 @@ def convertir_valores_fecha(data):
     if isinstance(data, dict):
         nuevo_dict = {}
         for k, v in data.items():
-            # Si el valor es un dict o lista, seguimos bajando
             if isinstance(v, (dict, list)):
                 nuevo_dict[k] = convertir_valores_fecha(v)
             else:
@@ -178,9 +180,7 @@ def convertir_valores_fecha(data):
         return [convertir_valores_fecha(v) for v in data]
 
     else:
-        # Caso base (no hay clave asociada, solo valor suelto)
         return data
-    
 
 def obtener_consecutivo_s3(bucket, prefix, cod_name):
     """
@@ -203,10 +203,10 @@ def obtener_consecutivo_s3(bucket, prefix, cod_name):
     return f"{max_consec + 1:03}"
 
 
-def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID):
+def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_ACU):
     # Construir el prefijo correcto
     s3_key_capa_principal = (
-        f"ArcGIS-Data/Puntos/{GlobalID}_{tipo_punto}/Capa_principal/"
+        f"ArcGIS-Data/Puntos/{CIRCUITO_ACU}/{GlobalID}_{tipo_punto}/Capa_principal/"
     )
 
     # Listar objetos en esa carpeta
@@ -254,6 +254,7 @@ def lambda_handler(event, context):
     tipo_punto = event["payload"]["attributes"]["TIPO_PUNTO"]
     FID_ELEM = event["payload"]["attributes"]["FID_ELEM"]
     GlobalID = event["payload"]["attributes"]["PARENT_ID"] #id uuid global 
+    CIRCUITO_ACU = event["payload"]["attributes"]["CIRCUITO_ACU"].replace(" ", "_")
 
 
     #template_path_s3 + devolver de template key el value segun tipo de punto (ej para caja de medicion devuelve formato-acueducto.xlsx)
@@ -284,7 +285,7 @@ def lambda_handler(event, context):
         #print(f"Columna {col}: {ws.column_dimensions[col].width}")
     
     # Leer datos adicionales desde S3
-    capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID)
+    capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_ACU)
 
     # Unir ambos diccionarios (payload tiene prioridad si hay claves iguales)
     combined_data = {**capa_principal_data, **payload_data}

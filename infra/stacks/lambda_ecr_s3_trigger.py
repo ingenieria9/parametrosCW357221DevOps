@@ -60,8 +60,8 @@ class LambdaEcrS3TriggerStack(Stack):
             s3.EventType.OBJECT_CREATED_PUT,
             notification,
             s3.NotificationKeyFilter(
-                prefix="files/files-to-convert/",
-                suffix=".docx",
+                prefix="files/files-to-convert/"
+                #suffix=".docx",
             ),
         )
 

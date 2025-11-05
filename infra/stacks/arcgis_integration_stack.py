@@ -105,6 +105,7 @@ class ArcGISIntStack(Stack):
                         "ARCGIS_CLIENT_ID" : ARCGIS_CLIENT_ID,
                         "ARCGIS_CLIENT_SECRET" : ARCGIS_CLIENT_SECRET
                         },
+            layers=[request_layer],
             timeout=Duration.seconds(20)                        
         )
 
@@ -154,6 +155,7 @@ class ArcGISIntStack(Stack):
                         "ARCGIS_CLIENT_ID" : ARCGIS_CLIENT_ID,
                         "ARCGIS_CLIENT_SECRET" : ARCGIS_CLIENT_SECRET
                         },
+            layers=[request_layer],
             timeout=Duration.seconds(300)                       
         )
 

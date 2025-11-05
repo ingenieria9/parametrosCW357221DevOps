@@ -28,16 +28,16 @@ def lambda_handler(event, context):
         uid = str(uuid.uuid4())
         tmpdir = f"/tmp/{uid}"
         os.makedirs(tmpdir, exist_ok=True)
-        local_docx = os.path.join(tmpdir, os.path.basename(key))
+        local_file = os.path.join(tmpdir, os.path.basename(key))
 
         try:
             # 1) download
-            download_s3(bucket, key, local_docx)
+            download_s3(bucket, key, local_file)
 
             # 2) extract images from docx
             '''
             images_out = os.path.join(tmpdir, "images")
-            images = extract_images_from_docx(local_docx, images_out)
+            images = extract_images_from_docx(local_file, images_out)
             uploaded_images = []
             for img_path in images:
                 img_key = f"converted_images/{os.path.splitext(os.path.basename(key))[0]}/{os.path.basename(img_path)}"
@@ -46,7 +46,8 @@ def lambda_handler(event, context):
 
             # 3) convert docx -> pdf
             pdf_outdir = os.path.join(tmpdir, "pdf")
-            pdf_path = convert_docx_to_pdf(local_docx, pdf_outdir, timeout=240)
+            #pdf_path = convert_docx_to_pdf(local_file, pdf_outdir, timeout=240)
+            pdf_path = convert_to_pdf(local_file, pdf_outdir, timeout=240)
 
             # 4) upload pdf
             pdf_key = f"files/pdf_files/{os.path.splitext(os.path.basename(key))[0]}.pdf"
@@ -89,6 +90,38 @@ def extract_images_from_docx(docx_path, out_dir):
                     shutil.copyfileobj(src, dst)
                 images.append(target)
     return images
+
+def convert_to_pdf(input_path, out_dir, timeout=120):
+    os.makedirs(out_dir, exist_ok=True)
+
+    # Buscar binario de LibreOffice
+    so = shutil.which('libreoffice') or shutil.which('soffice')
+    if not so:
+        raise RuntimeError("LibreOffice not found in PATH")
+
+    # LibreOffice detecta automáticamente el tipo (docx, xlsx, etc.)
+    cmd = [
+        so,
+        '--headless',
+        '--convert-to', 'pdf',
+        input_path,
+        '--outdir', out_dir
+    ]
+
+    subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
+
+    # Determinar salida
+    base = os.path.splitext(os.path.basename(input_path))[0]
+    pdf_path = os.path.join(out_dir, base + '.pdf')
+
+    if not os.path.exists(pdf_path):
+        # Buscar PDF generado
+        candidates = [os.path.join(out_dir, f) for f in os.listdir(out_dir) if f.lower().endswith('.pdf')]
+        if candidates:
+            candidates.sort(key=lambda p: os.path.getmtime(p), reverse=True)
+            pdf_path = candidates[0]
+
+    return pdf_path
 
 def convert_docx_to_pdf(input_path, out_dir, timeout=120):
     os.makedirs(out_dir, exist_ok=True)

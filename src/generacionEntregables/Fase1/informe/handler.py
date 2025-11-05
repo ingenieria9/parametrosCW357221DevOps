@@ -72,7 +72,7 @@ import boto3
 import json
 from pathlib import Path
 from docxtpl import DocxTemplate, InlineImage
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from docx.shared import Cm
 import os
 import requests
@@ -102,8 +102,10 @@ def lambda_handler(event, context):
     TIPO_PUNTO = event["payload"]["attributes"]["TIPO_PUNTO"]
     FID_ELEM = event["payload"]["attributes"]["FID_ELEM"]
     GlobalID = event["payload"]["attributes"]["PARENT_ID"]
+    CIRCUITO_ACU = event["payload"]["attributes"]["CIRCUITO_ACU"].replace(" ", "_")
 
-    capa_principal_data = obtener_info_de_capa_principal(bucket_name, TIPO_PUNTO, GlobalID)
+
+    capa_principal_data = obtener_info_de_capa_principal(bucket_name, TIPO_PUNTO, GlobalID, CIRCUITO_ACU)
 
     if TIPO_PUNTO == "vrp" or TIPO_PUNTO == "puntos_medicion":
         circuito_cuenca_valor = capa_principal_data.get("CIRCUITO_ACU", "N/A")
@@ -123,36 +125,7 @@ def lambda_handler(event, context):
     # Descargar archivos desde S3
     s3.download_file(bucket_name, template_key, str(template_path))
 
-    response = obtener_imagenes_grafana(circuito_cuenca_valor)
-    #obtener imagenes grafana 
-    img_path = "/tmp/grafico_fase_siguiente_puntos.png"
-    with open(img_path, "wb") as f:
-        f.write(response.content)
-
-    contexto_general = build_general_context(circuito_cuenca_valor, circuito_cuenca)
-
-    print("contexto_general", contexto_general)
-
-    contexto_puntos = build_puntos_context(circuito_cuenca_valor, circuito_cuenca)
-
-    print("contexto_puntos", contexto_puntos)
-
-
-    doc = DocxTemplate(template_path)
     
-    imagenes ={
-    "grafico_fase_siguiente_puntos": InlineImage(doc, img_path,width=Cm(10),height=Cm(5))
-    }
-    
-    contexto = {**contexto_general,  "puntos": contexto_puntos, **imagenes}
-    print(contexto)
-    
-    
-    doc.render(contexto)
-    doc.save(output_path)
-
-
-    # Subir resultado a S3
     #obtener de S3 el archivo json que contiene el codigo del circuito para construir el archivo
     # Descargar temporalmente en /tmp
     tmp_path_code = TMP_DIR / "code.json"
@@ -175,7 +148,32 @@ def lambda_handler(event, context):
     code_data = code_json[circuito_cuenca_valor]
 
     if not code_data:
-        code_data = circuito_cuenca_valor
+        code_data = circuito_cuenca_valor    
+
+
+    contexto_general = build_general_context(circuito_cuenca_valor, circuito_cuenca, capa_principal_data)
+
+    #print("contexto_general", contexto_general)
+
+    contexto_puntos_ok = build_puntos_context(circuito_cuenca_valor, circuito_cuenca, 1, code_data)
+    contexto_puntos_not_ok = build_puntos_context(circuito_cuenca_valor, circuito_cuenca, 0, code_data)
+
+    print(contexto_puntos_not_ok)
+    print(contexto_puntos_ok)
+
+    doc = DocxTemplate(template_path)
+
+    imagenes = obtener_imagenes_grafana(doc, circuito_cuenca_valor, circuito_cuenca)
+
+    print(imagenes)
+    
+    contexto = {**contexto_general,  "puntos_fase3": contexto_puntos_ok, "puntos_fase2": contexto_puntos_not_ok, **imagenes}
+    print(contexto)
+    
+    
+    doc.render(contexto)
+    doc.save(output_path)
+
 
     file_name = COD_name[circuito_cuenca].format(COD=code_data)
 
@@ -187,25 +185,55 @@ def lambda_handler(event, context):
         "output_file": f"s3://{bucket_name}/{output_key}"
     }
 
-def obtener_imagenes_grafana(circuito):
-    GRAFANA_URL = "https://iot-grupoepm.teleprocess.co"
-    var =  os.environ["GRAFANA_API_ACCESS"]
-    render_url = f"https://iot-grupoepm.teleprocess.co/render/d-solo/3b0bc7f5-c3ff-4728-a365-ebc795591190/graficos-informe?orgId=9&panelId=2&var-circuito={circuito}"
-    print(render_url)
 
-    headers = {"Authorization": f"Bearer {var}"}
-    response = requests.get(render_url, headers=headers)
-    response.raise_for_status()
-    print("HTTP status:", response.status_code)
-    print("Content-Type:", response.headers.get("Content-Type"))
-    print(response)
-    return response
+def obtener_imagenes_grafana(doc, circuito_cuenca_valor, circuito_cuenca):
+    """
+    Retorna un diccionario con las imágenes renderizadas desde Grafana listas
+    para usarse en docxtpl.render(contexto).
+    Las claves del diccionario son del tipo 'grafico_panel_{id}'.
+    """
+    GRAFANA_URL = "https://iot-grupoepm.teleprocess.co"
+    token = os.environ["GRAFANA_API_ACCESS"]
+
+    # Define los paneles según el tipo
+    if circuito_cuenca == 'circuito':
+        panel_ids = [2, 3, 5, 6]
+    elif circuito_cuenca == 'cuenca':
+        panel_ids = [6, 7, 8]  # puedes ajustar estos IDs
+    else:
+        panel_ids = []
+
+    imagenes = {}
+
+    for panel_id in panel_ids:
+        render_url = (
+            f"{GRAFANA_URL}/render/d-solo/3b0bc7f5-c3ff-4728-a365-ebc795591190/"
+            f"graficos-informe?orgId=9&panelId={panel_id}&var-{circuito_cuenca}={circuito_cuenca_valor}"
+        )
+
+        headers = {"Authorization": f"Bearer {token}"}
+
+        print(f"Descargando panel {panel_id}...")
+        response = requests.get(render_url, headers=headers)
+        response.raise_for_status()
+
+        img_path = f"/tmp/grafico_panel_{panel_id}.png"
+        with open(img_path, "wb") as f:
+            f.write(response.content)
+
+        imagenes[f"grafico_panel_{panel_id}"] = InlineImage(
+            doc, img_path, width=Cm(10), height=Cm(5)
+        )
+
+        print(f"✔ Panel {panel_id} descargado ({img_path})")
+
+    return imagenes
     
 
-def obtener_info_de_capa_principal(bucket_name, TIPO_PUNTO, GlobalID):
+def obtener_info_de_capa_principal(bucket_name, TIPO_PUNTO, GlobalID, CIRCUITO_ACU):
     # Construir el prefijo correcto
     s3_key_capa_principal = (
-        f"ArcGIS-Data/Puntos/{GlobalID}_{TIPO_PUNTO}/Capa_principal/"
+        f"ArcGIS-Data/Puntos/{CIRCUITO_ACU}/{GlobalID}_{TIPO_PUNTO}/Capa_principal/"
     )
 
     # Listar objetos en esa carpeta
@@ -248,18 +276,28 @@ def obtener_info_de_capa_principal(bucket_name, TIPO_PUNTO, GlobalID):
             return {}
 
 
-def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
+def build_puntos_context(circuito_cuenca_valor, circuito_cuenca, habilitado_medicion, code_data):
     if circuito_cuenca == "circuito":
         circuito_cuenca = "CIRCUITO_ACU"
     else: 
         circuito_cuenca = "CUENCA_ALC"
 
     # 1. Obtener lista de id y TIPO_PUNTO
-    query = f"""
-        SELECT "GlobalID", "TIPO_PUNTO" 
-        FROM puntos_capa_principal 
-        WHERE "{circuito_cuenca}" = '{circuito_cuenca_valor}'
-    """
+
+    if habilitado_medicion == 1:
+        query = f"""
+        SELECT p."GlobalID", p."TIPO_PUNTO" 
+        FROM puntos_capa_principal  p
+        INNER JOIN fase_1 f ON f."PARENT_ID"  = p."GlobalID"
+        WHERE p."{circuito_cuenca}" = '{circuito_cuenca_valor}' and f."habilitado_medicion" = 1
+        """
+    else: 
+        query = f"""
+        SELECT p."GlobalID", p."TIPO_PUNTO" 
+        FROM puntos_capa_principal  p
+        INNER JOIN fase_1 f ON f."PARENT_ID"  = p."GlobalID"
+        WHERE p."{circuito_cuenca}" = '{circuito_cuenca_valor}' and f."habilitado_medicion" = 0
+        """
     print(query)
     resultados = query_db(query, "fecha_creacion")
 
@@ -270,10 +308,19 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
     print(lista_id)
     print(lista_tipo)
 
+
+    # Diccionario con los formatos por tipo de punto - misma que se usa en lambda formato fase 1
+    COD_name = {
+        "puntos_medicion": "MPH-EJ-0601-{COD}-F01-ACU-EIN-",
+        "vrp": "MPH-EJ-0601-{COD}-F01-ACU-EIN-",
+        "camara": "MPH-EJ-0601-{COD}-F01-ALC-EIN-"
+    }
+
     puntos_visitados_consolidados = []
 
     for punto, TIPO_PUNTO in zip(lista_id, lista_tipo):
-        key_s3_prefix = f"ArcGIS-Data/Puntos/{punto}_{TIPO_PUNTO}/Fase1/"
+        key_s3_prefix = f"ArcGIS-Data/Puntos/{circuito_cuenca_valor.replace(' ', '_')}/{punto}_{TIPO_PUNTO}/Fase1/"
+        print(key_s3_prefix)
         s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=key_s3_prefix)
 
         # Filtrar archivos JSON
@@ -311,7 +358,13 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
 
         # Validamos que 'attributes' exista (info esta en attributes)
         data_attr = json_data.get("attributes", {})
-        print(data_attr)
+        print(data_attr)      
+
+        # Construir nombre_formato
+        FID_ELEM = data_attr.get("FID_ELEM", "SIN_FID")
+        base_name = COD_name.get(TIPO_PUNTO, "").format(COD=code_data)
+        nombre_formato = f"{base_name}{FID_ELEM}.xlsx"
+        punto_filtrado["nombre_formato"] = nombre_formato
 
         for attr in atributos_deseados:
             punto_filtrado[attr] = data_attr.get(attr)
@@ -320,11 +373,10 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca):
 
     return puntos_visitados_consolidados
 
-
-def build_general_context(circuito_cuenca_valor, circuito_cuenca):
+def build_general_context(circuito_cuenca_valor, circuito_cuenca, capa_principal_data):
 
     if circuito_cuenca == "circuito":
-        data = get_general_data_circuito(circuito_cuenca_valor)
+        data = get_general_data_circuito(circuito_cuenca_valor, capa_principal_data)
     else:   
         data = {}  # Implementar función similar para cuenca 
 
@@ -340,11 +392,9 @@ def build_general_context(circuito_cuenca_valor, circuito_cuenca):
 
     return context
 
-
-
-def get_general_data_circuito(circuito):
+def get_general_data_circuito(circuito, capa_principal_data):
     query = f"""
-    WITH puntos_filtrados AS (
+WITH puntos_filtrados AS (
         SELECT "GlobalID", "TIPO_PUNTO"
         FROM puntos_capa_principal
         WHERE "CIRCUITO_ACU" = '{circuito}'
@@ -355,46 +405,78 @@ def get_general_data_circuito(circuito):
         (SELECT COUNT(*) 
         FROM puntos_capa_principal 
         WHERE "CIRCUITO_ACU" = '{circuito}'
-        AND "TIPO_PUNTO" = 'puntos_medicion') AS numero_puntos_medicion_totales,
+        AND "TIPO_PUNTO" = 'puntos_medicion' AND "PUNTO_EXISTENTE" = 'Si' ) AS puntos_medicion_existentes,
+        
+        (SELECT COUNT(*) 
+        FROM puntos_capa_principal 
+        WHERE "CIRCUITO_ACU" = '{circuito}'
+        AND "TIPO_PUNTO" = 'puntos_medicion' AND "PUNTO_EXISTENTE" = 'No' ) AS puntos_medicion_proyectados,
 
         (SELECT COUNT(*) 
         FROM puntos_capa_principal 
         WHERE "CIRCUITO_ACU" = '{circuito}'
-        AND "TIPO_PUNTO" = 'vrp') AS numero_vrp_totales,
+        AND "TIPO_PUNTO" = 'vrp') AS vrp_circuito,
 
         -- Visitas en fase_1 (JOIN con ids del circuito)
-        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'puntos_medicion' THEN f."FID_ELEM" END) AS numero_puntos_medicion_visitadas,
-        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'vrp' THEN f."FID_ELEM" END) AS numero_vrp_visitadas,
+        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'puntos_medicion' AND f."REQUIERE_FASE1" = 'Si' THEN f."FID_ELEM" END) AS puntos_medicion_visitados,
+        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'vrp' AND f."REQUIERE_FASE1" = 'Si' THEN f."FID_ELEM" END) AS vrp_visitadas,
+        
+        -- habilitados fase 3 
+        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'puntos_medicion' AND f."REQUIERE_FASE1" = 'Si'  AND "habilitado_medicion" = 1 THEN f."FID_ELEM" END) AS puntos_medicion_habilitados_fase3,
+        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'vrp' AND f."REQUIERE_FASE1" = 'Si'  AND "habilitado_medicion" = 1 THEN f."FID_ELEM" END) AS vrp_habilitados_fase3,
+        
+        -- No habilitados fase 3 
+        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'puntos_medicion' AND f."REQUIERE_FASE1" = 'Si'  AND "habilitado_medicion" = 0 THEN f."FID_ELEM" END) AS puntos_medicion_requieren_fase2,
+        COUNT(DISTINCT CASE WHEN p."TIPO_PUNTO" = 'vrp' AND f."REQUIERE_FASE1" = 'Si'  AND "habilitado_medicion" = 0 THEN f."FID_ELEM" END) AS vrp_requieren_fase2,
+        
         
         -- Fechas mínima y máxima
 
 
-        -- Vulnerables
-        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.vulnerabilidades = 1) AS puntos_vulnerables,
-        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f.vulnerabilidades = 1) AS vrp_vulnerables,
+        -- Ubicacion critica
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f."REQUIERE_FASE1" = 'Si'AND f."UBICACION_GEO_CRITICA" > 3) AS puntos_ubi_criticos,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp'  AND f."REQUIERE_FASE1" = 'Si' AND f."UBICACION_GEO_CRITICA" > 3) AS vrp_ubi_critica,
 
 
         -- Condición física OK
-        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.condicion_fisica_general = 0) AS puntos_cond_ok,
-        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f.condicion_fisica_general = 0) AS vrp_cond_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND "REQUIERE_FASE1" = 'Si' AND f.condicion_fisica_general = 1) AS puntos_cond_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND "REQUIERE_FASE1" = 'Si' AND f.condicion_fisica_general = 1) AS vrp_cond_ok,
 
         -- Conexiones hidráulicas OK
-        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.conexiones_hidraulicas = 0) AS puntos_hid_ok,
-        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f.conexiones_hidraulicas = 0) AS vrp_hid_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f."REQUIERE_FASE1" = 'Si' AND f.conexiones_hidraulicas = 1) AS puntos_hid_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f."REQUIERE_FASE1" = 'Si' AND f.conexiones_hidraulicas = 1) AS vrp_hid_ok,
 
         -- Habilitado medición OK
-        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.habilitado_medicion = 1) AS puntos_ok,
-        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f.habilitado_medicion = 1) AS vrp_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f."REQUIERE_FASE1" = 'Si' AND f.habilitado_medicion = 1) AS puntos_ok,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f."REQUIERE_FASE1" = 'Si' AND f.habilitado_medicion = 1) AS vrp_ok,
 
         -- Instalación tapa
-        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f.requiere_instalacion_tapa = 1) AS puntos_tapa
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f."REQUIERE_FASE1" = 'Si' AND f.requiere_instalacion_tapa = 1) AS puntos_tapa,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f."REQUIERE_FASE1" = 'Si' AND f.requiere_instalacion_tapa = 1) AS vrp_tapa,
+        
+        -- Puntos no encontrados
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'puntos_medicion' AND f."REQUIERE_FASE1" = 'Si' AND f."PUNTO_ENCONTRADO" = 'No') AS puntos_no_encontrados,
+        COUNT(*) FILTER (WHERE p."TIPO_PUNTO" = 'vrp' AND f."REQUIERE_FASE1" = 'Si' AND f."PUNTO_ENCONTRADO" = 'No') AS vrp_no_encontrados,
+        
+        
+        -- Porcentaje puntos generales habilitados Fase 3
+	    ROUND(
+	        100.0 * COUNT(CASE WHEN f."habilitado_medicion" = 1 THEN 1 END)
+	        / NULLIF(
+	            (SELECT COUNT(*) 
+	             FROM puntos_capa_principal p2
+	             WHERE p2."CIRCUITO_ACU" = '{circuito}'
+	               AND p2."PUNTO_EXISTENTE" = 'Si'),
+	            0
+	        ),
+	        2
+	    ) AS porcentaje_puntos_habilitados_fase3
 
     FROM fase_1 f
-    INNER JOIN puntos_filtrados p ON f."PARENT_ID"  = p."GlobalID";
-    """
+    INNER JOIN puntos_filtrados p ON f."PARENT_ID"  = p."GlobalID";"""
 
     # --- UNA SOLA LLAMADA A LA LAMBDA ---
-    result = query_db(query, "fecha_creacion")[0]
+    result = query_db(query, "FECHA_CREACION")[0]
     print(result)
 
     #fecha primera visita 
@@ -450,8 +532,8 @@ def get_general_data_circuito(circuito):
         total_dias = 0
 
     # Otros cálculos derivados
-    numero_puntos_medicion_visitadas = result["numero_puntos_medicion_visitadas"]
-    numero_vrp_visitadas = result["numero_vrp_visitadas"]
+    numero_puntos_medicion_visitadas = result["puntos_medicion_visitados"]
+    numero_vrp_visitadas = result["vrp_visitadas"]
 
     numero_total_visitas = numero_puntos_medicion_visitadas + numero_vrp_visitadas
     puntos_intervencion = numero_puntos_medicion_visitadas - result["puntos_ok"]
@@ -459,29 +541,46 @@ def get_general_data_circuito(circuito):
 
     fecha_primera_visita_date = formatear_fecha(fecha_primera_visita)
     fecha_ultima_visita_date = formatear_fecha(fecha_ultima_visita)
+
+    #Fecha reporte
+    utc_minus_5 = timezone(timedelta(hours=-5))
+    fecha_actual = datetime.now(utc_minus_5)
+    fecha_reporte = fecha_actual.strftime("%Y-%m-%d %H:%M:%S")
     
     return {
         "nombre_circuito": circuito,
-        "numero_puntos_medicion_totales": result["numero_puntos_medicion_totales"],
-        "numero_vrp_totales": result["numero_vrp_totales"],
-        "numero_puntos_medicion_visitadas": numero_puntos_medicion_visitadas,
-        "numero_vrp_visitadas": numero_vrp_visitadas,
+        "puntos_medicion_existentes": result["puntos_medicion_existentes"],
+        "puntos_medicion_proyectados": result["puntos_medicion_proyectados"],
+        "vrp_circuito": result["vrp_circuito"],
+        "puntos_medicion_visitados": result["puntos_medicion_visitados"],
+        "vrp_visitadas": result["vrp_visitadas"],
+        "puntos_medicion_habilitados_fase3" : result["puntos_medicion_habilitados_fase3"],
+        "puntos_medicion_requieren_fase2" : result["puntos_medicion_requieren_fase2"],
+        "vrp_habilitados_fase3" : result["vrp_habilitados_fase3"],
+        "vrp_requieren_fase2" : result["vrp_requieren_fase2"],
         "fecha_primera_visita": fecha_primera_visita_date,
         "fecha_ultima_visita": fecha_ultima_visita_date,
         "total_dias": total_dias,
         "numero_total_visitas": numero_total_visitas,
         "puntos_ok": result["puntos_ok"],
         "vrp_ok": result["vrp_ok"],
-        "puntos_vulnerables": result["puntos_vulnerables"],
-        "vrp_vulnerables": result["vrp_vulnerables"],
+        "puntos_ubi_criticos": result["puntos_ubi_criticos"],
+        "vrp_ubi_critica": result["vrp_ubi_critica"],
         "puntos_cond_ok": result["puntos_cond_ok"],
         "vrp_cond_ok": result["vrp_cond_ok"],
         "puntos_hid_ok": result["puntos_hid_ok"],
         "vrp_hid_ok": result["vrp_hid_ok"],
         "puntos_intervencion": puntos_intervencion,
         "vrp_intervencion": vrp_intervencion,
-        "puntos_tapa": result["puntos_tapa"]
+        "puntos_tapa": result["puntos_tapa"],
+        "vrp_tapa" : result["vrp_tapa"],
+        "porcentaje_puntos_habilitados_fase3": result["porcentaje_puntos_habilitados_fase3"],
+        "fecha_reporte" : fecha_reporte,
+        "municipio" : capa_principal_data.get("MUNICIPIO_ACU", "N/A"),
+        "puntos_no_encontrados" : result["puntos_no_encontrados"],
+        "vrp_no_encontrados" : result["vrp_no_encontrados"]
     }
+
 
 def formatear_fecha(fecha_str):
     if not fecha_str:
