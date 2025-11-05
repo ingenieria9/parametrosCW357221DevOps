@@ -50,8 +50,11 @@ def lambda_handler(event, context):
             pdf_path = convert_to_pdf(local_file, pdf_outdir, timeout=240)
 
             # 4) upload pdf
-            pdf_key = f"files/pdf_files/{os.path.splitext(os.path.basename(key))[0]}.pdf"
-            pdf_s3 = upload_file(bucket, pdf_key, pdf_path)
+            #pdf_key = f"files/pdf_files/{os.path.splitext(os.path.basename(key))[0]}.pdf"
+            #pdf_s3 = upload_file(bucket, pdf_key, pdf_path)
+            pdf_key = key.replace("files/files-to-convert/", "files/entregables/")
+            pdf_key = os.path.splitext(pdf_key)[0] + ".pdf"   
+            pdf_s3 = upload_file(bucket, pdf_key, pdf_path)         
 
             return {
                 "status": "ok",
