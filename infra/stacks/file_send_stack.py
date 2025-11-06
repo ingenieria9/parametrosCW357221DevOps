@@ -55,7 +55,7 @@ class FileSendStack(Stack):
                 "GMAIL_EMAIL_PASSWORD": GMAIL_EMAIL_PASSWORD,
                 },
             function_name=f"{project_name}-sendFile",
-            timeout=Duration.seconds(60),
+            timeout=Duration.seconds(180),
             layers=[request_layer]
         )
 

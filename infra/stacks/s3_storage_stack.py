@@ -1,4 +1,4 @@
-from aws_cdk import Stack, RemovalPolicy, aws_s3 as s3
+from aws_cdk import Stack, RemovalPolicy, aws_s3 as s3, Duration
 from constructs import Construct
 
 
@@ -15,4 +15,10 @@ class StorageStack(Stack):
             versioned=False,
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True,
+        )
+
+        self.bucket.add_lifecycle_rule(
+            id="DeleteFilesToConvertAfter7Days",
+            prefix="files/files-to-convert/",
+            expiration=Duration.days(7),
         )
