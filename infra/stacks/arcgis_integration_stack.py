@@ -90,12 +90,12 @@ class ArcGISIntStack(Stack):
         )
 
         # ======================================================
-        # Lambda: Webhook
+        # Lambda: Changes
         # ======================================================
         changes_lambda = _lambda.Function(
             self, 
-            "WebhookLambda" ,
-            function_name= f"{project_name}-ArcGISWebhook",
+            "ChangesLambda" ,
+            function_name= f"{project_name}-ArcGISChanges",
             runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
             code=_lambda.Code.from_asset(f"../src/integracionArcGIS/changes"),
