@@ -37,11 +37,32 @@ class LambdasFileGenConstruct(Construct):
                 "BUCKET_NAME": bucket.bucket_name,
                 "FOLDER_NAME": folder_name,
                 "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
+                "FORMATO_CONSOLIDADO_LAMBDA_ARN" : self.formato_consolidado.function_arn
             },
             function_name=f"{project_name}-Formato-{folder_name}",
             layers=[openpyxl_layer],
             timeout=Duration.seconds(120)
         )
+
+        # "formato consolidado" lambda
+        self.formato_consolidado = _lambda.Function(
+            self,
+            f"{project_name}-FormatoConsolidado-{folder_name}",
+            runtime=_lambda.Runtime.PYTHON_3_13,
+            handler="handler.lambda_handler",
+            code=_lambda.Code.from_asset(f"../src/generacionEntregables/{folder_name}/formato_consolidado"),
+            environment={
+                "BUCKET_NAME": bucket.bucket_name,
+                "FOLDER_NAME": folder_name,
+                "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
+            },
+            function_name=f"{project_name}-FormatoConsolidado-{folder_name}",
+            layers=[openpyxl_layer],
+            timeout=Duration.seconds(120)
+        )        
+
+        #permiso de formato para invocar a formato consolidado
+        self.formato_consolidado.grant_invoke(self.formato)
 
         # "Informe" lambda
         self.informe = _lambda.Function(
@@ -64,6 +85,7 @@ class LambdasFileGenConstruct(Construct):
         # Permisos S3
         bucket.grant_read_write(self.formato)
         bucket.grant_read_write(self.informe)
+        bucket.grant_read_write(self.formato_consolidado)
 
         # Lambda general entregables
         self.entregable = _lambda.Function(

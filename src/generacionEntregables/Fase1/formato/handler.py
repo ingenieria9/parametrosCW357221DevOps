@@ -87,11 +87,15 @@ import re
 
 
 s3 = boto3.client("s3")
+client_lambda_db = boto3.client("lambda", region_name="us-east-1") 
+client_lambda = boto3.client("lambda") 
 TMP_DIR = Path("/tmp")
 
 # Parámetros de entrada (variables)
 
 bucket_name = os.environ['BUCKET_NAME']
+db_access_arn = os.environ['DB_ACCESS_LAMBDA_ARN']
+FORMATO_CONSOLIDADO_LAMBDA_ARN = os.environ['FORMATO_CONSOLIDADO_LAMBDA_ARN']
 template_path_s3 = "files/plantillas/Fase1/"
 output_path_s3 = "files/entregables/Fase1/"
 output_path_s3_for_convert = "files/files-to-convert/Fase1/"
@@ -251,6 +255,30 @@ def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_A
         except json.JSONDecodeError as e:
             print(f" Error al parsear JSON {latest_json}: {e}")
             return {}
+        
+def invoke_lambda_db(payload, FunctionName):
+    response = client_lambda_db.invoke(
+        FunctionName=FunctionName,
+        InvocationType='RequestResponse',
+        Payload=json.dumps(payload).encode('utf-8')
+    )
+    
+    # Lee el cuerpo de la respuesta
+    result = response["Payload"].read().decode("utf-8")
+    
+    # Intenta parsear a JSON si es posible
+    try:
+        return json.loads(result)
+    except json.JSONDecodeError:
+        return {"raw_response": result}      
+
+def invoke_lambda(payload, FunctionName):
+    response = client_lambda.invoke(
+        FunctionName=FunctionName,
+        InvocationType='Event',  # async
+        Payload=json.dumps(payload).encode('utf-8')  #  convierte a JSON y luego a bytes
+    )
+    return response  
 
 def lambda_handler(event, context):
 
@@ -384,6 +412,33 @@ def lambda_handler(event, context):
     #Subir a carpeta entregables y a files_to_convert
     s3.upload_file(str(output_path), bucket_name, convert_output_key)
     s3.upload_file(str(output_path), bucket_name, output_key)
+
+
+    payload_db = {
+        "queryStringParameters": {
+            "query": f"""SELECT CASE WHEN COUNT(*) = (SELECT COUNT(*)  FROM puntos_capa_principal p2 WHERE p2."CIRCUITO_ACU" = p1."CIRCUITO_ACU"  AND p2."PUNTO_EXISTENTE" = 'Si' AND p2."FASE_INICIAL" = 'fase1'  AND p2."FID_ELEM" IN (SELECT "FID_ELEM" FROM fase_1))THEN 'Finalizado' ELSE 'Incompleto' END AS estado, p1."CIRCUITO_ACU" as "CIRCUITO_ACU" FROM puntos_capa_principal p1 WHERE p1."CIRCUITO_ACU" = ( SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID"  = '{GlobalID}')GROUP BY p1."CIRCUITO_ACU";""",
+            "time_column": "fecha_creacion",
+            "db_name": "parametros"
+        }
+    }
+    print(payload_db)
+    response_db =invoke_lambda_db(payload_db, db_access_arn)
+    print(response_db)
+    #Parsear el body 
+    body = json.loads(response_db["body"])
+    # Extraer el valor del campo "estado"
+    estado = body[0]["estado"]
+    circuito = body[0]["CIRCUITO_ACU"]
+
+    print(estado)
+    print(circuito)
+
+    incoming_payload = { "payload": { "COD": file_name } }
+
+    # Si es ultimo punto, invocar a lambda de generación de informe (async)
+    if estado == "Finalizado":
+        invoke_lambda(incoming_payload, FORMATO_CONSOLIDADO_LAMBDA_ARN)
+        print("Invocada lambda formato consolidado")    
 
     return {
         "status": "ok",

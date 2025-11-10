@@ -5,13 +5,20 @@ from datetime import datetime, timezone, timedelta
 from datetime import date
 from collections import defaultdict
 import os
+import boto3
 
 
 CLIENT_ID = os.environ["ARCGIS_CLIENT_ID"]
 CLIENT_SECRET = os.environ["ARCGIS_CLIENT_SECRET"]
+BUCKET_NAME = os.environ["BUCKET_NAME"]
+LAMBDA_INFO_UPDATE = os.environ["LAMBDA_INFO_UPDATE"]
 
 # Fecha con la que se filtran los updates
 select_fecha = date(2025, 10, 28)
+# Definir el cliente de s3
+s3 = boto3.client('s3')
+# Definir el cliente de Lambda
+lambda_client = boto3.client('lambda')
 
 
 parents = []
@@ -62,6 +69,16 @@ payload_format = """
     ]
 }
 """
+
+# funcion para invicar lambda que genera los archivos
+def invoke_lambda(payload):
+
+    response = lambda_client.invoke(
+        FunctionName = LAMBDA_INFO_UPDATE,
+        InvocationType = 'Event',  # async
+        Payload = payload.encode('utf-8')  #  convierte a JSON y luego a bytes
+    )
+    return response 
 
 def sanitize_name(name):
     """
@@ -381,7 +398,28 @@ def lambda_handler(event, context):
         
         # agregamos attachments de fase 1
         query_attachment(token,1,data)
+        payload_changes = json.dumps(data)
         print("payload",json.dumps(data))
+        
+        
+        #Subir a S3
+        
+        #Generar el nombre del archivo con un timestamp
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        
+        #Carpeta principal del punto
+        key = f"ArcGIS-Data/Changes/{timestamp}.json"
+        
+        s3.put_object(
+            Bucket=BUCKET_NAME,
+            Key=key,
+            Body=payload_changes,
+            ContentType="application/json"
+        )
+
+        print(f" Subido {key}")
+        
+        invoke_lambda(payload_changes)
             
        
         
