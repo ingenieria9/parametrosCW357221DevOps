@@ -100,6 +100,7 @@ measurement_int_Stack = MeasurementIntStack(
     bucket_arn=storage.bucket.bucket_arn, 
     project_name=PROJECT_NAME,
     drive_layer = layers_stack.google_layer,
+    db_access_lambda_arn = db_stack.db_access_lambda_arn,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 
 )
 
