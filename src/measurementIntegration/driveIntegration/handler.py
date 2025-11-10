@@ -13,8 +13,8 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # === ENV VARS ===
-S3_BUCKET = os.environ.get('S3_BUCKET')
-DRIVE_FOLDER_ID = 'xxx'
+S3_BUCKET = os.environ.get('BUCKET_NAME')
+DRIVE_FOLDER_ID = '1nnqlexiEPGtTeEaqoTdNZLxydNlZAViV'
 PARAM_KEY_SA = os.environ.get('PARAM_KEY_SA', '/dev/drive/service_account_key')
 PARAM_KEY_TOKEN = os.environ.get('PARAM_KEY_TOKEN', '/dev/drive/start_page_token')
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
@@ -80,7 +80,7 @@ def lambda_handler(event, context):
     request = drive_service.changes().list(
         pageToken=token,
         spaces='drive',
-        fields='nextPageToken,newStartPageToken,changes(fileId,file(name,mimeType,parents))',
+        fields='nextPageToken,newStartPageToken,changes(fileId,file(id,name,mimeType,parents))',
         includeRemoved=False,
         supportsAllDrives=True
     )

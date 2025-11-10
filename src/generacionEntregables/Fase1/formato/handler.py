@@ -79,6 +79,8 @@ import json
 from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image  # para insertar imágenes
+from openpyxl.drawing.spreadsheet_drawing import AnchorMarker
+from openpyxl.utils import column_index_from_string
 import os
 from datetime import datetime, timezone, timedelta
 import re
@@ -105,6 +107,7 @@ COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F01-ACU-EIN-",
 celdas_imagenes_plantilla = {"puntos_medicion": ["B40", "C40", "D40", "E40","B41", "C41", "D41", "E41", "B42", "C42", "D42", "E42"],
                              "vrp": ["B48", "C48", "D48", "E48","B49", "C49", "D49", "E49", "B50", "C50", "D50", "E50"], "camara": []}
 
+
 def insert_image(ws, cellNumber, imagen_path):
     img = Image(str(imagen_path))
     cell = ws[cellNumber]
@@ -114,8 +117,8 @@ def insert_image(ws, cellNumber, imagen_path):
     row_height = ws.row_dimensions[cell.row].height             # alto fila en puntos
 
     # Conversión aproximada a píxeles
-    max_width = col_width * 7
-    max_height = row_height * 0.75
+    max_width = col_width * 8
+    max_height = row_height * 1.0
 
     # Escala manteniendo proporciones
     ratio = min(max_width / img.width, max_height / img.height)
@@ -251,11 +254,11 @@ def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_A
 
 def lambda_handler(event, context):
 
-    payload_data = event["payload"]["attributes"]
-    tipo_punto = event["payload"]["attributes"]["TIPO_PUNTO"]
-    FID_ELEM = event["payload"]["attributes"]["FID_ELEM"]
-    GlobalID = event["payload"]["attributes"]["PARENT_ID"] #id uuid global 
-    CIRCUITO_ACU = event["payload"]["attributes"]["CIRCUITO_ACU"].replace(" ", "_")
+    payload_data = event["payload"]
+    tipo_punto = event["payload"]["TIPO_PUNTO"]
+    FID_ELEM = event["payload"]["FID_ELEM"]
+    GlobalID = event["payload"]["PARENT_ID"] #id uuid global 
+    CIRCUITO_ACU = event["payload"]["CIRCUITO_ACU"].replace(" ", "_")
 
 
     #template_path_s3 + devolver de template key el value segun tipo de punto (ej para caja de medicion devuelve formato-acueducto.xlsx)
@@ -264,6 +267,22 @@ def lambda_handler(event, context):
     # Paths locales en Lambda (/tmp)
     template_path = TMP_DIR / "plantilla.xlsx"
     imagen_keys = event["attachments"]
+    # otras imagenes extra de capa principal
+    folder_imagen_extra = f"ArcGIS-Data/Puntos/{CIRCUITO_ACU}/{GlobalID}_{tipo_punto}/Capa_principal/"
+    # Listar objetos PNG en el folder del bucket
+    response = s3.list_objects_v2(
+        Bucket=bucket_name,
+        Prefix=folder_imagen_extra
+    )
+    # Agregar todos los archivos .png encontrados
+    if "Contents" in response:
+        for obj in response["Contents"]:
+            key = obj["Key"]
+            if key.lower().endswith((".png", ".jpeg", ".jpg")):
+                imagen_keys.append(key)
+    # Eliminar duplicados si existen
+    imagen_keys = list(set(imagen_keys))
+
     imagen_paths = [TMP_DIR / Path(k).name for k in imagen_keys]
     output_path = TMP_DIR / "output.xlsx"
 
@@ -287,7 +306,7 @@ def lambda_handler(event, context):
     
     # Leer datos adicionales desde S3
     capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_ACU)
-
+    #capa_principal_atributos = capa_principal_data["attributes"]
     # Unir ambos diccionarios (payload tiene prioridad si hay claves iguales)
     combined_data = {**capa_principal_data, **payload_data}
 
@@ -351,10 +370,10 @@ def lambda_handler(event, context):
         except json.JSONDecodeError as e:
             print(f" Error al parsear JSON {code_file}: {e}")
     
-    code_data = code_json[capa_principal_data["CIRCUITO_ACU"]]
+    code_data = code_json[event["payload"]["CIRCUITO_ACU"]]
 
     if not code_data:
-        code_data = capa_principal_data["CIRCUITO_ACU"]
+        code_data = CIRCUITO_ACU
 
     file_name = COD_name[tipo_punto].format(COD=code_data)
 

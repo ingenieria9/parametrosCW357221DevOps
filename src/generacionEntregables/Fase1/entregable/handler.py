@@ -78,12 +78,13 @@ payload_prueba = {
 }  # valor de prueba
 
 def lambda_handler(event, context):
+    print(event)
 
     incoming_payload = event
     #circuito = event.payload["circuito"] #obtener el circuito del evento
     #incoming_payload = payload_prueba
-    FID_ELEM = incoming_payload["payload"]["attributes"]["FID_ELEM"] #FID
-    GlobalID = incoming_payload["payload"]["attributes"]["PARENT_ID"] #PARENT_ID de fase 1 = GlobalID capa principal
+    FID_ELEM = incoming_payload["payload"]["FID_ELEM"] #FID
+    GlobalID = incoming_payload["payload"]["PARENT_ID"] #PARENT_ID de fase 1 = GlobalID capa principal
     
     # invocar a lambda de generación de formato (async)
     invoke_lambda(incoming_payload, formato_ARN)

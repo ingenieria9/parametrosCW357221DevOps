@@ -4,7 +4,7 @@
 Variables input del stack
 bucket, project_name: str, db_access_lambda_arn, entregables-fase-x (lista)
 
-1. API Gateway + lambda (webhook)
+1. API Gateway + lambda (changes)
     - ruta: Post a /update
     - Acceso a bucket
     - permiso de invocar a lambda infoUpdate
@@ -92,13 +92,13 @@ class ArcGISIntStack(Stack):
         # ======================================================
         # Lambda: Webhook
         # ======================================================
-        webhook_lambda = _lambda.Function(
+        changes_lambda = _lambda.Function(
             self, 
             "WebhookLambda" ,
             function_name= f"{project_name}-ArcGISWebhook",
             runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
-            code=_lambda.Code.from_asset(f"../src/integracionArcGIS/webhook"),
+            code=_lambda.Code.from_asset(f"../src/integracionArcGIS/changes"),
             environment={"BUCKET_NAME": bucket.bucket_name,
                         "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
                         "LAMBDA_INFO_UPDATE": info_update_lambda.function_arn,
@@ -110,35 +110,26 @@ class ArcGISIntStack(Stack):
         )
 
         # acceso al bucket
-        bucket.grant_read_write(webhook_lambda)
-        #webhook_lambda.add_to_role_policy(
+        bucket.grant_read_write(changes_lambda)
+        #changes_lambda.add_to_role_policy(
         #    iam.PolicyStatement(
         #        actions=["s3:*"],
         #        resources=[f"arn:aws:s3:::{bucket}", f"arn:aws:s3:::{bucket}/*"]
         #    )
         #)
         # permiso para invocar info_update_lambda
-        info_update_lambda.grant_invoke(webhook_lambda)
+        info_update_lambda.grant_invoke(changes_lambda)
 
-        # API Gateway
-        integration = integrations.HttpLambdaIntegration(
-            "WebhookIntegration",
-            handler=webhook_lambda,
+        # EventBridge rule (1 vez al finalizar el dia (4 pm UTC-5))
+        events.Rule(
+            self, "changesArcgisInfo",  rule_name = f"{project_name}-changesArcgisInfo",
+            schedule=events.Schedule.cron(
+                minute="0",
+                hour="21",  # 4pm UTC-5 is 21 UTC
+                week_day="MON-SAT"
+            ),
+            targets=[targets.LambdaFunction(changes_lambda)]
         )
-
-        api = apigwv2.HttpApi(
-            self,
-            "WebhookHttpApi",
-            api_name=f"{project_name}-webhook-api",
-        )
-
-        # Ruta POST /update
-        api.add_routes(
-            path="/update",
-            methods=[apigwv2.HttpMethod.POST],
-            integration=integration,
-        )
-
         
         # ======================================================
         # Lambda: lote_inicial

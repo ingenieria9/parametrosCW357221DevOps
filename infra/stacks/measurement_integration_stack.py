@@ -16,7 +16,7 @@ import os
 
 class MeasurementIntStack(Stack):
     # bucket, project_name: str, db_access_lambda_arn, lambdas_gen_files (list)
-    def __init__(self, scope: Construct, id: str, bucket_name: str, bucket_arn:str , project_name: str, drive_layer: _lambda.ILayerVersion, **kwargs):
+    def __init__(self, scope: Construct, id: str, bucket_name: str, bucket_arn:str , project_name: str, drive_layer: _lambda.ILayerVersion, db_access_lambda_arn: str, **kwargs):
         super().__init__(scope, id, **kwargs)
 
         # Importar el bucket por nombre/ARN (no se crea relación circular)
@@ -77,3 +77,33 @@ class MeasurementIntStack(Stack):
         service_account_param.grant_read(drive_integration_lambda)
         start_token_param.grant_read(drive_integration_lambda)
         start_token_param.grant_write(drive_integration_lambda)
+
+        # Por crear: Lambda que se triggerea por put object a s3 (carpeta drive_uploads/).
+        # Esta lambda tiene permisos para llamar a db_access_lambda_arn y asi almacenar 
+        # y procesar la información en la DB. 
+
+        # ======================================================
+        # Lambda: uploadData
+        # ======================================================
+        upload_data_lambda = _lambda.Function(
+            self, 
+            "uploadDataLambda" ,
+            function_name= f"{project_name}-uploadData",
+            runtime=_lambda.Runtime.PYTHON_3_13,
+            handler="handler.lambda_handler",
+            code=_lambda.Code.from_asset(f"../src/measurementIntegration/uploadData"),
+            environment={
+                "BUCKET_NAME": bucket.bucket_name,
+                "DB_ACCESS_LAMBDA_ARN" : db_access_lambda_arn
+            },
+            reserved_concurrent_executions=5,
+            timeout=Duration.seconds(180)
+        )
+
+        # Permiso para invocar db_access_lambda
+        upload_data_lambda.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["lambda:InvokeFunction"],
+                resources=[db_access_lambda_arn]
+            )
+        )

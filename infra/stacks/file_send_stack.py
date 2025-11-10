@@ -75,9 +75,9 @@ class FileSendStack(Stack):
             self, "sendDailyEmailRule",  rule_name = f"{project_name}-sendDailyEmailRule",
             #Every day at 4pm UTC-5 from Monday to Friday
             schedule=events.Schedule.cron(
-                minute="0",
+                minute="20",
                 hour="21",  # 4pm UTC-5 is 21 UTC
-                week_day="MON-FRI"
+                week_day="MON-SAT"
             ),
             targets=[targets.LambdaFunction(send_file_lambda)]
         )
