@@ -89,25 +89,31 @@ class ApiGenStack(Stack):
         )
 
         # PERMISSIONS
+        source_arn = self.format_arn(
+            service="execute-api",
+            resource=http_api.api_id,
+            resource_name="*/*",  # permite cualquier método y path del API
+        )
+
         simple_get.add_permission(
             "AllowHttpApiInvokeBasicGet",
-            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),  # <-- aquí el cambio
+            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
             action="lambda:InvokeFunction",
-            source_arn=f"{http_api.api_id}/*"
+            source_arn=source_arn
         )
 
         lambda_changes_fn.add_permission(
             "AllowHttpApiInvokeChanges",
             principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
             action="lambda:InvokeFunction",
-            source_arn=f"{http_api.api_id}/*"  # o usa api.execution_arn
+            source_arn=source_arn
         )
 
         lambda_send_fn.add_permission(
             "AllowHttpApiInvokeSendFile",
             principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
             action="lambda:InvokeFunction",
-            source_arn=f"{http_api.api_id}/*"
+            source_arn=source_arn
         )
 
         #INTEGRATIONS
