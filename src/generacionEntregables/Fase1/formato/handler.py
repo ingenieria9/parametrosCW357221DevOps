@@ -1,3 +1,5 @@
+#FORMATO
+
 #Ejemplo de payload 
 #{'payload': {'layer_id': 1, 'OBJECTID': '0002', 'geometry': 'null', 'attributes': {'OBJECTID': '0002', 'GlobalID': '3CFDE950-8AE7-440E-B1E7-310C56A35794', 'Identificador': 'PTO_0002', 'Tipo_Punto': 'VRP', 'Creador': 'central_ti_telemetrik', 'Fecha_Creacion': 1758818476306, 'Editor': 'central_ti_telemetrik', 'Fecha_Edicion': 1758829344252, 'Sí': 'Sí', 'Fugas': 'No', 'Signos_de_desgaste': 'null'}, 'point_type': 'VRP'}, 'attachments': ['CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg']}
 
@@ -8,10 +10,6 @@
 '''
 {
    "payload":{
-      "layer_id":1,
-      "OBJECTID":"0002",
-      "geometry":"null",
-      "attributes":{
          "OBJECTID":"0002",
          "GlobalID":"3CFDE950-8AE7-440E-B1E7-310C56A35794",
          "Creador":"central_ti_telemetrik",
@@ -49,8 +47,6 @@
          "fecha_creacion" : "1758818476306",
          "latitud" : "37.21",
          "longitud" : "-72.912"
-      },
-      "point_type":"cajas_medicion"
    },
    "attachments":[
       "files/temp-image-folder/ejemplo1.jpg",
@@ -211,29 +207,7 @@ def obtener_consecutivo_s3(bucket, prefix, cod_name):
     return f"{max_consec + 1:03}"
 
 
-def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_ACU):
-    # Construir el prefijo correcto
-    s3_key_capa_principal = (
-        f"ArcGIS-Data/Puntos/{CIRCUITO_ACU}/{GlobalID}_{tipo_punto}/Capa_principal/"
-    )
 
-    # Listar objetos en esa carpeta
-    s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key_capa_principal)
-
-    if "Contents" not in s3_objects:
-        print("No hay archivos en la carpeta Capa_principal.")
-        return {}
-
-    # Filtrar SOLO archivos que terminen en .json
-    json_files = [
-        obj for obj in s3_objects["Contents"]
-        if obj["Key"].lower().endswith(".json")
-    ]
-
-    if not json_files:
-        print("No se encontraron archivos .json en Capa_principal.")
-        print(f"Se buscó usando Prefix: {s3_key_capa_principal}")
-        return {}
 
     # Tomar el más reciente por fecha
     latest_json = max(json_files, key=lambda x: x["LastModified"])["Key"]
@@ -280,6 +254,55 @@ def invoke_lambda(payload, FunctionName):
     )
     return response  
 
+
+
+
+def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_ACU):
+    # Construir el prefijo correcto
+    s3_key_capa_principal = (
+        f"ArcGIS-Data/Puntos/{CIRCUITO_ACU}/{GlobalID}_{tipo_punto}/Capa_principal/"
+    )
+
+    # Listar objetos en esa carpeta
+    s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key_capa_principal)
+
+    if "Contents" not in s3_objects:
+        print("No hay archivos en la carpeta Capa_principal.")
+        return {}
+
+    # Filtrar SOLO archivos que terminen en .json
+    json_files = [
+        obj for obj in s3_objects["Contents"]
+        if obj["Key"].lower().endswith(".json")
+    ]
+
+    if not json_files:
+        print("No se encontraron archivos .json en Capa_principal.")
+        print(f"Se buscó usando Prefix: {s3_key_capa_principal}")
+        return {}
+
+    # Tomar el más reciente por fecha
+    latest_json = max(json_files, key=lambda x: x["LastModified"])["Key"]
+
+    print(f"Usando archivo principal: {latest_json}")
+
+    # Descargar temporalmente en /tmp
+    tmp_path = TMP_DIR / "capa_principal.json"
+    s3.download_file(bucket_name, latest_json, str(tmp_path))
+
+    # Leer el contenido con validación
+    with open(tmp_path, "r", encoding="utf-8") as f:
+        contenido = f.read().strip()
+        if not contenido:
+            print(" El archivo JSON está vacío.")
+            return {}
+        try:
+            return json.loads(contenido)
+        except json.JSONDecodeError as e:
+            print(f" Error al parsear JSON {latest_json}: {e}")
+            return {}
+        
+
 def lambda_handler(event, context):
 
     payload_data = event["payload"]
@@ -322,7 +345,29 @@ def lambda_handler(event, context):
     for key, path in zip(imagen_keys, imagen_paths):
         s3.download_file(bucket_name, key, str(path))
 
-    # Cargar plantilla Excel
+    # Cargar plantilla Exceldef obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_ACU):
+    # Construir el prefijo correcto
+    s3_key_capa_principal = (
+        f"ArcGIS-Data/Puntos/{CIRCUITO_ACU}/{GlobalID}_{tipo_punto}/Capa_principal/"
+    )
+
+    # Listar objetos en esa carpeta
+    s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key_capa_principal)
+
+    if "Contents" not in s3_objects:
+        print("No hay archivos en la carpeta Capa_principal.")
+        return {}
+
+    # Filtrar SOLO archivos que terminen en .json
+    json_files = [
+        obj for obj in s3_objects["Contents"]
+        if obj["Key"].lower().endswith(".json")
+    ]
+
+    if not json_files:
+        print("No se encontraron archivos .json en Capa_principal.")
+        print(f"Se buscó usando Prefix: {s3_key_capa_principal}")
+        return {}
     wb = load_workbook(template_path)
     ws = wb.active  # hoja específica con wb["NombreHoja"] o activa con wb.active
 
@@ -410,13 +455,13 @@ def lambda_handler(event, context):
     convert_output_key = f"{output_path_s3_for_convert}{file_name}{FID_ELEM}.xlsx"
 
     #Subir a carpeta entregables y a files_to_convert
-    s3.upload_file(str(output_path), bucket_name, convert_output_key)
+    #s3.upload_file(str(output_path), bucket_name, convert_output_key)
     s3.upload_file(str(output_path), bucket_name, output_key)
 
 
     payload_db = {
         "queryStringParameters": {
-            "query": f"""SELECT CASE WHEN COUNT(*) = (SELECT COUNT(*)  FROM puntos_capa_principal p2 WHERE p2."CIRCUITO_ACU" = p1."CIRCUITO_ACU"  AND p2."PUNTO_EXISTENTE" = 'Si' AND p2."FASE_INICIAL" = 'fase1'  AND p2."FID_ELEM" IN (SELECT "FID_ELEM" FROM fase_1))THEN 'Finalizado' ELSE 'Incompleto' END AS estado, p1."CIRCUITO_ACU" as "CIRCUITO_ACU" FROM puntos_capa_principal p1 WHERE p1."CIRCUITO_ACU" = ( SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID"  = '{GlobalID}')GROUP BY p1."CIRCUITO_ACU";""",
+            "query": f"""SELECT CASE WHEN COUNT(*) = (SELECT COUNT(*)  FROM puntos_capa_principal p2 WHERE p2."CIRCUITO_ACU" = p1."CIRCUITO_ACU"  AND p2."PUNTO_EXISTENTE" = 'Si' AND p2."FASE_INICIAL" = 'fase1'  AND p2."FID_ELEM" IN (SELECT "FID_ELEM" FROM fase_1))THEN 'Finalizado' ELSE 'Incompleto' END AS estado, p1."CIRCUITO_ACU" as "CIRCUITO_ACU", COUNT(*) AS numero_puntos  FROM puntos_capa_principal p1 WHERE p1."CIRCUITO_ACU" = ( SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID"  = '{GlobalID}') AND p1."PUNTO_EXISTENTE" = 'Si' AND p1."FASE_INICIAL" = 'fase1' GROUP BY p1."CIRCUITO_ACU";""",
             "time_column": "fecha_creacion",
             "db_name": "parametros"
         }
@@ -429,11 +474,12 @@ def lambda_handler(event, context):
     # Extraer el valor del campo "estado"
     estado = body[0]["estado"]
     circuito = body[0]["CIRCUITO_ACU"]
+    numero_puntos = body[0]["numero_puntos"]
 
     print(estado)
     print(circuito)
 
-    incoming_payload = { "payload": { "COD": file_name } }
+    incoming_payload = { "payload": { "COD": code_data, "numero_consolidado" : numero_puntos, "CIRCUITO_ACU" : CIRCUITO_ACU } }
 
     # Si es ultimo punto, invocar a lambda de generación de informe (async)
     if estado == "Finalizado":

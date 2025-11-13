@@ -29,6 +29,7 @@ from aws_cdk import (
     aws_events_targets as targets,
     Duration,
     aws_s3 as s3, 
+    CfnOutput
 )
 from constructs import Construct
 import os
@@ -75,7 +76,7 @@ class ArcGISIntStack(Stack):
                 "ARCGIS_CLIENT_SECRET" : ARCGIS_CLIENT_SECRET
             },
             layers=[request_layer],
-            timeout=Duration.seconds(20)
+            timeout=Duration.seconds(120)
         )
 
         # Acceso al bucket
@@ -92,7 +93,7 @@ class ArcGISIntStack(Stack):
         # ======================================================
         # Lambda: Changes
         # ======================================================
-        changes_lambda = _lambda.Function(
+        self.changes_lambda = _lambda.Function(
             self, 
             "ChangesLambda" ,
             function_name= f"{project_name}-ArcGISChanges",
@@ -108,9 +109,10 @@ class ArcGISIntStack(Stack):
             layers=[request_layer],
             timeout=Duration.seconds(20)                        
         )
+        CfnOutput(self, "ChangesLambdaArn", value=self.changes_lambda.function_arn)
 
         # acceso al bucket
-        bucket.grant_read_write(changes_lambda)
+        bucket.grant_read_write(self.changes_lambda)
         #changes_lambda.add_to_role_policy(
         #    iam.PolicyStatement(
         #        actions=["s3:*"],
@@ -118,7 +120,7 @@ class ArcGISIntStack(Stack):
         #    )
         #)
         # permiso para invocar info_update_lambda
-        info_update_lambda.grant_invoke(changes_lambda)
+        info_update_lambda.grant_invoke(self.changes_lambda)
 
         # EventBridge rule (1 vez al finalizar el dia (4 pm UTC-5))
         events.Rule(
@@ -128,7 +130,7 @@ class ArcGISIntStack(Stack):
                 hour="21",  # 4pm UTC-5 is 21 UTC
                 week_day="MON-SAT"
             ),
-            targets=[targets.LambdaFunction(changes_lambda)]
+            targets=[targets.LambdaFunction(self.changes_lambda)]
         )
         
         # ======================================================
@@ -185,4 +187,5 @@ class ArcGISIntStack(Stack):
             targets=[targets.LambdaFunction(update_semanal_lambda)]
         )
 
+   
 

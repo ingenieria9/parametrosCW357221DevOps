@@ -40,7 +40,8 @@ class LambdasFileGenConstruct(Construct):
             },
             function_name=f"{project_name}-FormatoConsolidado-{folder_name}",
             layers=[openpyxl_layer],
-            timeout=Duration.seconds(120)
+            timeout=Duration.seconds(120),
+            memory_size=512
         )        
 
 
@@ -81,7 +82,8 @@ class LambdasFileGenConstruct(Construct):
             },
             function_name=f"{project_name}-Informe-{folder_name}",
             layers=[docxtpl_layer, requests_layer],
-            timeout=Duration.seconds(120)
+            timeout=Duration.seconds(120),
+            memory_size=256
         )
 
         # Permisos S3

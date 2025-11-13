@@ -333,8 +333,8 @@ def db_upsert_fase_1(json_data):
     fase_1_fields = [
         "PARENT_ID", "TIPO_PUNTO", "FECHA_CREACION", "FECHA_EDICION",
         "condicion_fisica_general", "conexiones_hidraulicas", "UBICACION_GEO_CRITICA",
-        "habilitado_medicion", "actualizacion_ubicacion", "cobertura",
-        "requiere_instalacion_tapa", "requiere_limpieza", "FID_ELEM",
+        "habilitado_medicion", "UBICACION_ACTUALIZADA", "SENAL_4G",
+        "REQUIERE_INST_TAPA_ACU", "REQ_LIMPIEZA_ACU", "FID_ELEM",
         "REQUIERE_FASE1", "PUNTO_ENCONTRADO", "EXPOSICION_FRAUDE", "FECHA_FASE1"
     ]
 
@@ -387,13 +387,19 @@ def db_upsert_fase_1(json_data):
 
                 # condicion_fisica_general
                 if (
-                    attributes.get("SIGNOS_DESGASTE_ACU") in ["Si", 1]
+                    attributes.get("SIGNOS_DESGASTE_ACU") in ["Si", 1] 
                     or attributes.get("DANOS_ESTRUCT_ACU") in ["Si", 1]
                     or attributes.get("TAPA_ASEGURADA_ACU") in ["No", 0]
-                ):
-                    fase_1_values["condicion_fisica_general"] = 0
-                else:
+                ):fase_1_values["condicion_fisica_general"] = 0
+                    
+                elif( attributes.get("SIGNOS_DESGASTE_ACU") in ["No", 0]
+                    and attributes.get("DANOS_ESTRUCT_ACU") in ["No", 1]):
                     fase_1_values["condicion_fisica_general"] = 1
+                
+                elif(attributes.get("PUNTO_ENCONTRADO") in ["No", 0]):
+                    fase_1_values["condicion_fisica_general"] = "NULL"
+                else:
+                    fase_1_values["condicion_fisica_general"] = 0 #para cuando lo encuentran pero no lo pueden abrir
 
                 # conexiones_hidraulicas 
                 if (attributes.get("ESTADO_OPTIMO_CON_HID_ACU") in ["No", 0] or
@@ -404,18 +410,29 @@ def db_upsert_fase_1(json_data):
                     attributes.get("VERIFICA_CONEX_ROSCADA_ACU") in ["No", 0] or
                     attributes.get("CUMPLE_MEDIDAS_MIN_MED_CAU_ACU") in ["No", 0]):
                     fase_1_values["conexiones_hidraulicas"] = 0
-                else:
+                    
+                elif(attributes.get("ESTADO_OPTIMO_CON_HID_ACU") in ["Si", 1] and
+                    attributes.get("ESTADO_ADECUADO_TUBERIA_ACU") in ["Si", 1] and
+                    attributes.get("VALVULA_FUNCIONAL_ACU") in ["Si", 1] and
+                    attributes.get("PRESENTA_FUGAS_ACU") in ["No", 0] and
+                    attributes.get("FLUJO_DE_AGUA_ACU") in ["Si", 1] and
+                    attributes.get("VERIFICA_CONEX_ROSCADA_ACU") in ["Si", 1] ):
                     fase_1_values["conexiones_hidraulicas"] = 1
+                
+                elif(attributes.get("PUNTO_ENCONTRADO") in ["No", 0]):
+                    fase_1_values["conexiones_hidraulicas"] = "NULL"
+
+                #else: fase_1_values["conexiones_hidraulicas"] = 0
 
                 # habilitado_medicion
                 if (
-                    attributes.get("PUNTO_REQUIERE_FASE2") in ["Si", 1]
-                    and attributes.get("PUNTOS_HABILITADO_FASE3") in ["No", 0]
+                    #attributes.get("PUNTO_REQUIERE_FASE2") in ["Si", 1] and
+                    attributes.get("PUNTOS_HABILITADO_FASE3") in ["No", 0]
                 ):
                     fase_1_values["habilitado_medicion"] = 0
                 elif (
                     attributes.get("PUNTOS_HABILITADO_FASE3") in ["Si", 1]
-                    and attributes.get("PUNTO_REQUIERE_FASE2") in ["No", 0]
+                    #and attributes.get("PUNTO_REQUIERE_FASE2") in ["No", 0]
                 ):
                     fase_1_values["habilitado_medicion"] = 1
 

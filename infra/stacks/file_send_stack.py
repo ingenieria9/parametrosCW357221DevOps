@@ -56,6 +56,7 @@ class FileSendStack(Stack):
                 },
             function_name=f"{project_name}-sendFile",
             timeout=Duration.seconds(180),
+            memory_size=256,
             layers=[request_layer]
         )
 

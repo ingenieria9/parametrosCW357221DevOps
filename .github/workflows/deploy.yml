@@ -49,6 +49,8 @@ jobs:
           GRAFANA_API_ACCESS : ${{secrets.GRAFANA_API_ACCESS}}   
           IMAGE_TAG: ${{ env.IMAGE_TAG }}          
           GMAIL_EMAIL_PASSWORD : ${{secrets.GMAIL_EMAIL_PASSWORD}}
+          password_API_A : ${{secrets.PASSWORD_API_A}}
+          password_API_B : ${{secrets.PASSWORD_API_B}}
 
 
       - name: Synthesize CDK
@@ -63,6 +65,8 @@ jobs:
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           GRAFANA_API_ACCESS : ${{secrets.GRAFANA_API_ACCESS}}
           GMAIL_EMAIL_PASSWORD : ${{secrets.GMAIL_EMAIL_PASSWORD}}
+          password_API_A : ${{secrets.PASSWORD_API_A}}
+          password_API_B : ${{secrets.PASSWORD_API_B}}          
 
       - name: Deploy CDK stack
         working-directory: infra
@@ -79,3 +83,5 @@ jobs:
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           GRAFANA_API_ACCESS : ${{secrets.GRAFANA_API_ACCESS}}
           GMAIL_EMAIL_PASSWORD : ${{secrets.GMAIL_EMAIL_PASSWORD}}
+          password_API_A : ${{secrets.PASSWORD_API_A}}
+          password_API_B : ${{secrets.PASSWORD_API_B}}          

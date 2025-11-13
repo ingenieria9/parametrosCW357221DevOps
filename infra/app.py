@@ -9,7 +9,7 @@ from stacks.arcgis_integration_stack import ArcGISIntStack
 from stacks.lambda_layers import LayersStack
 from stacks.measurement_integration_stack import MeasurementIntStack
 from stacks.file_send_stack import FileSendStack
-
+from stacks.api_gen_stack import ApiGenStack
 
 app = cdk.App()
 
@@ -94,6 +94,7 @@ arcgis_int_Stack = ArcGISIntStack(
 arcgis_int_Stack.add_dependency(filegen_stack)
 
 
+
 measurement_int_Stack = MeasurementIntStack(
     app,  f"{PROJECT_NAME}-MeasurementIntStack",
     bucket_name=storage.bucket.bucket_name,
@@ -114,5 +115,10 @@ file_send_stack = FileSendStack(
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION),
     request_layer = layers_stack.requests_layer,
 )
+
+ApiGenStack(
+    app, f"{PROJECT_NAME}-ApiGenStack", 
+    lambda_changes = arcgis_int_Stack.changes_lambda.function_arn, lambda_sendFile=file_send_stack.send_file_lambda.function_arn)
+
 
 app.synth()
