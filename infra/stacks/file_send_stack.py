@@ -13,6 +13,7 @@ Stack que tiene:
 
 
 from aws_cdk import (
+    CfnOutput,
     Stack,
     aws_lambda as _lambda,
     aws_iam as iam,
@@ -44,7 +45,7 @@ class FileSendStack(Stack):
             bucket_arn=bucket_arn,
         )
 
-        send_file_lambda = _lambda.Function(
+        self.send_file_lambda = _lambda.Function(
             self, "sendFileLambda",
             runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
@@ -61,10 +62,10 @@ class FileSendStack(Stack):
         )
 
         # Acceso al bucket
-        bucket.grant_read_write(send_file_lambda)
+        bucket.grant_read_write(self.send_file_lambda)
 
         # Permiso para invocar db_access_lambda
-        send_file_lambda.add_to_role_policy(
+        self.send_file_lambda.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["lambda:InvokeFunction"],
                 resources=[db_access_lambda_arn]
@@ -80,5 +81,5 @@ class FileSendStack(Stack):
                 hour="21",  # 4pm UTC-5 is 21 UTC
                 week_day="MON-SAT"
             ),
-            targets=[targets.LambdaFunction(send_file_lambda)]
+            targets=[targets.LambdaFunction(self.send_file_lambda)]
         )
