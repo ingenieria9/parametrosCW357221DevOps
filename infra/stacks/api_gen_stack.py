@@ -50,7 +50,6 @@ class ApiGenStack(Stack):
         
         lambda_authorizer = authorizers.HttpLambdaAuthorizer(
             "ApiLambdaAuthorizer",
-            authorizer_lambda=authorizer_lambda,
             authorizer_name=f"{project_name}-lambda-authorizer",
             identity_source=["$request.header.Authorization"],
             response_types=[authorizers.HttpLambdaResponseType.SIMPLE],
