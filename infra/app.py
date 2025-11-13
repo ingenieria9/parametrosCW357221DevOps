@@ -117,7 +117,7 @@ file_send_stack = FileSendStack(
 )
 
 ApiGenStack(
-    app, f"{PROJECT_NAME}-ApiGenStack", 
+    app, f"{PROJECT_NAME}-ApiGenStack",   project_name=PROJECT_NAME,
     lambda_changes = arcgis_int_Stack.changes_lambda.function_arn, lambda_sendFile=file_send_stack.send_file_lambda.function_arn)
 
 
