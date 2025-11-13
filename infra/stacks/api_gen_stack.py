@@ -91,21 +91,21 @@ class ApiGenStack(Stack):
         # PERMISSIONS
         simple_get.add_permission(
             "AllowHttpApiInvokeBasicGet",
-            principal=_lambda.ServicePrincipal("apigateway.amazonaws.com"),
+            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),  # <-- aquí el cambio
             action="lambda:InvokeFunction",
             source_arn=f"{http_api.api_id}/*"
         )
 
         lambda_changes_fn.add_permission(
             "AllowHttpApiInvokeChanges",
-            principal=_lambda.ServicePrincipal("apigateway.amazonaws.com"),
+            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
             action="lambda:InvokeFunction",
             source_arn=f"{http_api.api_id}/*"  # o usa api.execution_arn
         )
 
         lambda_send_fn.add_permission(
             "AllowHttpApiInvokeSendFile",
-            principal=_lambda.ServicePrincipal("apigateway.amazonaws.com"),
+            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
             action="lambda:InvokeFunction",
             source_arn=f"{http_api.api_id}/*"
         )
