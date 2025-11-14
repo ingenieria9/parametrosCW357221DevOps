@@ -111,6 +111,14 @@ class ArcGISIntStack(Stack):
         )
         CfnOutput(self, "ChangesLambdaArn", value=self.changes_lambda.function_arn)
 
+        #invocación desde api gateway (wildcard)
+        self.changes_lambda.add_permission(
+            "AllowInvokeFromApiGateway",
+            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
+            action="lambda:InvokeFunction",
+            source_arn = f"arn:aws:execute-api:{self.region}:{self.account}:*/*/*"
+        )
+
         # acceso al bucket
         bucket.grant_read_write(self.changes_lambda)
         #changes_lambda.add_to_role_policy(
@@ -185,16 +193,4 @@ class ArcGISIntStack(Stack):
             self, "updateArcgisInfo",  rule_name = f"{project_name}-updateArcgisInfo",
             schedule=events.Schedule.rate(Duration.days(7)),
             targets=[targets.LambdaFunction(update_semanal_lambda)]
-        )
-
-   
-    # MÉTODO QUE AGREGA PERMISOS
-    def add_permissions_for_api(self, api_id: str):
-        source_arn = f"arn:aws:execute-api:{self.region}:{self.account}:{api_id}/*/*"
-
-        self.changes_lambda.add_permission(
-            "AllowInvokeFromApiGateway",
-            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
-            action="lambda:InvokeFunction",
-            source_arn=source_arn
         )

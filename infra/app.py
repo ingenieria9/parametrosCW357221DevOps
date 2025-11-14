@@ -117,9 +117,6 @@ api_gen_stack = ApiGenStack(
     lambda_changes = arcgis_int_Stack.changes_lambda.function_arn, lambda_sendFile=file_send_stack.send_file_lambda.function_arn)
 
 
-arcgis_int_Stack.add_permissions_for_api(api_gen_stack.http_api_id)
-file_send_stack.add_permissions_for_api(api_gen_stack.http_api_id)
-
 # PARA FASE 3
 measurement_int_Stack = MeasurementIntStack(
     app,  f"{PROJECT_NAME}-MeasurementIntStack",
