@@ -30,6 +30,7 @@ class ApiGenStack(Stack):
         # API V2
         http_api = apigwv2.HttpApi(self, f"{project_name}GenerationAPI",)
         self.api_url = http_api.api_endpoint
+        self.http_api_id = http_api.api_id
 
         # ======================================================
         # Lambda: Authorizer Function
@@ -89,22 +90,13 @@ class ApiGenStack(Stack):
         )
 
         # PERMISSIONS
-        source_arn = self.format_arn(
-            service="execute-api",
-            resource=http_api.api_id,
-            resource_name="*/*",  # permite cualquier método y path del API
-        )
 
         simple_get.add_permission(
             "AllowHttpApiInvokeBasicGet",
             principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
             action="lambda:InvokeFunction",
-            source_arn=source_arn
+            source_arn=f"arn:aws:execute-api:{self.region}:{self.account}:{self.http_api_id}/*/*"
         )
-
-        lambda_changes_fn.grant_invoke(iam.ServicePrincipal("apigateway.amazonaws.com"))
-        lambda_send_fn.grant_invoke(iam.ServicePrincipal("apigateway.amazonaws.com"))
-
 
         #INTEGRATIONS
 

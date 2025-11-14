@@ -76,6 +76,9 @@ filegen_stack = FileGenStack(
 LambdaEcrS3TriggerStack(app, f"{PROJECT_NAME}-LambdaEcrS3TriggerStack",     bucket_name=storage.bucket.bucket_name,
     bucket_arn=storage.bucket.bucket_arn, project_name=PROJECT_NAME, env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
 
+
+
+
 # Stack para etapa 3 "integración ArcGIS" 
 
 arcgis_int_Stack = ArcGISIntStack(
@@ -89,21 +92,11 @@ arcgis_int_Stack = ArcGISIntStack(
     ],
     request_layer = layers_stack.requests_layer,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 
+    #api_id = api_gen_stack.http_api_id
 )
 
 arcgis_int_Stack.add_dependency(filegen_stack)
 
-
-
-measurement_int_Stack = MeasurementIntStack(
-    app,  f"{PROJECT_NAME}-MeasurementIntStack",
-    bucket_name=storage.bucket.bucket_name,
-    bucket_arn=storage.bucket.bucket_arn, 
-    project_name=PROJECT_NAME,
-    drive_layer = layers_stack.google_layer,
-    db_access_lambda_arn = db_stack.db_access_lambda_arn,
-    env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 
-)
 
 file_send_stack = FileSendStack(
     app,
@@ -114,11 +107,29 @@ file_send_stack = FileSendStack(
     db_access_lambda_arn=db_stack.db_access_lambda_arn,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION),
     request_layer = layers_stack.requests_layer,
+    
 )
 
-ApiGenStack(
+# stack api generador de cambios --> con authorizador lambda
+
+api_gen_stack = ApiGenStack(
     app, f"{PROJECT_NAME}-ApiGenStack",   project_name=PROJECT_NAME,
     lambda_changes = arcgis_int_Stack.changes_lambda.function_arn, lambda_sendFile=file_send_stack.send_file_lambda.function_arn)
+
+
+arcgis_int_Stack.add_permissions_for_api(api_gen_stack.http_api_id)
+file_send_stack.add_permissions_for_api(api_gen_stack.http_api_id)
+
+# PARA FASE 3
+measurement_int_Stack = MeasurementIntStack(
+    app,  f"{PROJECT_NAME}-MeasurementIntStack",
+    bucket_name=storage.bucket.bucket_name,
+    bucket_arn=storage.bucket.bucket_arn, 
+    project_name=PROJECT_NAME,
+    drive_layer = layers_stack.google_layer,
+    db_access_lambda_arn = db_stack.db_access_lambda_arn,
+    env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 
+)
 
 
 app.synth()

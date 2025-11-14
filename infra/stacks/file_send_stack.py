@@ -83,3 +83,14 @@ class FileSendStack(Stack):
             ),
             targets=[targets.LambdaFunction(self.send_file_lambda)]
         )
+
+    # MÉTODO QUE AGREGA PERMISOS
+    def add_permissions_for_api(self, api_id: str):
+        source_arn = f"arn:aws:execute-api:{self.region}:{self.account}:{api_id}/*/*"
+
+        self.send_file_lambda.add_permission(
+            "AllowInvokeFromApiGateway",
+            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
+            action="lambda:InvokeFunction",
+            source_arn=source_arn
+        )

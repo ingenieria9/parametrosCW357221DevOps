@@ -188,4 +188,13 @@ class ArcGISIntStack(Stack):
         )
 
    
+    # MÉTODO QUE AGREGA PERMISOS
+    def add_permissions_for_api(self, api_id: str):
+        source_arn = f"arn:aws:execute-api:{self.region}:{self.account}:{api_id}/*/*"
 
+        self.changes_lambda.add_permission(
+            "AllowInvokeFromApiGateway",
+            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
+            action="lambda:InvokeFunction",
+            source_arn=source_arn
+        )
