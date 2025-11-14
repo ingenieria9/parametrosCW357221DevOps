@@ -14,7 +14,10 @@ BUCKET_NAME = os.environ["BUCKET_NAME"]
 LAMBDA_INFO_UPDATE = os.environ["LAMBDA_INFO_UPDATE"]
 
 # Fecha con la que se filtran los updates
-select_fecha = date(2025, 10, 28)
+select_fecha = date(2025, 11, 6)
+# Fecha actual del sistema
+#select_fecha = date.today()
+
 # Definir el cliente de s3
 s3 = boto3.client('s3')
 # Definir el cliente de Lambda
@@ -70,7 +73,7 @@ payload_format = """
 }
 """
 
-# funcion para invicar lambda que genera los archivos
+# funcion para invocar lambda que genera los archivos
 def invoke_lambda(payload):
 
     response = lambda_client.invoke(
@@ -186,21 +189,60 @@ def query_attachment(token,fase,payload):
 
         print(f"Upload attachments fase {fase} ", payload)
 
-
-      
-        
-def lambda_handler(event, context):   
+def query_layer(token,fase,where_clause):
     
-        # Cargar el formato de payload a enviar
-        data = json.loads(payload_format)     
-         
-    # Vamos a generar un token par acceder a la API de ARCGIS y traer la fase 1
-        token = http_token_request()
+    # Generamos la dirección URL que permite hacer el query a la fase 1   
+    API_query_layer = f"https://services3.arcgis.com/hrpzrRnIsS21AFPI/ArcGIS/rest/services/FINAAAAAAAL/FeatureServer/{fase}/query"
+   
+    if fase == 0:
+        payload_API_query_layer = {
+            "where": where_clause,
+            "objectIds": "",
+            "geometry": "",
+            "geometryType": "esriGeometryEnvelope",
+            "inSR": "",
+            "spatialRel": "esriSpatialRelIntersects",
+            "resultType": "none",
+            "distance": 0.0,
+            "units": "esriSRUnit_Meter",
+            "relationParam": "",
+            "returnGeodetic": "false",
+            "outFields": "*",
+            "returnHiddenFields": "false",
+            "returnGeometry": "true",
+            "featureEncoding": "esriDefault",
+            "multipatchOption": "xyFootprint",
+            "maxAllowableOffset": "",
+            "geometryPrecision": "",
+            "outSR": "",
+            "defaultSR": "",
+            "datumTransformation": "",
+            "applyVCSProjection": "false",
+            "returnIdsOnly": "false",
+            "returnUniqueIdsOnly": "false",
+            "returnCountOnly": "false",
+            "returnExtentOnly": "false",
+            "returnQueryGeometry": "false",
+            "returnDistinctValues": "false",
+            "cacheHint": "false",
+            "collation": "",
+            "orderByFields": "",
+            "groupByFieldsForStatistics": "",
+            "outStatistics": "",
+            "having": "",
+            "resultOffset": "",
+            "resultRecordCount": "",
+            "returnZ": "false",
+            "returnM": "false",
+            "returnTrueCurves": "false",
+            "returnExceededLimitFeatures": "true",
+            "quantizationParameters": "",
+            "sqlFormat": "none",
+            "f": "pjson",
+            "token": token
+        } 
         
-        # Generamos la dirección URL que permite hacer el query a la fase 1
-    
-        API_query_layer = "https://services3.arcgis.com/hrpzrRnIsS21AFPI/ArcGIS/rest/services/FINAAAAAAAL/FeatureServer/1/query"
-        
+    else:    
         payload_API_query_layer = {
             "where": "1=1",
             "objectIds": "",
@@ -248,26 +290,57 @@ def lambda_handler(event, context):
             "token": token
         }
 
-        #Vamos a realizar un http get request con esta URL + el token  
-        response_API_query_layer_fase1 = requests.get(API_query_layer, params=payload_API_query_layer)
-        #print("Status:", response_API_query_layer.status_code)
-        #print("Respuesta:", response_API_query_layer.text[:500])  # imprime primeros 500 caracteres
+    #Vamos a realizar un http get request con esta URL + el token  
+    response_API_query_layer = requests.get(API_query_layer, params=payload_API_query_layer)
+    print("DEBUG Status:", response_API_query_layer.status_code)
+    #print("Status:", response_API_query_layer.status_code)
+    #print("Respuesta:", response_API_query_layer.text[:500])  # imprime primeros 500 caracteres
+    return response_API_query_layer
+        
+def lambda_handler(event, context):   
+    
+    if event:
+        data_event = json.loads(event['body'])
+        if "fecha" in data_event:
+            select_fecha = datetime.strptime(data_event["fecha"], "%Y-%m-%d").date()
+            select_circuito = None
+            #print("fecha API:",select_fecha)
+        elif "circuito" in data_event:
+            select_circuito = data_event["circuito"]
+            select_fecha = None
+            #print("Circuito API:",select_circuito)
+            
+            
+    # Cargar el formato del payload a enviar
+    data = json.loads(payload_format)     
+        
+    # Vamos a generar un token par acceder a la API de ARCGIS y traer la fase 1
+    token = http_token_request()
+    
+    #Request a la fase 1
+    # Vamos a recibir un json con la información de la fase 1
+    response_API_query_layer_fase1 = query_layer(token,1,"1=1")
+    response_API_query_layer_dict_fase1 = response_API_query_layer_fase1.json()
+    #print("Respuesta:", response_API_query_layer_fase1.text[:1000])
+    
+    
+    # recorrer el json recibido (DE FASE 1) y tomar los atributos (tanto para guardar cda punto en s3 como para
+    # almacenar en la base de datos)
+    for feature in response_API_query_layer_dict_fase1.get("features", []):
+        
+        atributos = feature.get("attributes", {})
+        
+        # datos que necesitamos para aignar el nombre al archivo
+        identificador = atributos.get("GlobalID")
+        parent_id = atributos.get("PARENT_ID")
         
         
-        # Vamos a recibir un json con la información de la fase 1
-        response_API_query_layer_dict_fase1 = response_API_query_layer_fase1.json()
-        
-        # recorrer el json recibido y tomar los atributos (tanto para guardar cda punto en s3 como para
-        # almacenar en la base de datos)
-        for feature in response_API_query_layer_dict_fase1.get("features", []):
-            atributos = feature.get("attributes", {})
-            # datos que necesitamos para aignar el nombre al archivo
-            identificador = atributos.get("GlobalID")
-            parent_id = atributos.get("PARENT_ID")
+        if select_fecha:
             
             
             fecha = atributos.get("FECHA_FASE1")
-  
+            
+
             # Si no hay fecha, saltar este feature
             if fecha is None:
                 continue
@@ -282,8 +355,35 @@ def lambda_handler(event, context):
             fecha_timestamp = datetime.fromtimestamp(fecha_edicion / 1000)  # convertir ms a segundos
             solo_fecha = fecha_timestamp.date()  # extrae solo AAAA-MM-DD
             
+            
             #filtramos por fecha para almacenar los puntos actualizados y traerlos de la capa principal   
             if solo_fecha == select_fecha:
+                
+                parents.append(parent_id)
+                #print("Item x de parents:",parents)
+                global_id_fase.append(identificador)
+                
+                #Guardar en el payload que se enviará a la otra lambda las actualizaciones en los
+                
+                # atributos de fase 1
+                # crear el bloque para agregar dentro de updates
+                fase1_update = {
+                    "attributes": atributos,
+                }
+                
+                # agregar al diccionario principal
+                data["edits"][1]["features"]["updates"].append(fase1_update)
+
+        elif select_circuito:
+            
+            circuito = atributos.get("CIRCUITO_ACU")
+            
+            # Si no hay circuito, saltar este feature
+            if circuito is None:
+                continue
+            
+            #filtramos por circuito para almacenar los puntos actualizados y traerlos de la capa principal   
+            if circuito == select_circuito:
                 
                 parents.append(parent_id)
                 global_id_fase.append(identificador)
@@ -298,133 +398,83 @@ def lambda_handler(event, context):
                 
                 # agregar al diccionario principal
                 data["edits"][1]["features"]["updates"].append(fase1_update)
-        
-        print(data)
-        
-        
-        
-        #QUERY PARA CAPA PRINCIPAL
-        
-        #Generamos el formato para el item "where" en la peticion hhtp
-        where_clause = "GlobalID IN (" + ", ".join(f"'{{{parent}}}'" for parent in parents) + ")"
-        print(where_clause)
-        
-        # Generamos la dirección URL que permite hacer el query a la capa principal
-        API_query_layer = f"https://services3.arcgis.com/hrpzrRnIsS21AFPI/ArcGIS/rest/services/FINAAAAAAAL/FeatureServer/0/query"
-        
-        payload_API_query_layer = {
-            "where": where_clause,
-            "objectIds": "",
-            "geometry": "",
-            "geometryType": "esriGeometryEnvelope",
-            "inSR": "",
-            "spatialRel": "esriSpatialRelIntersects",
-            "resultType": "none",
-            "distance": 0.0,
-            "units": "esriSRUnit_Meter",
-            "relationParam": "",
-            "returnGeodetic": "false",
-            "outFields": "*",
-            "returnHiddenFields": "false",
-            "returnGeometry": "true",
-            "featureEncoding": "esriDefault",
-            "multipatchOption": "xyFootprint",
-            "maxAllowableOffset": "",
-            "geometryPrecision": "",
-            "outSR": "",
-            "defaultSR": "",
-            "datumTransformation": "",
-            "applyVCSProjection": "false",
-            "returnIdsOnly": "false",
-            "returnUniqueIdsOnly": "false",
-            "returnCountOnly": "false",
-            "returnExtentOnly": "false",
-            "returnQueryGeometry": "false",
-            "returnDistinctValues": "false",
-            "cacheHint": "false",
-            "collation": "",
-            "orderByFields": "",
-            "groupByFieldsForStatistics": "",
-            "outStatistics": "",
-            "having": "",
-            "resultOffset": "",
-            "resultRecordCount": "",
-            "returnZ": "false",
-            "returnM": "false",
-            "returnTrueCurves": "false",
-            "returnExceededLimitFeatures": "true",
-            "quantizationParameters": "",
-            "sqlFormat": "none",
-            "f": "pjson",
-            "token": token
-        }  
-        
-        #Vamos a realizar un http get request con esta URL + el token  
-        response_API_query_layer_capa_principal = requests.get(API_query_layer, params=payload_API_query_layer)
-        #print("Status:", response_API_query_layer.status_code)
-        #print("Respuesta:", response_API_query_layer.text[:500])  # imprime primeros 500 caracteres
-        
-        
-        # Vamos a recibir un json con la información de la capa principal
-        response_API_query_layer_capa_principal_dict = response_API_query_layer_capa_principal.json()
-        
-        # recorrer el json recibido y tomar los atributos (tanto para guardar cda punto en s3 como para
-        # almacenar en la base de datos)
-        for feature in response_API_query_layer_capa_principal_dict.get("features", []):
-            
-            atributos = feature.get("attributes", {})
-            geometria = feature.get("geometry",{})
-            identificador = atributos.get("GlobalID")
-            parent_id = atributos.get("PARENT_ID")
             
             
-            data_update = json.loads(payload_format)
-       
-            # atributos de la capa_principal
-            # crear el bloque para agregar dentro de updates
-            capa_principal_update = {
-                "attributes": atributos,
-                "geometry" : geometria
-            }
-            
-            # agregar al diccionario principal
-            data["edits"][0]["features"]["updates"].append(capa_principal_update) 
-            
-        print(data) 
+    #print(data)
+        
+    
+    #QUERY PARA CAPA PRINCIPAL
+    
+    #Generamos el formato para el item "where" en la peticion hhtp
+    where_clause = "GlobalID IN (" + ", ".join(f"'{{{parent}}}'" for parent in parents) + ")"
+    #print(where_clause)
+    
+    #Vamos a realizar un http get request con esta URL + el token  
+    response_API_query_layer_capa_principal = query_layer(token,0,where_clause)
+    #print("Status:", response_API_query_layer.status_code)
+    
+    #print("Respuesta:", response_API_query_layer_capa_principal.text[:1000])  # imprime primeros 500 caracteres
+    
+    
+    # Vamos a recibir un json con la información de la capa principal
+    response_API_query_layer_capa_principal_dict = response_API_query_layer_capa_principal.json()
+    
+    # recorrer el json recibido y tomar los atributos (tanto para guardar cda punto en s3 como para
+    # almacenar en la base de datos)
+    for feature in response_API_query_layer_capa_principal_dict.get("features", []):
+        
+        atributos = feature.get("attributes", {})
+        geometria = feature.get("geometry",{})
+        identificador = atributos.get("GlobalID")
+        parent_id = atributos.get("PARENT_ID")
         
         
-        # agregamos attachments de capa principal
-        query_attachment(token,0,data)
+        data_update = json.loads(payload_format)
+    
+        # atributos de la capa_principal
+        # crear el bloque para agregar dentro de updates
+        capa_principal_update = {
+            "attributes": atributos,
+            "geometry" : geometria
+        }
         
-        # agregamos attachments de fase 1
-        query_attachment(token,1,data)
-        payload_changes = json.dumps(data)
-        print("payload",json.dumps(data))
+        # agregar al diccionario principal
+        data["edits"][0]["features"]["updates"].append(capa_principal_update) 
         
+    #print(data) 
         
-        #Subir a S3
-        
-        #Generar el nombre del archivo con un timestamp
-        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        
-        #Carpeta principal del punto
-        key = f"ArcGIS-Data/Changes/{timestamp}.json"
-        
-        s3.put_object(
-            Bucket=BUCKET_NAME,
-            Key=key,
-            Body=payload_changes,
-            ContentType="application/json"
-        )
+    # agregamos attachments de capa principal
+    query_attachment(token,0,data)
+    
+    # agregamos attachments de fase 1
+    query_attachment(token,1,data)
+    payload_changes = json.dumps(data)
+    print("payload",json.dumps(data))
+    
+    
+    #Subir a S3
+    
+    #Generar el nombre del archivo con un timestamp
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    
+    #Carpeta principal del punto
+    key = f"ArcGIS-Data/Changes/{timestamp}.json"
+    
+    s3.put_object(
+        Bucket=BUCKET_NAME,
+        Key=key,
+        Body=payload_changes,
+        ContentType="application/json"
+    )
 
-        print(f" Subido {key}")
+    print(f" Subido {key}")
+    
+    #invoke_lambda(payload_changes)
         
-        invoke_lambda(payload_changes)
-            
-       
-        
-        
-        
+    
+    
+    
+    
                 
                 
                 

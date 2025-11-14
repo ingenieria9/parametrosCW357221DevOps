@@ -65,7 +65,7 @@ class ApiGenStack(Stack):
         "BasicGetLambda" ,
         function_name= f"{project_name}-basicGet",
         runtime=_lambda.Runtime.PYTHON_3_13,
-        handler="handler.lambda_handler",
+        handler="index.lambda_handler",
         #code basic hello world
         code=_lambda.Code.from_inline
         (
@@ -102,19 +102,9 @@ class ApiGenStack(Stack):
             source_arn=source_arn
         )
 
-        lambda_changes_fn.add_permission(
-            "AllowHttpApiInvokeChanges",
-            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
-            action="lambda:InvokeFunction",
-            source_arn=source_arn
-        )
+        lambda_changes_fn.grant_invoke(iam.ServicePrincipal("apigateway.amazonaws.com"))
+        lambda_send_fn.grant_invoke(iam.ServicePrincipal("apigateway.amazonaws.com"))
 
-        lambda_send_fn.add_permission(
-            "AllowHttpApiInvokeSendFile",
-            principal=iam.ServicePrincipal("apigateway.amazonaws.com"),
-            action="lambda:InvokeFunction",
-            source_arn=source_arn
-        )
 
         #INTEGRATIONS
 
