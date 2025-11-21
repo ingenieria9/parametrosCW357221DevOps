@@ -85,6 +85,7 @@ def lambda_handler(event, context):
     #incoming_payload = payload_prueba
     FID_ELEM = incoming_payload["payload"]["FID_ELEM"] #FID
     GlobalID = incoming_payload["payload"]["PARENT_ID"] #PARENT_ID de fase 1 = GlobalID capa principal
+    forzarInforme = incoming_payload.get("forzarInforme", "false")
     
     # invocar a lambda de generación de formato (async)
     invoke_lambda(incoming_payload, formato_ARN)
@@ -114,8 +115,8 @@ def lambda_handler(event, context):
     print(estado)
     print(circuito)
 
-    # Si es ultimo punto, invocar a lambda de generación de informe (async)
-    if estado == "Finalizado":
+    # Si es ultimo punto, invocar a lambda de generación de informe (async) (O si es forzado por API)
+    if estado == "Finalizado" or str(forzarInforme).lower() == "true":
         invoke_lambda(incoming_payload, informe_ARN)
         print("Invocada lambda informe")
 

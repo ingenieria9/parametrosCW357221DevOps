@@ -59,7 +59,7 @@ layers_stack = LayersStack(app, f"{PROJECT_NAME}-LayersStack", project_name=PROJ
 # Stack de almacenamiento S3 (Bucket del proyecto)
 storage = StorageStack(app, f"{PROJECT_NAME}-StorageStack", project_name=PROJECT_NAME, env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION))
 
-# Stack para etapa 2 "Generación de entregables" para Fase I, II  y III.A
+# Stack para etapa 2 "Generación de entregables" para Fase I, II  y III
 filegen_stack = FileGenStack(
     app,
     f"{PROJECT_NAME}-FileGenStack",
@@ -88,7 +88,8 @@ arcgis_int_Stack = ArcGISIntStack(
     project_name=PROJECT_NAME,
     db_access_lambda_arn=db_stack.db_access_lambda_arn,
     entregables_fase_x=[
-        filegen_stack.entregable_fase1_lambda.function_arn
+        filegen_stack.entregable_fase1_lambda.function_arn,
+        filegen_stack.entregable_fase2_lambda.function_arn
     ],
     request_layer = layers_stack.requests_layer,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 
@@ -117,7 +118,7 @@ api_gen_stack = ApiGenStack(
     lambda_changes = arcgis_int_Stack.changes_lambda.function_arn, lambda_sendFile=file_send_stack.send_file_lambda.function_arn)
 
 
-# PARA FASE 3
+# PARA FASE 3 (medidas)
 measurement_int_Stack = MeasurementIntStack(
     app,  f"{PROJECT_NAME}-MeasurementIntStack",
     bucket_name=storage.bucket.bucket_name,

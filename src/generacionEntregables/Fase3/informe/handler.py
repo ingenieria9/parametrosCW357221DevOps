@@ -118,10 +118,10 @@ def lambda_handler(event, context):
             Metadata={'created': datetime.utcnow().isoformat()},
             IfNoneMatch='*'
         )
-        print(f"🔒 Lock creado para {CIRCUITO_ACU}")
+        print(f"Lock creado para {CIRCUITO_ACU}")
     except ClientError as e:
         if e.response['Error']['Code'] == 'PreconditionFailed':
-            print(f"⚠️ Otro proceso ya tiene lock para {CIRCUITO_ACU}")
+            print(f"Otro proceso ya tiene lock para {CIRCUITO_ACU}")
             return {
                 "statusCode": 200,
                 "body": f"Lambda saltada: lock activo para {CIRCUITO_ACU}"
@@ -224,19 +224,8 @@ def lambda_handler(event, context):
 
         for table in doc.tables:
             for row in table.rows:
-
-                # Verificar si todas las celdas están vacías Y sin imágenes
-                all_empty = True
-
-                for cell in row.cells:
-                    has_text = bool(cell.text.strip())
-                    has_image = bool(cell._element.xpath('.//w:drawing'))
-
-                    if has_text or has_image:
-                        all_empty = False
-                        break
-
-                if all_empty:
+                # Si todas las celdas están vacías o con espacios
+                if all(not cell.text.strip() for cell in row.cells):
                     row._element.getparent().remove(row._element)
 
         doc.save(output_path)
@@ -281,48 +270,20 @@ def obtener_imagenes_grafana(doc, circuito_cuenca_valor, circuito_cuenca):
     GRAFANA_URL = "https://iot-grupoepm.teleprocess.co"
     token = os.environ["GRAFANA_API_ACCESS"]
 
-    # Paneles por tipo
+    # Define los paneles según el tipo
     if circuito_cuenca == 'circuito':
-        panel_ids = [8, 9, 10, 12]
-        
-        # Tamaños solicitados a Grafana (px)
-        panel_render_sizes = {
-            8:  {"width": 800, "height": 600},
-            9:  {"width": 1200, "height": 600},
-            10: {"width": 1200, "height": 600},
-            12:  {"width": 800, "height": 600}
-        }
-
-        # Tamaños dentro del Word (Cm)
-        panel_word_sizes = {
-            8:  {"width": Cm(8), "height": Cm(6)},
-            9:  {"width": Cm(12), "height": Cm(6)},
-            10: {"width": Cm(12), "height": Cm(6)},
-            12:  {"width": Cm(8), "height": Cm(6)},
-        }        
-
+        panel_ids = [8, 9, 10]
     elif circuito_cuenca == 'cuenca':
-        panel_ids = [6, 7, 8]
-
+        panel_ids = [6, 7, 8]  # puedes ajustar estos IDs
     else:
         panel_ids = []
-
-
 
     imagenes = {}
 
     for panel_id in panel_ids:
-        render_w = panel_render_sizes.get(panel_id, {"width": 1000})["width"]
-        render_h = panel_render_sizes.get(panel_id, {"height": 500})["height"]
-
         render_url = (
             f"{GRAFANA_URL}/render/d-solo/3b0bc7f5-c3ff-4728-a365-ebc795591190/"
-            f"graficos-informe?orgId=9"
-            f"&panelId={panel_id}"
-            f"&var-{circuito_cuenca}={circuito_cuenca_valor}"
-            f"&width={render_w}"
-            f"&height={render_h}"
-            f"&scale=1"
+            f"graficos-informe?orgId=9&panelId={panel_id}&var-{circuito_cuenca}={circuito_cuenca_valor}"
         )
 
         headers = {"Authorization": f"Bearer {token}"}
@@ -335,14 +296,11 @@ def obtener_imagenes_grafana(doc, circuito_cuenca_valor, circuito_cuenca):
         with open(img_path, "wb") as f:
             f.write(response.content)
 
-        word_w = panel_word_sizes.get(panel_id, {"width": Cm(12)})["width"]
-        word_h = panel_word_sizes.get(panel_id, {"height": Cm(6)})["height"]
-
         imagenes[f"grafico_panel_{panel_id}"] = InlineImage(
-            doc, img_path, width=word_w, height=word_h
+            doc, img_path, width=Cm(10), height=Cm(5)
         )
 
-        print(f"Panel {panel_id} descargado ({img_path})")
+        print(f"✔ Panel {panel_id} descargado ({img_path})")
 
     return imagenes
     
@@ -759,23 +717,6 @@ def get_general_data_circuito(circuito, capa_principal_data):
             AND f."habilitado_medicion" = 1
             AND p."PUNTO_EXISTENTE" = 'Si') AS vrp_habilitados_fase3,
 
-            (SELECT COUNT(p."GlobalID")
-            FROM puntos_capa_principal p
-            INNER JOIN fase_1 f ON f."PARENT_ID" = p."GlobalID"
-            WHERE p."CIRCUITO_ACU" = '{circuito}'
-            AND p."TIPO_PUNTO" = 'puntos_medicion'
-            AND f."EXPOSICION_FRAUDE" >=4 AND f."habilitado_medicion" = 0
-            AND p."PUNTO_EXISTENTE" = 'Si') AS puntos_fraude,
-            
-            (SELECT COUNT(p."GlobalID")
-            FROM puntos_capa_principal p
-            INNER JOIN fase_1 f ON f."PARENT_ID" = p."GlobalID"
-            WHERE p."CIRCUITO_ACU" = '{circuito}'
-            AND p."TIPO_PUNTO" = 'vrp'
-            AND f."EXPOSICION_FRAUDE" >=4 AND f."habilitado_medicion" = 0
-            AND p."PUNTO_EXISTENTE" = 'Si') AS vrp_fraude,
-            
-
             -- Porcentaje habilitados
             ROUND(
             100.0 * (
@@ -787,12 +728,9 @@ def get_general_data_circuito(circuito, capa_principal_data):
                 AND p."PUNTO_EXISTENTE" = 'Si')
                 /
                 NULLIF(
-               (SELECT COUNT(p."GlobalID")::numeric
-                FROM puntos_capa_principal p
-                INNER JOIN fase_1 f ON f."PARENT_ID" = p."GlobalID"
-                WHERE p."CIRCUITO_ACU" = 'POPULAR'
-                AND f."REQUIERE_FASE1" = 'Si'
-                AND p."PUNTO_EXISTENTE" = 'Si')::numeric,
+                (SELECT COUNT(*) FROM puntos_capa_principal 
+                WHERE "CIRCUITO_ACU" = '{circuito}'
+                    AND "PUNTO_EXISTENTE" = 'Si' and "FASE_INICIAL" != 'fase3')::numeric,
                 0::numeric)
             ), 2
             ) AS porcentaje_puntos_habilitados_fase3
@@ -866,7 +804,7 @@ def get_general_data_circuito(circuito, capa_principal_data):
     #Fecha reporte
     utc_minus_5 = timezone(timedelta(hours=-5))
     fecha_actual = datetime.now(utc_minus_5)
-    fecha_reporte = fecha_actual.strftime("%Y-%m-%d")
+    fecha_reporte = fecha_actual.strftime("%Y-%m-%d %H:%M:%S")
 
     #otro query 
     query_2 = f"""WITH datos AS (
@@ -988,9 +926,7 @@ def get_general_data_circuito(circuito, capa_principal_data):
         "porcentaje_fase_2_final" : result_2["porcentaje_fase_2_final"],
         "numero_fase_2_final" : result_2["numero_fase_2_final"],
         "puntos_proyectados" : result["puntos_proyectados"],
-        "puntos_intervencion" : result["puntos_intervencion"],
-        "puntos_fraude" : result["puntos_fraude"],
-        "vrp_fraude" : result["vrp_fraude"]
+        "puntos_intervencion" : result["puntos_intervencion"]
     }
 
 

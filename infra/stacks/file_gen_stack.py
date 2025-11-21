@@ -21,15 +21,21 @@ class FileGenStack(Stack):
         
         self.entregable_fase1_lambda = self.pipeline1.entregable 
 
-        '''
+        
         self.pipeline2 = LambdasFileGenConstruct(
             self, f"{project_name}-fileGenFase2",
             bucket=bucket,
             folder_name="Fase2",
             project_name=project_name,
-            db_access_lambda_arn=db_access_lambda_arn
+            db_access_lambda_arn = db_access_lambda_arn, 
+            openpyxl_layer = openpyxl_layer ,
+            docxtpl_layer = docxtpl_layer,
+            requests_layer = requests_layer
         )
-        
+
+        self.entregable_fase2_lambda = self.pipeline2.entregable 
+
+        '''
         self.pipeline3 = LambdasFileGenConstruct(
             self, f"{project_name}-fileGenFase3",
             bucket=bucket,

@@ -17,20 +17,21 @@ TMP_DIR = Path("/tmp")
 bucket_name = os.environ["BUCKET_NAME"]
 
 # Rutas conocidas de Lambda A
-template_path_s3 = "files/plantillas/Fase1/"
-output_path_s3 = "files/entregables/Fase1/"
+template_path_s3 = "files/plantillas/Fase3/"
+output_path_s3 = "files/entregables/Fase3/"
 
-template_name = {
-    "puntos_medicion": "formato-acueducto-pm.xlsx",
-    "vrp": "formato-acueducto-vrp.xlsx",
-    "camara": "formato-alcantarillado.xlsx",
-}
+template_name = {"puntos_medicion": "formato-acueducto-pm.xlsx",
+                 "vrp-caudal-PLUM": "formato-acueducto-vrp-caudal-PLUM.xlsx",
+                 "vrp-presion_caudal-PLUM": "formato-acueducto-vrp-presion_caudal-PLUM.xlsx",
+                 "vrp-presion-Additel": "formato-acueducto-vrp-presion-Additel.xlsx",
+                  "vrp-presion-PLUM":  "formato-acueducto-vrp-presion-PLUM.xlsx",
+                   "camara": "formato-alcantarillado.xlsx"}
 
-celdas_imagenes_plantilla = {
-    "puntos_medicion": ["B40","C40","D40","E40","B41","C41","D41","E41","B42","C42","D42","E42"],
-    "vrp": ["B48","C48","D48","E48","B49","C49","D49","E49","B50","C50","D50","E50"],
-    "camara": []
-}
+celdas_imagenes_plantilla = {"puntos_medicion": ["B20", "C20", "D20", "E20","B21", "C21", "D21", "E21", "B22", "C22", "D22", "E22"],
+                            "vrp-caudal-PLUM": ["B21", "C21", "D21", "E21","B22", "C22", "D22", "E22", "B23", "C23", "D23", "E23"],
+                            "vrp-presion_caudal-PLUM": ["B23", "C23", "D23", "E23","B24", "C24", "D24", "E24", "B25", "C25", "D25", "E25"],
+                            "vrp-presion-Additel": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"],
+                            "vrp-presion-PLUM": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"], "camara": []}
 
 # === Funciones auxiliares ===
 
@@ -135,8 +136,7 @@ def generar_hoja_desde_template(
     imagen_keys,
     bucket_name,
     template_path_s3,
-    template_name,
-):
+    template_name, code_key):
     """
     Genera una hoja nueva dentro del workbook consolidado usando la plantilla
     correspondiente al tipo de punto. Mantiene formato, merges, imágenes,
@@ -144,8 +144,8 @@ def generar_hoja_desde_template(
     imágenes de Capa_principal).
     """
 
-    tipo_key = tipo_punto.lower()
-    template_filename = template_name.get(tipo_key)
+    #tipo_key = tipo_punto.lower()
+    template_filename = template_name.get(code_key)
     if not template_filename:
         raise ValueError(f"No se encontró plantilla para tipo de punto: {tipo_punto}")
 
@@ -199,7 +199,7 @@ def generar_hoja_desde_template(
             pass
 
     # === AJUSTE MANUAL DE CELDAS PARA IMÁGENES (requerido) ===
-    if tipo_key in ["puntos_medicion", "vrp"]:
+    if tipo_punto in ["puntos_medicion", "vrp"]:
         for col in ["B", "C", "D", "E"]:
             ws_new.column_dimensions[col].width = 40  # ancho ideal para imágenes
 
@@ -265,7 +265,7 @@ def generar_hoja_desde_template(
                 cell.value = reemplazar_valor(cell.value)
 
     # === Preparamos lista de celdas disponibles para imágenes según plantilla ===
-    celdas_imagenes = celdas_imagenes_plantilla.get(tipo_key, [])
+    celdas_imagenes = celdas_imagenes_plantilla.get(code_key, [])
 
     # === Descargar imágenes (attachments + capa_principal) localmente/stream y luego insertarlas ===
     # imagen_keys puede contener rutas locales (files/...) o llaves S3. Detectamos S3 por que no empiezan con '/' ni 'tmp' ni 'files/temp-image-folder'
@@ -341,7 +341,7 @@ def lambda_handler(event, context):
     circuito_acu = event["payload"].get("CIRCUITO_ACU", "").replace(" ", "_")
 
     # --- SISTEMA DE LOCK POR CIRCUITO ---
-    lock_key = f"locks_formato/{circuito_acu}.lock"
+    lock_key = f"locks_formato/fase3/{circuito_acu}.lock"
 
     # Verificar si ya existe un lock para este circuito
     try:
@@ -353,10 +353,10 @@ def lambda_handler(event, context):
             Metadata={'created': datetime.utcnow().isoformat()},
             IfNoneMatch='*'
         )
-        print(f"🔒 Lock creado para {circuito_acu}")
+        print(f"Lock creado para {circuito_acu}")
     except ClientError as e:
         if e.response['Error']['Code'] == 'PreconditionFailed':
-            print(f"⚠️ Otro proceso ya tiene lock para {circuito_acu}")
+            print(f"Otro proceso ya tiene lock para {circuito_acu}")
             return {
                 "statusCode": 200,
                 "body": f"Lambda saltada: lock activo para {circuito_acu}"
@@ -364,7 +364,7 @@ def lambda_handler(event, context):
         raise    
 
     try:
-        # === Buscar puntos con carpeta Fase1 ===
+        # === Buscar puntos con carpeta Fase3 ===
         prefix = f"ArcGIS-Data/Puntos/{circuito_acu}/"
         paginator = s3.get_paginator("list_objects_v2")
 
@@ -373,29 +373,29 @@ def lambda_handler(event, context):
             for c in page.get("CommonPrefixes", []):
                 subcarpetas_puntos.add(c["Prefix"])
 
-        puntos_fase1 = []
+        puntos_fase3 = []
         for subfolder in subcarpetas_puntos:
-            fase1_prefix = f"{subfolder}Fase1/"
-            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=fase1_prefix)
+            fase3_prefix = f"{subfolder}Fase3/"
+            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=fase3_prefix)
             if "Contents" not in response:
                 continue
             json_files = [obj for obj in response["Contents"] if obj["Key"].lower().endswith(".json")]
             if not json_files:
                 continue
-            # Tomar el JSON más reciente de Fase1
+            # Tomar el JSON más reciente de Fase3
             latest_json = max(json_files, key=lambda x: x["LastModified"])["Key"]
-            puntos_fase1.append(latest_json)
+            puntos_fase3.append(latest_json)
 
-        if not puntos_fase1:
+        if not puntos_fase3:
             return {"status": "no_points_found", "circuito": circuito_acu}
 
-        print(f"Se encontraron {len(puntos_fase1)} puntos Fase1 para {circuito_acu}")
+        print(f"Se encontraron {len(puntos_fase3)} puntos Fase3 para {circuito_acu}")
 
         wb_final = Workbook()
         ws_default = wb_final.active
         ws_default.title = "Resumen"
 
-        for json_key in puntos_fase1:
+        for json_key in puntos_fase3:
             tmp_json = TMP_DIR / f"punto_{Path(json_key).name}"
             s3.download_file(bucket_name, json_key, str(tmp_json))
             with open(tmp_json, "r", encoding="utf-8") as f:
@@ -407,12 +407,16 @@ def lambda_handler(event, context):
             tipo_punto = payload_data.get("TIPO_PUNTO", "").lower()
             GlobalID = payload_data.get("PARENT_ID")
             fid = payload_data.get("FID_ELEM", "SIN_FID")
+            VARIABLES_MEDICION = payload_data.get("VARIABLES_MEDICION", "")
+            EQUIPO__DATALOGGER_INSTALADOS = payload_data.get("EQUIPO__DATALOGGER_INSTALADOS", "")
+
+            code_key =  tipo_punto + "-" + VARIABLES_MEDICION + "-" + EQUIPO__DATALOGGER_INSTALADOS
 
             # Obtener capa principal (atributos + posiblemente imágenes en esa carpeta)
             capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, circuito_acu)
 
-            # Buscar imágenes dentro de Fase1
-            folder = f"ArcGIS-Data/Puntos/{circuito_acu}/{GlobalID}_{tipo_punto}/Fase1/"
+            # Buscar imágenes dentro de Fase3
+            folder = f"ArcGIS-Data/Puntos/{circuito_acu}/{GlobalID}_{tipo_punto}/Fase3/"
             resp = s3.list_objects_v2(Bucket=bucket_name, Prefix=folder)
             imagen_keys = []
             if "Contents" in resp:
@@ -450,7 +454,7 @@ def lambda_handler(event, context):
                 imagen_keys,
                 bucket_name,
                 template_path_s3,
-                template_name,
+                template_name, code_key
             )
 
         if ws_default.max_row == 1 and ws_default.max_column == 1:
@@ -460,7 +464,7 @@ def lambda_handler(event, context):
             except Exception:
                 pass
 
-        output_filename = f"MPH-EJ-0601-{cod}-F01-ACU-EIN-001.xlsx"
+        output_filename = f"MPH-EJ-0601-{cod}-F03-ACU-LSE-001.xlsx"
         output_key = f"{output_path_s3}ACU/CIR/{output_filename}"
         output_path = TMP_DIR / output_filename
         wb_final.save(output_path)
@@ -469,7 +473,7 @@ def lambda_handler(event, context):
         return {
             "status": "ok",
             "circuito": circuito_acu,
-            "puntos_total": len(puntos_fase1),
+            "puntos_total": len(puntos_fase3),
             "output_file": f"s3://{bucket_name}/{output_key}"
         }
 
@@ -477,6 +481,6 @@ def lambda_handler(event, context):
         # --- Liberar el lock ---
         try:
             s3.delete_object(Bucket=bucket_name, Key=lock_key)
-            print(f"✅ Lock liberado para {circuito_acu}")
+            print(f"Lock liberado para {circuito_acu}")
         except Exception as e:
-            print(f"⚠️ Error al eliminar lock para {circuito_acu}: {e}")
+            print(f"Error al eliminar lock para {circuito_acu}: {e}")

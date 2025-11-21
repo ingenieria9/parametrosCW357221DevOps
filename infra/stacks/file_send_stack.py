@@ -81,7 +81,8 @@ class FileSendStack(Stack):
             )
         )        
 
-        # EventBridge rule (1 vez por semana)
+        # EventBridge rule , actualización --> Solo se hace por API, no por scheduler
+        '''
         events.Rule(
             self, "sendDailyEmailRule",  rule_name = f"{project_name}-sendDailyEmailRule",
             #Every day at 4pm UTC-5 from Monday to Friday
@@ -92,4 +93,4 @@ class FileSendStack(Stack):
             ),
             targets=[targets.LambdaFunction(self.send_file_lambda)]
         )
-
+        '''

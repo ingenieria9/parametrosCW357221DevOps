@@ -1,75 +1,3 @@
-#FORMATO
-
-#Ejemplo de payload 
-#{'payload': {'layer_id': 1, 'OBJECTID': '0002', 'geometry': 'null', 'attributes': {'OBJECTID': '0002', 'GlobalID': '3CFDE950-8AE7-440E-B1E7-310C56A35794', 'Identificador': 'PTO_0002', 'Tipo_Punto': 'VRP', 'Creador': 'central_ti_telemetrik', 'Fecha_Creacion': 1758818476306, 'Editor': 'central_ti_telemetrik', 'Fecha_Edicion': 1758829344252, 'Sí': 'Sí', 'Fugas': 'No', 'Signos_de_desgaste': 'null'}, 'point_type': 'VRP'}, 'attachments': ['CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg']}
-
-#incoming_payload = event
-#incoming_payload = {'payload': {'layer_id': 1, 'OBJECTID': '0002', 'geometry': 'null', 'attributes': {'OBJECTID': '0002', 'GlobalID': '3CFDE950-8AE7-440E-B1E7-310C56A35794', 'Identificador': 'PTO_0002', 'Tipo_Punto': 'VRP', 'Creador': 'central_ti_telemetrik', 'Fecha_Creacion': 1758818476306, 'Editor': 'central_ti_telemetrik', 'Fecha_Edicion': 1758829344252, 'Sí': 'Sí', 'Fugas': 'No', 'Signos_de_desgaste': 'null'}, 'point_type': 'VRP'}, 'attachments': ['CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg, CW357221-ArcGIS-Data/Puntos/1402_VRP/Fase1/attachment_1402_VRP.jpeg']}
-
-#ejemplo de payload 
-'''
-{
-   "payload":{
-         "OBJECTID":"0002",
-         "GlobalID":"3CFDE950-8AE7-440E-B1E7-310C56A35794",
-         "Creador":"central_ti_telemetrik",
-         "Fecha_Creacion":1758818476306,
-         "Editor":"central_ti_telemetrik",
-         "Fecha_Edicion":1758829344252,
-         "id" : "0002",
-         "tipo_punto" : "puntos_medicion",
-         "signos_desgaste" : "Si",
-         "fugas" : "Si",
-         "danios" : "No",
-         "requiere_instalacion_tapa" : "Si",
-         "requiere_limpieza" : "No",
-         "razon_limpieza" : "",
-         "requiere_clausura" : "",
-         "comentario_cond_fisica" : "Tiene una pequeña fuga y desgaste en la tapa",
-         "estado_conexion" : "Si",
-         "estado_tuberia" : "Si",
-         "accesorios_existentes" : "Si",
-         "valvula_abre" : "Si",
-         "valvula_cierra" : "Si",
-         "flujo_agua" : "Si",
-         "comentario_conexiones_hid" : "oK",
-         "ubicacion_geografica_critica" : "No",
-         "posible_expos_fraude" : "No",
-         "comentario_vuln" : "Ok",
-         "verificacion_4g" : "Si",
-         "operador_4g" : "Claro",
-         "equipos_usados" : "",
-         "conclusiones" : "",
-         "recomendaciones" : "Se debe corregir fuga y reemplazar tapa",
-         "comentario_general" : "",
-         "fecha_modificacion" : "1758818476306",
-         "actualizacion_ubicacion" : "No",
-         "fecha_creacion" : "1758818476306",
-         "latitud" : "37.21",
-         "longitud" : "-72.912"
-   },
-   "attachments":[
-      "files/temp-image-folder/ejemplo1.jpg",
-      "files/temp-image-folder/ejemplo2.jpg",
-      "files/temp-image-folder/ejemplo3.jpg",
-      "files/temp-image-folder/ejemplo4.jpg",
-      "files/temp-image-folder/ejemplo5.jpg",
-      "files/temp-image-folder/ejemplo6.jpg",
-      "files/temp-image-folder/ejemplo7.jpg",
-      "files/temp-image-folder/ejemplo8.jpg"
-   ]
-} 
-
-Variables que vienen de la capa principal y no del payload:
-circuito, subcircuito, cuenca, direccion_referencia, vrp
-"circuito" : "tmk",
-"direccion_referencia" : "Cra 42 #2 cerca al mall",
-"vrp" : "vrp-0001",
-
-key s3 de capa principal 
-ArcGIS-Data/Puntos/{ID}_{tipo_punto}/Capa_principal/{latest-timestamp}.json
-'''
-
 import boto3
 import json
 from pathlib import Path
@@ -92,20 +20,27 @@ TMP_DIR = Path("/tmp")
 bucket_name = os.environ['BUCKET_NAME']
 db_access_arn = os.environ['DB_ACCESS_LAMBDA_ARN']
 FORMATO_CONSOLIDADO_LAMBDA_ARN = os.environ['FORMATO_CONSOLIDADO_LAMBDA_ARN']
-template_path_s3 = "files/plantillas/Fase1/"
-output_path_s3 = "files/entregables/Fase1/"
-output_path_s3_for_convert = "files/files-to-convert/Fase1/"
+template_path_s3 = "files/plantillas/Fase3/"
+output_path_s3 = "files/entregables/Fase3/"
+output_path_s3_for_convert = "files/files-to-convert/Fase3/"
 
 
 template_name = {"puntos_medicion": "formato-acueducto-pm.xlsx",
-                 "vrp": "formato-acueducto-vrp.xlsx", "camara": "formato-alcantarillado.xlsx"}
+                 "vrp-caudal-PLUM": "formato-acueducto-vrp-caudal-PLUM.xlsx",
+                 "vrp-presion_caudal-PLUM": "formato-acueducto-vrp-presion_caudal-PLUM.xlsx",
+                 "vrp-presion-Additel": "formato-acueducto-vrp-presion-Additel.xlsx",
+                  "vrp-presion-PLUM":  "formato-acueducto-vrp-presion-PLUM.xlsx",
+                   "camara": "formato-alcantarillado.xlsx"}
 
 #MPH-EJ-0601-{CIR_COD}-F01-{ACU/ALC}-EIN-{FID}
-COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F01-ACU-EIN-",
-            "vrp": "ACU/VRP/MPH-EJ-0601-{COD}-F01-ACU-EIN-", "camara": "ALC/MPH-EJ-0601-{COD}-F01-ALC-EIN-"}
+COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F03-ACU-LSE-",
+            "vrp": "ACU/VRP/MPH-EJ-0601-{COD}-F03-ACU-LSE-", "camara": "ALC/MPH-EJ-0601-{COD}-F03-ALC-LSE-"}
 
-celdas_imagenes_plantilla = {"puntos_medicion": ["B40", "C40", "D40", "E40","B41", "C41", "D41", "E41", "B42", "C42", "D42", "E42"],
-                             "vrp": ["B48", "C48", "D48", "E48","B49", "C49", "D49", "E49", "B50", "C50", "D50", "E50"], "camara": []}
+celdas_imagenes_plantilla = {"puntos_medicion": ["B20", "C20", "D20", "E20","B21", "C21", "D21", "E21", "B22", "C22", "D22", "E22"],
+                            "vrp-caudal-PLUM": ["B21", "C21", "D21", "E21","B22", "C22", "D22", "E22", "B23", "C23", "D23", "E23"],
+                            "vrp-presion_caudal-PLUM": ["B23", "C23", "D23", "E23","B24", "C24", "D24", "E24", "B25", "C25", "D25", "E25"],
+                            "vrp-presion-Additel": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"],
+                            "vrp-presion-PLUM": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"], "camara": []}
 
 
 def insert_image(ws, cellNumber, imagen_path):
@@ -312,9 +247,17 @@ def lambda_handler(event, context):
     CIRCUITO_ACU = event["payload"]["CIRCUITO_ACU"].replace(" ", "_")
     forzarInforme = event.get("forzarInforme", "false")
 
+    #valores para armar key de la plantilla
+    EQUIPO__DATALOGGER_INSTALADOS = event["payload"].get("EQUIPO__DATALOGGER_INSTALADOS", "")
+    VARIABLES_MEDICION = event["payload"].get("VARIABLES_MEDICION", "")
 
-    #template_path_s3 + devolver de template key el value segun tipo de punto (ej para caja de medicion devuelve formato-acueducto.xlsx)
-    template_key = template_path_s3 + template_name.get(tipo_punto)
+    if tipo_punto == "vrp":
+        value_code = tipo_punto + "-" + VARIABLES_MEDICION + "-" + EQUIPO__DATALOGGER_INSTALADOS
+    else:
+        value_code = tipo_punto
+
+    #template_path_s3 + devolver de template key el value segun tipo de punto y variables a medir
+    template_key = template_path_s3 + template_name.get(value_code)
 
     # Paths locales en Lambda (/tmp)
     template_path = TMP_DIR / "plantilla.xlsx"
@@ -410,7 +353,7 @@ def lambda_handler(event, context):
 
     # Insertar imágenes (en celdas específicas)
     #celdas_imagenes = ["B40", "C40", "D40", "E40","B41", "C41", "D41", "E41", "B42", "C42", "D42", "E42"]
-    celdas_imagenes = celdas_imagenes_plantilla.get(tipo_punto)
+    celdas_imagenes = celdas_imagenes_plantilla.get(value_code)
 
     #Ciclo para insertar las imagenes en las celdas disponibles
     for celda, imagen_path in zip(celdas_imagenes, imagen_paths):
@@ -460,6 +403,7 @@ def lambda_handler(event, context):
     s3.upload_file(str(output_path), bucket_name, output_key)
 
 
+    # TO-DO: ACTUALIZAR QUERY
     payload_db = {
         "queryStringParameters": {
             "query": f""" WITH circuito AS (SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID" = '{GlobalID}'),
@@ -485,7 +429,7 @@ def lambda_handler(event, context):
     print(circuito)
 
    
-    if estado == "Finalizado":   # Si es ultimo punto, invocar a lambda de generación de informe (async)
+    if estado == "Finalizado":   # Si es ultimo punto, invocar a lambda de generación de formato consolidado (async)
         incoming_payload = { "payload": { "COD": code_data, "numero_consolidado" : numero_puntos, "CIRCUITO_ACU" : CIRCUITO_ACU } }
         invoke_lambda(incoming_payload, FORMATO_CONSOLIDADO_LAMBDA_ARN)
         print("Invocada lambda formato consolidado")    

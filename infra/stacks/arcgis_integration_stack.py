@@ -76,7 +76,8 @@ class ArcGISIntStack(Stack):
                 "ARCGIS_CLIENT_SECRET" : ARCGIS_CLIENT_SECRET
             },
             layers=[request_layer],
-            timeout=Duration.seconds(120)
+            timeout=Duration.seconds(140),
+            memory_size=256
         )
 
         # Acceso al bucket
@@ -107,7 +108,8 @@ class ArcGISIntStack(Stack):
                         "ARCGIS_CLIENT_SECRET" : ARCGIS_CLIENT_SECRET
                         },
             layers=[request_layer],
-            timeout=Duration.seconds(20)                        
+            timeout=Duration.seconds(20),
+            memory_size=256                        
         )
         CfnOutput(self, "ChangesLambdaArn", value=self.changes_lambda.function_arn)
 
@@ -135,12 +137,12 @@ class ArcGISIntStack(Stack):
             self, "changesArcgisInfo",  rule_name = f"{project_name}-changesArcgisInfo",
             schedule=events.Schedule.cron(
                 minute="0",
-                hour="21",  # 4pm UTC-5 is 21 UTC
+                hour="17,21",  # 4pm UTC-5 is 21 UTC
                 week_day="MON-SAT"
             ),
             targets=[targets.LambdaFunction(self.changes_lambda)]
         )
-        
+
         # ======================================================
         # Lambda: lote_inicial
         # ======================================================
