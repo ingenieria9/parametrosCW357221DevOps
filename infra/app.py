@@ -89,7 +89,8 @@ arcgis_int_Stack = ArcGISIntStack(
     db_access_lambda_arn=db_stack.db_access_lambda_arn,
     entregables_fase_x=[
         filegen_stack.entregable_fase1_lambda.function_arn,
-        filegen_stack.entregable_fase2_lambda.function_arn
+        "lambda_fase2_to_do",
+        filegen_stack.entregable_fase3_lambda.function_arn
     ],
     request_layer = layers_stack.requests_layer,
     env=cdk.Environment(account=ACCOUNT, region=MAIN_REGION), 

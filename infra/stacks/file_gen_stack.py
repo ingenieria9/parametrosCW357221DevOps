@@ -22,7 +22,7 @@ class FileGenStack(Stack):
         self.entregable_fase1_lambda = self.pipeline1.entregable 
 
         
-        self.pipeline2 = LambdasFileGenConstruct(
+        self.pipeline3 = LambdasFileGenConstruct(
             self, f"{project_name}-fileGenFase2",
             bucket=bucket,
             folder_name="Fase2",
@@ -33,7 +33,7 @@ class FileGenStack(Stack):
             requests_layer = requests_layer
         )
 
-        self.entregable_fase2_lambda = self.pipeline2.entregable 
+        self.entregable_fase3_lambda = self.pipeline3.entregable 
 
         '''
         self.pipeline3 = LambdasFileGenConstruct(
