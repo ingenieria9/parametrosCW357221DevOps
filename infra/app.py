@@ -89,7 +89,7 @@ arcgis_int_Stack = ArcGISIntStack(
     db_access_lambda_arn=db_stack.db_access_lambda_arn,
     entregables_fase_x=[
         filegen_stack.entregable_fase1_lambda.function_arn,
-        "lambda_fase2_to_do",
+        "arn:aws:lambda:us-east-1:123456789012:function:lambda_fase2_to_do",  #dummy arn fase 2
         filegen_stack.entregable_fase3_lambda.function_arn
     ],
     request_layer = layers_stack.requests_layer,
