@@ -8,6 +8,7 @@ class FileGenStack(Stack):
         docxtpl_layer: _lambda.ILayerVersion, requests_layer: _lambda.ILayerVersion, **kwargs):
         super().__init__(scope, id, **kwargs)
 
+        #fase 1
         self.pipeline1 = LambdasFileGenConstruct(
             self, f"{project_name}-fileGenFase1",
             bucket=bucket,
@@ -21,11 +22,11 @@ class FileGenStack(Stack):
         
         self.entregable_fase1_lambda = self.pipeline1.entregable 
 
-        
+        #fase 3
         self.pipeline3 = LambdasFileGenConstruct(
-            self, f"{project_name}-fileGenFase2",
+            self, f"{project_name}-fileGenFase3",
             bucket=bucket,
-            folder_name="Fase2",
+            folder_name="Fase3",
             project_name=project_name,
             db_access_lambda_arn = db_access_lambda_arn, 
             openpyxl_layer = openpyxl_layer ,
