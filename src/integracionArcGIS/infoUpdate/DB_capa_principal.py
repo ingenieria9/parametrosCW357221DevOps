@@ -76,12 +76,12 @@ def build_bulk_upsert_sql(table_name: str, rows: list[dict], conflict_key: str =
     DO UPDATE SET
         {update_clause};
     """.strip()
-
+    #print("SQL ",sql )
     return sql
 
 
 def db_upsert_capa_principal(json_data):
-    print(json_data)
+    #print(json_data)
     if isinstance(json_data, str):
         json_data = json.loads(json_data)
 
@@ -117,7 +117,7 @@ def db_upsert_capa_principal(json_data):
 
     upsert_sql = build_bulk_upsert_sql("puntos_capa_principal", all_rows, "GlobalID")
 
-    print("upsert capa principal", upsert_sql)
+    #print("upsert capa principal", upsert_sql)
 
     payload_db = {
         "queryStringParameters": {
@@ -130,7 +130,13 @@ def db_upsert_capa_principal(json_data):
     return payload_db
 
 
-def db_update_habilitado_fase3():
+def db_update_habilitado_fase3(parents_relation):
+    #Toma los global Id que fueron actualizados: 
+    global_id = [item["padre"] for item in parents_relation]
+
+    # Convertirlos a formato ('', '', '') para postgress
+    global_ids_tupla = tuple(global_id)
+
     """
     Actualiza HABILITADO_FASE3 en puntos_capa_principal usando:
     1. habilitado_medicion de fase_1 (prioridad)
@@ -153,17 +159,18 @@ def db_update_habilitado_fase3():
 
     """
         # Query para actualizar
-    update_sql = """
+    update_sql = f"""
             UPDATE puntos_capa_principal p
-            SET HABILITADO_FASE3 = f.habilitado_medicion
+            SET "HABILITADO_FASE3" = f.habilitado_medicion
             FROM fase_1 f
-            WHERE p.PARENT_ID = f.PARENT_ID
+            WHERE p."GlobalID" = f."PARENT_ID"
             AND f.habilitado_medicion IS NOT NULL;
+            AND p."GlobalID" IN {global_ids_tupla}
 
 
     """
 
-    print("update_habilitado_fase3:", update_sql)
+    #print("update_habilitado_fase3:", update_sql)
 
     payload_db = {
         "queryStringParameters": {

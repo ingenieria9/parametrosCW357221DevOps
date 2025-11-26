@@ -790,7 +790,7 @@ def get_general_data_circuito(circuito, capa_principal_data):
                (SELECT COUNT(p."GlobalID")::numeric
                 FROM puntos_capa_principal p
                 INNER JOIN fase_1 f ON f."PARENT_ID" = p."GlobalID"
-                WHERE p."CIRCUITO_ACU" = 'POPULAR'
+                WHERE p."CIRCUITO_ACU" = '{circuito}'
                 AND f."REQUIERE_FASE1" = 'Si'
                 AND p."PUNTO_EXISTENTE" = 'Si')::numeric,
                 0::numeric)

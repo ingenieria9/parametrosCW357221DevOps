@@ -4,8 +4,9 @@ import requests
 import re
 from datetime import datetime
 from collections import defaultdict
-from InfoUpdate.DB_capa_principal import db_upsert_capa_principal,db_update_habilitado_fase3 # type: ignore
-from InfoUpdate.DB_fase1 import db_upsert_fase_1 # type: ignore
+from DB_capa_principal import db_upsert_capa_principal,db_update_habilitado_fase3 # type: ignore
+from DB_fase1 import db_upsert_fase_1 #
+from DB_fase3 import db_upsert_fase_3_a_data,db_upsert_fase_3_a_status,db_fase_3_a_b_trazabilidad_mediciones
 import os
 
 # traer las variables de entorno
@@ -13,13 +14,13 @@ DB_ACCESS_LAMBDA_ARN = os.environ["DB_ACCESS_LAMBDA_ARN"]
 BUCKET_NAME = os.environ["BUCKET_NAME"]
 CLIENT_ID = os.environ["ARCGIS_CLIENT_ID"]
 CLIENT_SECRET = os.environ["ARCGIS_CLIENT_SECRET"]
-#ENTREGABLES_FASE_X = os.environ["ENTREGABLES_FASE_X"]
 ENTREGABLES_FASE_X = os.getenv("ENTREGABLES_FASE_X", "").split(",")
 
 
 
 # Definir el cliente de s3
 s3 = boto3.client('s3')
+
 # Definir el cliente de Lambda
 lambda_client = boto3.client('lambda')
 client_lambda_db = boto3.client("lambda", region_name="us-east-1") 
@@ -32,7 +33,7 @@ base_attach_prefix = "ArcGIS-Data/Puntos/"
 # cache para guardar los prefix ya encontrados por parent_id
 prefix_cache = {}
 
-# funcion para invicar lambda que genera los archivos
+# funcion para invocar lambda que genera los archivos
 def invoke_lambda(payload,fase):
     print("entregables arn")
     print(ENTREGABLES_FASE_X)
@@ -44,14 +45,14 @@ def invoke_lambda(payload,fase):
     )
     return response 
  
+# funcion para invicar lambda de base de datos
 def invoke_lambda_db(payload, FunctionName):
     response = client_lambda_db.invoke(
         FunctionName=FunctionName,
         InvocationType='RequestResponse',
         Payload=json.dumps(payload).encode('utf-8')
     )
-    
-    
+       
 # funcion para generar token de arcgis
 def http_token_request():
 
@@ -69,11 +70,12 @@ def http_token_request():
     #print(responseToken)
     if responseToken.json():
         access_token = responseToken.json()['access_token']
-        print(access_token)
+        #print(access_token)
         return access_token
     else:
         print("error en la obtencion del token") 
-        
+   
+# función que eemplaza espacios, guiones y caracteres no válidos por guiones bajos     
 def sanitize_name(name):
     """
     Limpia el texto para usarlo en nombres de archivo o rutas S3.
@@ -86,7 +88,6 @@ def sanitize_name(name):
     
     return safe.replace(" ", "_")
     
-
 # función para obtener diccionario de attachmets
 def get_attachments(data):
     
@@ -125,17 +126,17 @@ def get_attachments(data):
                     })
                    
     return urls
-                                        
-                                 
-        
+                                                
 # función para obtener diccionario de los items agregados o actualizados en arcgis
 def get_feature_jsons(data):
     """
     Recorre el payload JSON de ArcGIS y genera una lista de diccionarios,
     uno por cada feature (solo adds y updates).
     """
-    #donde se almacena la lista de diccionarios
+    #donde se almacena la lista de diccionarios por punto 
     feature_jsons = []
+    
+    
     try:
         
         forzar_informe = data["edits"][4].get("forzarInforme")
@@ -153,7 +154,7 @@ def get_feature_jsons(data):
         for action in ["adds", "updates"]:
             
             for feat in features.get(action, []):
-                
+                dict_for_payload_fase_3_a_status = []
                 attrs = feat.get("attributes", {})
                 
                 if layer_id == 0:
@@ -166,14 +167,59 @@ def get_feature_jsons(data):
                     global_f = attrs.get("GlobalID")
                     # Eliminar cualquier paréntesis o llave (por si acaso)
                     Global_ID = re.sub(r"[{}]", "", Global)
-                    global_fase = re.sub(r"[{}]", "", global_f)  
+                    global_fase = re.sub(r"[{}]", "", global_f) 
+                    
+                if layer_id == 3:
+                    
+                    datalogger_2 = attrs.get("CAMPO_EXTRA_1")
+                    
+                    # Información del datalogger 1
+                    dict_for_payload_fase_3_a_status.append({
+                        "PARENT_ID" : global_fase,
+                        "FID_ELEM" : attrs.get("FID_ELEM") ,
+                        "IDENTIFICADOR_DATALOGGER" : attrs.get("IDENTIFICADOR_DATALOGGER"),#para cada datalogger
+                        "TIPO_PUNTO": attrs.get("TIPO_PUNTO") ,
+                        "EQUIPO__DATALOGGER_INSTALADOS" : attrs.get("EQUIPO__DATALOGGER_INSTALADOS"),
+                        "CIRCUITO_ACU": attrs.get("CIRCUITO_ACU"),
+                        "FECHA_FASE3" : attrs.get("FECHA_FASE3"),
+                        "MEDIDA_PRESION":attrs.get("MEDIDA_PRESION"), #para cada datalogger
+                        "MEDIDA_PRESION_2":attrs.get("MEDIDA_PRESION2"), #para cada datalogger
+                        "MEDIDA_CAUDAL" :attrs.get("MEDIDA_CAUDAL"),
+                        "MEDIDA_VELOCIDAD" : attrs.get("MEDIDA_VELOCIDAD"),
+                        "MEDIDA_NIVEL" : attrs.get("MEDIDA_NIVEL"),
+                        "REFERENCIA_PRESION" : attrs.get("REFERENCIA_PRESION"), #para cada datalogger
+                        "REFERENCIA_PRESION_2" : attrs.get("MEDIDA_REF_PRESION_2"),
+                        "CARGA_BATERIA" : attrs.get("CARGA_BATERIA"), #para cada datalogger
+                        "VARIABLES_MEDICION" : attrs.get("VARIABLES_MEDICION")                       
+                        })
+
+                    # si hay un segundo datalogger agregar información
+                    if datalogger_2 is not None and datalogger_2 != "":
+                        dict_for_payload_fase_3_a_status.append({
+                            "PARENT_ID" : global_fase,
+                            "FID_ELEM" : attrs.get("FID_ELEM") ,
+                            "IDENTIFICADOR_DATALOGGER" : datalogger_2,
+                            "TIPO_PUNTO": attrs.get("TIPO_PUNTO") ,
+                            "EQUIPO__DATALOGGER_INSTALADOS" : attrs.get("EQUIPO__DATALOGGER_INSTALADOS"),
+                            "CIRCUITO_ACU": attrs.get("CIRCUITO_ACU"),
+                            "FECHA_FASE3" : attrs.get("FECHA_FASE3"),
+                            "MEDIDA_PRESION":attrs.get("MEDIDA_PRESION"), 
+                            "MEDIDA_PRESION_2":attrs.get("MEDIDA_PRESION2"), 
+                            "MEDIDA_CAUDAL" :attrs.get("MEDIDA_CAUDAL"),
+                            "MEDIDA_VELOCIDAD" : attrs.get("MEDIDA_VELOCIDAD"),
+                            "MEDIDA_NIVEL" : attrs.get("MEDIDA_NIVEL"),
+                            "REFERENCIA_PRESION" : attrs.get("REFERENCIA_PRESION"),
+                            "REFERENCIA_PRESION_2" : attrs.get("MEDIDA_REF_PRESION_2"),
+                            "CARGA_BATERIA" : attrs.get("CAMPO_EXTRA_2"), 
+                            "VARIABLES_MEDICION" : attrs.get("VARIABLES_MEDICION")                       
+                        }) 
                     
                 identificador = attrs.get("OBJECTID") 
                 point_type = attrs.get("TIPO_PUNTO")
                 geometry = feat.get("geometry")
                 circuito = attrs.get("CIRCUITO_ACU")
                 
-                
+                # Payload que será utilizado para generar archivos
                 if identificador:
                     feature_jsons.append({
                         "layer_id": layer_id,
@@ -184,9 +230,17 @@ def get_feature_jsons(data):
                         "GlobalID"  : Global_ID,
                         "circuito" : circuito,
                         "GlobalID_Fase" : global_fase,
-                        "forzarInforme" : forzar_informe
+                        "forzarInforme" : forzar_informe,
+                        "payload_fase_3_a_satus": dict_for_payload_fase_3_a_status
                         
                     })
+                
+                
+                
+                        
+                        
+                    
+                    
 
     return feature_jsons
 
@@ -199,21 +253,32 @@ def lambda_handler(event, context):
     payload_f1 = []
     payload_f2 = []
     payload_f3 = []
-    # Diccionario donde cada key será un parent_id
+    
+    # Diccionario donde cada key será un parent_id para generar payload que
+    # invooca la lambda de generación de archivos
     capa_principal = defaultdict(list)
     fase_1 = defaultdict(list)
     fase_2 = defaultdict(list)
     fase_3 = defaultdict(list)
+    db_fase_3_a_status = defaultdict(list)
  
 
-    #diccionario para realcionar gobal id de padrecon gobal id  de hijo:
+    #diccionario para realcionar gobal id de padre con gobal id  de hijo:
     parents_relation = []
+    # lista de parents ID de fase 3
+    parents_ID_fase_3 = []
     
-    # 1. Obtener un diccionario tipo python de la información recibida
+    ##PARA EXTRAER UPDATES POR PUNTO
+    
+    # 1. Obtener una lista de diccionarios con los updates
     data = event if isinstance(event, dict) else json.loads(event['body'])
 
-    # 2. Se extrae un diccionario con la información de los puntos added y updated realizados en arcgis
+    # 2. Se extrae una lista de diccionarios con la información de los puntos added 
+    # y updated realizados en arcgis. La segunda lista corresponde a una lista de
+    # diccionarios que será utilizada para la base de datos de fase 3: "fase_3_a_status"
+
     features = get_feature_jsons(data)
+    
 
     # 3. Extraer la información del diccionario
     for feature in features:
@@ -226,7 +291,8 @@ def lambda_handler(event, context):
         geometria = feature["geometry"]
         GlobalID_fase = feature["GlobalID_Fase"]
         forzar_informe = feature["forzarInforme"]
-        print("forzar informe:",forzar_informe)
+        list_of_dict_fase_3_status = feature["payload_fase_3_a_satus"]
+        #print("PAYLOAD input fase_3_a_status:",list_of_dict_fase_3_status)
         
         #Diccionario para relacionar global Id de padre e hijo
         if layer_id != 0:
@@ -256,7 +322,7 @@ def lambda_handler(event, context):
         base_prefix = f"ArcGIS-Data/Puntos/{safe_circuito}/{GlobalID}_{safe_point_type}/"
         
         
-        #Determinar destino segun id
+        #DETERMINAR DESTINO SEGUN ID
         if layer_id == 0:
             key = f"{base_prefix}Capa_principal/{filename}"
             
@@ -269,7 +335,7 @@ def lambda_handler(event, context):
         elif layer_id == 1:
             key = f"{base_prefix}Fase1/{filename}"
             
-            # Crear una entrada base para este punto sin attachments aun
+            # Crear una entrada base para este punto sin attachments aun 
             fase_1[GlobalID].append({
                 "payload": atr_geom,
                 "attachments": [],
@@ -279,7 +345,7 @@ def lambda_handler(event, context):
         elif layer_id == 2:
             key = f"{base_prefix}Fase2/{filename}"
             
-            # Crear una entrada base para este punto sin attachments aun
+            # Crear una entrada base para este punto sin attachments aun 
             fase_2[GlobalID].append({
                 "payload": atr_geom,
                 "attachments": [],
@@ -289,12 +355,25 @@ def lambda_handler(event, context):
         elif layer_id == 3:
             key = f"{base_prefix}Fase3/{filename}"
             
-            # Crear una entrada base para este punto sin attachments aun
+            #se agrega el parent ID por punto (para payload de base de datos
+            # fase_3_a_b_trazabilidad_mediciones)
+            parents_ID_fase_3.append(GlobalID)
+            
+            #Payload para generar archivos por punto
+            # Crear una entrada base para este punto sin attachments aun 
             fase_3[GlobalID].append({
                 "payload": atr_geom,
                 "attachments": [],
                 "forzarInforme": forzar_informe
                 })
+            
+            
+            for item in list_of_dict_fase_3_status:
+                #Payload para base de datos fase_3_a_status
+                db_fase_3_a_status[GlobalID].append({
+                    "payload": item
+                })
+            
             
         else:
             continue  # ignora ids fuera de rango
@@ -310,9 +389,9 @@ def lambda_handler(event, context):
             ContentType="application/json"
         )
 
-        print(f" Subido {key}")
+        #print(f" Subido {key}")
     
-    print(parents_relation)
+    #print(parents_relation)
     ##Para los attachments##    
     
     # Extraer un diccionario con la informacion de los attachmens added y updated realizados en arcgis
@@ -321,7 +400,7 @@ def lambda_handler(event, context):
     #Generar un token par acceder a la API de ARCGIS y traer los nuevos attachmnets
     token = http_token_request()
     
-    # Mapeo de hijo y  padre
+    # Mapeo de hijo y  padre (para almacenar en s3 relacionar attachments)
     relaciones = {item["hijo"]: item["padre"] for item in parents_relation}     
     
     #Para extraer metadata, obtener la imagen y guardar en S3
@@ -338,7 +417,7 @@ def lambda_handler(event, context):
         imageType = contentType_parts[1]
         url = attach["url"]
         
-        ###nuevo
+        #Para relacionar parent id de los atachments con el punto
         if layer_id != 0:
             hijo = attach["parent_id"]
             if hijo in relaciones:
@@ -368,7 +447,7 @@ def lambda_handler(event, context):
                     pattern = rf"Puntos/.*/({parent_id})_"
                     if re.search(pattern, sub_prefix):
                         found_prefix = sub_prefix
-                        print(f"  Carpeta encontrada: {found_prefix}")
+                        #print(f"  Carpeta encontrada: {found_prefix}")
                         break
                 if found_prefix:
                     break
@@ -442,54 +521,53 @@ def lambda_handler(event, context):
     payload_fase_1 = dict(fase_1)
     payload_fase_2 = dict(fase_2)
     payload_fase_3 = dict(fase_3)
+    payload_db_fase_3_a_status = dict(db_fase_3_a_status)
 
-    #Generar payloads para lambda de base de datos
-    
 
+    #GENERACION DE PAYLOADS PARA LAMBDA DE BASE DE DATOS
     
-    # Convertir a JSON para enviarlo
-    json_capa_principal = json.dumps(capa_principal)
+    json_capa_principal = json.dumps(payload_capa_principal)
     json_fase_1 = json.dumps(payload_fase_1)
-    json_fase_2 = json.dumps(payload_fase_2)
+    #print("INPUT UPSERT FASE 1: ",json_fase_1)
+    json_fase_3 = json.dumps(payload_fase_3)
+    json_payload_db_fase_3_a_status = json.dumps(payload_db_fase_3_a_status)
+    #print("INPUT UPSERT FASE 3 _ STATUS: ",json_payload_db_fase_3_a_status)
     
-    print("fase 1")
-    payload_db_fase_1, fase_1_values = db_upsert_fase_1(json_fase_1)
-    print("valores fase 1: " ,fase_1_values)
+    # Para Capa principal
+    #print("capa principal")
+    payload_db_capa_principal =db_upsert_capa_principal(json_capa_principal)
+    invoke_lambda_db(payload_db_capa_principal, DB_ACCESS_LAMBDA_ARN)
+
+    # Para fase 1
+    #print("fase 1")
+    payload_db_fase_1 =db_upsert_fase_1(json_fase_1) 
     invoke_lambda_db(payload_db_fase_1, DB_ACCESS_LAMBDA_ARN)
-    print("CAPA PRINCIPAL :" ,json_capa_principal)
-    #Condicional para cambiar columna de habilitado_medicion en capa principal
-    
 
-
-    # Agregamos HABILITADO_FASE3 dentro del payload
-    if fase_1_values.get("habilitado_medicion") == 1:
-        json_capa_principal[parent_id][0]["payload"]["HABILITADO_FASE3"] = 1
-        print("CAPA PRINCIPAL MODIFICADA :", capa_principal)
-    else:
-        json_capa_principal[parent_id][0]["payload"]["HABILITADO_FASE3"] = 2
-
-    print("capa principal")
-    payload_db_capa_principal = db_upsert_capa_principal(json_capa_principal)
-    invoke_lambda_db(payload_db_capa_principal, DB_ACCESS_LAMBDA_ARN)
-        
-    if payload_db_fase_1.get("habilitado_medicion", "") == 1  :
-        json_hab_med_capa_principal = {**payload_capa_principal,"HABILITADO_FASE3": 1}
-    else:
-        json_hab_med_capa_principal = {**payload_capa_principal,"HABILITADO_FASE3": 2}
-        
-    json_capa_principal = json.dumps(json_hab_med_capa_principal)
-    
-    print("capa principal")
-    payload_db_capa_principal = db_upsert_capa_principal(json_capa_principal)
-    invoke_lambda_db(payload_db_capa_principal, DB_ACCESS_LAMBDA_ARN)
-    
-    
-    """
-    payload_update_habilitado_fase3 = db_update_habilitado_fase3()   
+    ### para llenar una columna de la base de datos de capa_principal (habilitado_fase3)
+    ### teniendo en cuenta la base de datos de fase 1 y fase 2
+    payload_update_habilitado_fase3 = db_update_habilitado_fase3(parents_relation)   
     invoke_lambda_db(payload_update_habilitado_fase3, DB_ACCESS_LAMBDA_ARN)
-    print("Update completado: HABILITADO_FASE3 sincronizado con fase_1 y fase_2.")
-    """
-   
+    #print("Update completado: HABILITADO_FASE3 sincronizado con fase_1 y fase_2.")
+
+    # Para fase 2
+    
+    #Para fase_3_a_data 
+    #(registro completo del formulario de fase 3. Campo único:PARENT_ID)
+    payload_db_fase_3_a_data = db_upsert_fase_3_a_data(json_fase_3)
+    invoke_lambda_db(payload_db_fase_3_a_data, DB_ACCESS_LAMBDA_ARN)
+    #print("payload db FASE 3:", payload_db_fase_3_a_data)
+    
+    #Para fase_3_a_status
+    #Registro actual de los dataloggers. Campo único: IDENTIFICADOR_DATALOGGER
+    #payload_db_fase_3_a_status = 
+    payload_db_fase_3_a_status = db_upsert_fase_3_a_status(json_payload_db_fase_3_a_status)
+    #print("PAYLOAD FASE 3 STATUS:",payload_db_fase_3_a_status)
+    invoke_lambda_db(payload_db_fase_3_a_status, DB_ACCESS_LAMBDA_ARN)
+    
+    #Para fase_3_a_b_trazabilidad_mediciones
+    print("PARENTS ID FOR FASE 3: ", parents_ID_fase_3)
+    payload_db_fase_3_a_b_trazabilidad_mediciones = db_fase_3_a_b_trazabilidad_mediciones(parents_ID_fase_3)
+    
    # Generar los payloads para invocar lambda que genera archivos por punto
 
     for count2 in payload_fase_1:
@@ -497,14 +575,14 @@ def lambda_handler(event, context):
             # En este punto payload_cp es un diccionario limpio, sin corchetes
             # Convertir a JSON
             json_f1 = json.dumps(payload_f1)
-            print("PAYLOAD_fase_1:",json_f1 )
-            #invoke_lambda(payload_f1,0)
+            #print("PAYLOAD_fase_1:",json_f1 )
+            invoke_lambda(payload_f1,0)
         
     for count3 in payload_fase_2:
         for payload_f2 in payload_fase_2[count3]:
             # En este punto payload_cp es un diccionario limpio, sin corchetes
             json_f2 = json.dumps(payload_f2)
-            print("PAYLOAD_fase_2:",json_f2 )
+            #print("PAYLOAD_fase_2:",json_f2 )
             #invoke_lambda(payload_f2,1)
             
     for count4 in payload_fase_3:

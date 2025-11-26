@@ -483,7 +483,7 @@ def query_capa_principal(data,token,parents):
     capa_principal_update = []
     #Generamos el formato para el item "where" en la peticion hhtp
     where_clause = "GlobalID IN (" + ", ".join(f"'{{{parent}}}'" for parent in parents) + ")"
-    #print(where_clause)
+    print(where_clause)
     
     #Vamos a realizar un http get request con esta URL + el token  
     response_API_query_layer_capa_principal = query_layer(token,0,where_clause)
