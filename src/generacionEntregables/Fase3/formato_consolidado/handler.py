@@ -27,22 +27,17 @@ template_name = {"puntos_medicion": "formato-acueducto-pm.xlsx",
                   "vrp-presion-PLUM":  "formato-acueducto-vrp-presion-PLUM.xlsx",
                    "camara": "formato-alcantarillado.xlsx"}
 
-celdas_imagenes_plantilla = {"puntos_medicion": ["B20", "C20", "D20", "E20","B21", "C21", "D21", "E21", "B22", "C22", "D22", "E22"],
-                            "vrp-caudal-PLUM": ["B21", "C21", "D21", "E21","B22", "C22", "D22", "E22", "B23", "C23", "D23", "E23"],
-                            "vrp-presion_caudal-PLUM": ["B23", "C23", "D23", "E23","B24", "C24", "D24", "E24", "B25", "C25", "D25", "E25"],
-                            "vrp-presion-Additel": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"],
-                            "vrp-presion-PLUM": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"], "camara": []}
+template_general = 'listado-senales'
+
+celdas_imagenes_plantilla = {"puntos_medicion": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
+                            "vrp-caudal-PLUM": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
+                            "vrp-presion_caudal-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"],
+                            "vrp-presion-Additel": ["B27", "C27", "D27", "E27","B28", "C28", "D28", "E28", "B29", "C29", "D29", "E29"],
+                            "vrp-presion-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"], "camara": []}
 
 # === Funciones auxiliares ===
 
 def insert_image(ws, cellNumber, image_source):
-    """
-    Inserta una imagen (ruta local o BytesIO) en la celda indicada y la escala
-    para que quepa dentro de la celda manteniendo proporciones.
-    image_source puede ser:
-      - ruta a archivo en disco (Path o str)
-      - BytesIO con los bytes de la imagen
-    """
     if isinstance(image_source, (str, Path)):
         img = Image(str(image_source))
     else:
@@ -334,6 +329,89 @@ def generar_hoja_desde_template(
     return ws_new
 
 
+def generar_resumen_desde_template(wb_final, lista_puntos, bucket_name, template_path_s3):
+    """
+    Genera la hoja 'Resumen' copiando encabezados/estilos desde la plantilla
+    y replicando una fila que contiene los placeholders {{punto.xxx}}.
+    """
+
+    template_filename = "listado-senales.xlsx"
+    template_key = f"{template_path_s3}{template_filename}"
+
+    # Descargar plantilla desde S3
+    template_stream = BytesIO()
+    s3.download_fileobj(bucket_name, template_key, template_stream)
+    template_stream.seek(0)
+
+    wb_template = load_workbook(template_stream)
+    ws_template = wb_template.active
+
+    # Crear hoja final
+    ws_resumen = wb_final.create_sheet("Resumen")
+
+    # Copiar TODA la hoja de plantilla (encabezados, estilos, merges)
+    for row_idx, row in enumerate(ws_template.iter_rows(), start=1):
+        for col_idx, cell in enumerate(row, start=1):
+            new_cell = ws_resumen.cell(row=row_idx, column=col_idx, value=cell.value)
+
+            if cell.has_style:
+                new_cell.font = cell.font.copy()
+                new_cell.border = cell.border.copy()
+                new_cell.fill = cell.fill.copy()
+                new_cell.number_format = cell.number_format
+                new_cell.alignment = cell.alignment.copy()
+
+    # Copiar merges
+    for merge in ws_template.merged_cells.ranges:
+        ws_resumen.merge_cells(str(merge))
+
+    # Buscar fila plantilla con placeholders
+    fila_template = None
+    for row_idx, row in enumerate(ws_template.iter_rows(), start=1):
+        row_text = " ".join([str(c.value) for c in row if isinstance(c.value, str)])
+        if "{{punto." in row_text:
+            fila_template = row_idx
+            break
+
+    if not fila_template:
+        print("⚠ No se encontró fila plantilla con placeholders {{punto.xxx}}.")
+        return ws_resumen
+
+    # Para evitar que la fila plantilla original quede vacía en la salida,
+    # se elimina esa fila y se reconstruye con datos reales
+    ws_resumen.delete_rows(fila_template)
+
+    # Insertar filas reemplazando los placeholders
+    for punto in lista_puntos:
+        ws_resumen.insert_rows(fila_template)
+
+        for col_idx, cell_template in enumerate(ws_template[fila_template], start=1):
+            valor = cell_template.value
+
+            # Reemplazar placeholders
+            if isinstance(valor, str):
+                valor = (
+                    valor.replace("{{punto.FID_ELEM}}", str(punto.get("FID_ELEM", "")))
+                         .replace("{{punto.VARIABLES_MEDICION}}", str(punto.get("VARIABLES_MEDICION", "")))
+                         .replace("{{punto.OBSERV_ACU}}", str(punto.get("OBSERV_ACU", "")))
+                         .replace("{{punto.CRITERIO_ACU}}", str(punto.get("CRITERIO_ACU", "")))
+                )
+
+            new_cell = ws_resumen.cell(row=fila_template, column=col_idx, value=valor)
+
+            # Copiar estilos
+            if cell_template.has_style:
+                new_cell.font = cell_template.font.copy()
+                new_cell.border = cell_template.border.copy()
+                new_cell.fill = cell_template.fill.copy()
+                new_cell.number_format = cell_template.number_format
+                new_cell.alignment = cell_template.alignment.copy()
+
+        fila_template += 1
+
+    return ws_resumen
+
+
 # === Lambda Handler principal que genera un workbook con una hoja por punto ===
 def lambda_handler(event, context):
     cod = event["payload"].get("COD", "")
@@ -392,8 +470,14 @@ def lambda_handler(event, context):
         print(f"Se encontraron {len(puntos_fase3)} puntos Fase3 para {circuito_acu}")
 
         wb_final = Workbook()
+
+        # Quitar la hoja creada por defecto para evitar interferencias
         ws_default = wb_final.active
-        ws_default.title = "Resumen"
+        wb_final.remove(ws_default)
+        #ws_default = wb_final.active
+        #ws_default.title = "Resumen"
+
+        listado_senales = []
 
         for json_key in puntos_fase3:
             tmp_json = TMP_DIR / f"punto_{Path(json_key).name}"
@@ -410,10 +494,21 @@ def lambda_handler(event, context):
             VARIABLES_MEDICION = payload_data.get("VARIABLES_MEDICION", "")
             EQUIPO__DATALOGGER_INSTALADOS = payload_data.get("EQUIPO__DATALOGGER_INSTALADOS", "")
 
-            code_key =  tipo_punto + "-" + VARIABLES_MEDICION + "-" + EQUIPO__DATALOGGER_INSTALADOS
+            if tipo_punto == "vrp":
+                code_key = tipo_punto + "-" + VARIABLES_MEDICION + "-" + EQUIPO__DATALOGGER_INSTALADOS
+            else:
+                code_key = tipo_punto
 
             # Obtener capa principal (atributos + posiblemente imágenes en esa carpeta)
             capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, circuito_acu)
+
+            # Para pagina inicial "LSE"
+            listado_senales.append({
+                "FID_ELEM": capa_principal_data.get("FID_ELEM"),
+                "VARIABLES_MEDICION": capa_principal_data.get("VARIABLES_MEDICION"),
+                "OBSERV_ACU": capa_principal_data.get("OBSERV_ACU"),
+                "CRITERIO_ACU": capa_principal_data.get("CRITERIO_ACU")
+            })
 
             # Buscar imágenes dentro de Fase3
             folder = f"ArcGIS-Data/Puntos/{circuito_acu}/{GlobalID}_{tipo_punto}/Fase3/"
@@ -457,12 +552,14 @@ def lambda_handler(event, context):
                 template_name, code_key
             )
 
-        if ws_default.max_row == 1 and ws_default.max_column == 1:
-            # si no quedó contenido en hoja resumen, borrarla
-            try:
-                wb_final.remove(ws_default)
-            except Exception:
-                pass
+        generar_resumen_desde_template(wb_final,listado_senales,bucket_name,template_path_s3)
+
+        #if ws_resumen.max_row == 1 and ws_resumen.max_column == 1:
+        #    # si no quedó contenido en hoja resumen, borrarla
+        #    try:
+        #        wb_final.remove(ws_default)
+        #    except Exception:
+        #        pass
 
         output_filename = f"MPH-EJ-0601-{cod}-F03-ACU-LSE-001.xlsx"
         output_key = f"{output_path_s3}ACU/CIR/{output_filename}"

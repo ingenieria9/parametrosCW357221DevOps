@@ -31,6 +31,7 @@ def lambda_handler(event, context):
     # revisar si el punto es el ultimo visitado del circuito
 
     # TO-DO : revisar query para hacer referencia a fase 3 con tabla trazabilidad (asegurar que finalizado = 1)
+    # mirar pertinencia (igual se fuerza desde grafana)
     payload_db = {
         "queryStringParameters": {
             "query": f"""select case when "FINALIZADO" = 1 then 'Finalizado' else 'incompleto' end as "estado"  from trazabilidad_mediciones tm where "CIRCUITO_ACU" = '{CIRCUITO_ACU}'""",

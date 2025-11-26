@@ -36,11 +36,11 @@ template_name = {"puntos_medicion": "formato-acueducto-pm.xlsx",
 COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F03-ACU-LSE-",
             "vrp": "ACU/VRP/MPH-EJ-0601-{COD}-F03-ACU-LSE-", "camara": "ALC/MPH-EJ-0601-{COD}-F03-ALC-LSE-"}
 
-celdas_imagenes_plantilla = {"puntos_medicion": ["B20", "C20", "D20", "E20","B21", "C21", "D21", "E21", "B22", "C22", "D22", "E22"],
-                            "vrp-caudal-PLUM": ["B21", "C21", "D21", "E21","B22", "C22", "D22", "E22", "B23", "C23", "D23", "E23"],
-                            "vrp-presion_caudal-PLUM": ["B23", "C23", "D23", "E23","B24", "C24", "D24", "E24", "B25", "C25", "D25", "E25"],
-                            "vrp-presion-Additel": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"],
-                            "vrp-presion-PLUM": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"], "camara": []}
+celdas_imagenes_plantilla = {"puntos_medicion": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
+                            "vrp-caudal-PLUM": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
+                            "vrp-presion_caudal-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"],
+                            "vrp-presion-Additel": ["B27", "C27", "D27", "E27","B28", "C28", "D28", "E28", "B29", "C29", "D29", "E29"],
+                            "vrp-presion-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"], "camara": []}
 
 
 def insert_image(ws, cellNumber, imagen_path):
@@ -190,8 +190,6 @@ def invoke_lambda(payload, FunctionName):
     return response  
 
 
-
-
 def obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_ACU):
     # Construir el prefijo correcto
     s3_key_capa_principal = (
@@ -289,7 +287,7 @@ def lambda_handler(event, context):
     for key, path in zip(imagen_keys, imagen_paths):
         s3.download_file(bucket_name, key, str(path))
 
-    # Cargar plantilla Exceldef obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, CIRCUITO_ACU):
+    # Cargar plantilla Excel
     # Construir el prefijo correcto
     s3_key_capa_principal = (
         f"ArcGIS-Data/Puntos/{CIRCUITO_ACU}/{GlobalID}_{tipo_punto}/Capa_principal/"
@@ -365,7 +363,7 @@ def lambda_handler(event, context):
 
     # Subir resultado a S3
     #listar los archivos de s3 en
-    # Obtener el consecutivo siguiente en esa carpeta
+    #Obtener el consecutivo siguiente en esa carpeta
     #consecutivo = obtener_consecutivo_s3(bucket_name, output_path_s3, COD_name[tipo_punto])
 
     #obtener de S3 el archivo json que contiene el codigo del circuito para construir el archivo
@@ -396,20 +394,21 @@ def lambda_handler(event, context):
 
     #Construir el nombre completo del archivo
     output_key = f"{output_path_s3}{file_name}{FID_ELEM}.xlsx"
-    convert_output_key = f"{output_path_s3_for_convert}{file_name}{FID_ELEM}.xlsx"
+    #convert_output_key = f"{output_path_s3_for_convert}{file_name}{FID_ELEM}.xlsx"
 
     #Subir a carpeta entregables y a files_to_convert
     #s3.upload_file(str(output_path), bucket_name, convert_output_key)
     s3.upload_file(str(output_path), bucket_name, output_key)
 
 
-    # TO-DO: ACTUALIZAR QUERY
+    # TO-DO: Revisar si si es pertinente
+    
     payload_db = {
         "queryStringParameters": {
             "query": f""" WITH circuito AS (SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID" = '{GlobalID}'),
-                puntos_realizados AS (SELECT COUNT(*) AS count_realizados, p."CIRCUITO_ACU" FROM puntos_capa_principal p WHERE p."CIRCUITO_ACU" = (SELECT "CIRCUITO_ACU" FROM circuito) AND p."PUNTO_EXISTENTE" = 'Si' AND p."FASE_INICIAL" = 'fase1' AND p."FID_ELEM" IN (SELECT "FID_ELEM" FROM fase_1) GROUP BY p."CIRCUITO_ACU"),
-                puntos_totales AS ( SELECT COUNT(*) AS count_totales, p."CIRCUITO_ACU" FROM puntos_capa_principal p WHERE p."CIRCUITO_ACU" = (SELECT "CIRCUITO_ACU" FROM circuito) AND p."PUNTO_EXISTENTE" = 'Si' AND p."FASE_INICIAL" = 'fase1' GROUP BY p."CIRCUITO_ACU")
-                SELECT CASE WHEN t.count_totales = r.count_realizados THEN 'Finalizado' ELSE 'Incompleto'END AS estado, t."CIRCUITO_ACU", t.count_totales AS numero_puntos, r.count_realizados AS puntos_realizados FROM puntos_totales t LEFT JOIN puntos_realizados r ON t."CIRCUITO_ACU" = r."CIRCUITO_ACU";""",
+            puntos_realizados AS (SELECT COUNT(*) AS count_realizados, p."CIRCUITO_ACU" FROM puntos_capa_principal p WHERE p."CIRCUITO_ACU" = (SELECT "CIRCUITO_ACU" FROM circuito) AND p."PUNTO_EXISTENTE" = 'Si' AND p."HABILITADO_FASE3" = 1 AND p."FID_ELEM" IN ( SELECT "FID_ELEM" FROM  fase_3_a_data where "El_punto_requiere_fase_3" = 'Si') GROUP BY p."CIRCUITO_ACU"),
+            puntos_totales AS (SELECT  COUNT(*) AS count_totales,  p."CIRCUITO_ACU"  FROM puntos_capa_principal p WHERE  p."CIRCUITO_ACU" = ( SELECT    "CIRCUITO_ACU"  FROM circuito)  AND p."PUNTO_EXISTENTE" = 'Si' AND p."HABILITADO_FASE3" = 1 GROUP BY  p."CIRCUITO_ACU")
+            SELECT CASE WHEN t.count_totales = r.count_realizados THEN 'Finalizado' ELSE 'Incompleto'  END AS estado,t."CIRCUITO_ACU", t.count_totales AS numero_puntos,  r.count_realizados AS puntos_realizados FROM puntos_totales t LEFT JOIN puntos_realizados r ON t."CIRCUITO_ACU" = r."CIRCUITO_ACU";""",
             "time_column": "fecha_creacion",
             "db_name": "parametros"
         }
@@ -423,17 +422,18 @@ def lambda_handler(event, context):
     estado = body[0]["estado"]
     circuito = body[0]["CIRCUITO_ACU"]
     numero_puntos = body[0]["numero_puntos"]
-    puntos_realizados = body[0]["puntos_realizados"]
+    #puntos_realizados = body[0]["puntos_realizados"]
+    puntos_realizados = body[0].get("puntos_realizados", 0)
 
-    print(estado)
-    print(circuito)
+    print("estado", estado)
+    print("circuito",circuito)
 
-   
+    '''
     if estado == "Finalizado":   # Si es ultimo punto, invocar a lambda de generación de formato consolidado (async)
         incoming_payload = { "payload": { "COD": code_data, "numero_consolidado" : numero_puntos, "CIRCUITO_ACU" : CIRCUITO_ACU } }
         invoke_lambda(incoming_payload, FORMATO_CONSOLIDADO_LAMBDA_ARN)
         print("Invocada lambda formato consolidado")    
-    
+    '''
     if str(forzarInforme).lower() == "true": #si viene de la API Forzado a ejecutarse
         incoming_payload = { "payload": { "COD": code_data, "numero_consolidado" : puntos_realizados, "CIRCUITO_ACU" : CIRCUITO_ACU } }
         invoke_lambda(incoming_payload, FORMATO_CONSOLIDADO_LAMBDA_ARN)
