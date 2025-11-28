@@ -1,73 +1,3 @@
-'''
-{
-   "payload":{
-      "layer_id":1,
-      "OBJECTID":"0002",
-      "geometry":"null",
-      "attributes":{
-         "OBJECTID":"0002",
-         "GlobalID":"3CFDE950-8AE7-440E-B1E7-310C56A35794",
-         "Creador":"central_ti_telemetrik",
-         "Fecha_Creacion":1758818476306,
-         "Editor":"central_ti_telemetrik",
-         "Fecha_Edicion":1758829344252,
-         "id" : "0002",
-         "TIPO_PUNTO" : "puntos_medicion",
-         "signos_desgaste" : "Si",
-         "fugas" : "Si",
-         "danios" : "No",
-         "REQUIERE_INST_TAPA_ACU" : "Si",
-         "REQ_LIMPIEZA_ACU" : "No",
-         "razon_limpieza" : "",
-         "requiere_clausura" : "",
-         "comentario_cond_fisica" : "Tiene una pequeña fuga y desgaste en la tapa",
-         "estado_conexion" : "Si",
-         "estado_tuberia" : "Si",
-         "accesorios_existentes" : "Si",
-         "valvula_abre" : "Si",
-         "valvula_cierra" : "Si",
-         "flujo_agua" : "Si",
-         "comentario_conexiones_hid" : "oK",
-         "ubicacion_geografica_critica" : "No",
-         "posible_expos_fraude" : "No",
-         "comentario_vuln" : "Ok",
-         "verificacion_4g" : "Si",
-         "operador_4g" : "Claro",
-         "equipos_usados" : "",
-         "conclusiones" : "",
-         "recomendaciones" : "Se debe corregir fuga y reemplazar tapa",
-         "comentario_general" : "",
-         "fecha_edicion" : "1758818476306",
-         "actualizacion_ubicacion" : "No",
-         "fecha_creacion" : "1758818476306",
-         "latitud" : "37.21",
-         "longitud" : "-72.912"
-      },
-      "point_type":"cajas_medicion"
-   },
-   "attachments":[
-      "files/temp-image-folder/ejemplo1.jpg",
-      "files/temp-image-folder/ejemplo2.jpg",
-      "files/temp-image-folder/ejemplo3.jpg",
-      "files/temp-image-folder/ejemplo4.jpg",
-      "files/temp-image-folder/ejemplo5.jpg",
-      "files/temp-image-folder/ejemplo6.jpg",
-      "files/temp-image-folder/ejemplo7.jpg",
-      "files/temp-image-folder/ejemplo8.jpg"
-   ]
-} 
-
-Variables que vienen de la capa principal y no del payload:
-circuito, subcircuito, cuenca, direccion_referencia, vrp
-"circuito" : "tmk",
-"direccion_referencia" : "Cra 42 #2 cerca al mall",
-"vrp" : "vrp-0001",
-
-key s3 de capa principal 
-ArcGIS-Data/Puntos/{ID}_{TIPO_PUNTO}/Capa_principal/{latest-timestamp}.json
-'''
-
-
 import boto3
 from botocore.exceptions import ClientError
 import json
@@ -86,16 +16,16 @@ s3 = boto3.client("s3")
 TMP_DIR = Path("/tmp")
 
 bucket_name = os.environ['BUCKET_NAME']
-template_path_s3 = "files/plantillas/Fase1/"
-output_path_s3 = "files/entregables/Fase1/"
+template_path_s3 = "files/plantillas/Fase3/"
+output_path_s3 = "files/entregables/Fase3/"
 
 template_name = {"circuito": "informe-acueducto.docx",
                  "cuenca": "informe-alcantarillado.docx"}
 
-#COD_name = {"circuito": "ACU/MPH-EJ-06-01-F01-ACU-DIA-", "cuenca": "ALC/MPH-EJ-06-01-F01-ALC-DIA-"}
+#COD_name = {"circuito": "ACU/MPH-EJ-06-01-F03-ACU-ITD-", "cuenca": "ALC/MPH-EJ-06-01-F03-ALC-ITD-"}
 
-COD_name = {"circuito": "ACU/CIR/MPH-EJ-0601-{COD}-F01-ACU-DIA-001",
-            "cuenca": "ALC/CUE/MPH-EJ-0601-{COD}-F01-ALC-DIA-001"}
+COD_name = {"circuito": "ACU/CIR/MPH-EJ-0601-{COD}-F03-ACU-ITD-001",
+            "cuenca": "ALC/CUE/MPH-EJ-0601-{COD}-F03-ALC-ITD-001"}
 
 
 def lambda_handler(event, context):   
@@ -507,17 +437,17 @@ def build_puntos_context(circuito_cuenca_valor, circuito_cuenca, habilitado_medi
     print(lista_tipo)
 
 
-    # Diccionario con los formatos por tipo de punto - misma que se usa en lambda formato fase 1
+    # Diccionario con los formatos por tipo de punto - misma que se usa en lambda formato fase 3
     COD_name = {
-        "puntos_medicion": "MPH-EJ-0601-{COD}-F01-ACU-EIN-001",
-        "vrp": "MPH-EJ-0601-{COD}-F01-ACU-EIN-001",
-        "camara": "MPH-EJ-0601-{COD}-F01-ALC-EIN-001"
+        "puntos_medicion": "MPH-EJ-0601-{COD}-F03-ACU-LSE-001",
+        "vrp": "MPH-EJ-0601-{COD}-F03-ACU-LSE-001",
+        "camara": "MPH-EJ-0601-{COD}-F03-ALC-LSE-001"
     }
 
     puntos_visitados_consolidados = []
 
     for punto, TIPO_PUNTO in zip(lista_id, lista_tipo):
-        key_s3_prefix = f"ArcGIS-Data/Puntos/{circuito_cuenca_valor.replace(' ', '_')}/{punto}_{TIPO_PUNTO}/Fase1/"
+        key_s3_prefix = f"ArcGIS-Data/Puntos/{circuito_cuenca_valor.replace(' ', '_')}/{punto}_{TIPO_PUNTO}/Fase3/"
         print(key_s3_prefix)
         s3_objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=key_s3_prefix)
 

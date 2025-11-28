@@ -11,6 +11,7 @@ from datetime import datetime, timezone, timedelta
 from openpyxl import load_workbook, Workbook
 from openpyxl.drawing.image import Image
 
+
 s3 = boto3.client("s3")
 TMP_DIR = Path("/tmp")
 
@@ -34,6 +35,10 @@ celdas_imagenes_plantilla = {"puntos_medicion": ["B22", "C22", "D22", "E22","B23
                             "vrp-presion_caudal-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"],
                             "vrp-presion-Additel": ["B27", "C27", "D27", "E27","B28", "C28", "D28", "E28", "B29", "C29", "D29", "E29"],
                             "vrp-presion-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"], "camara": []}
+
+variables_a_medir_traduccion = {
+    "presion_caudal": "Presión, Caudal","presion": "Presión",
+    "caudal": "Caudal","area_velocidad": "Área, velocidad"}
 
 # === Funciones auxiliares ===
 
@@ -156,7 +161,7 @@ def generar_hoja_desde_template(
     ws_template = wb_template.active
 
     # Obtener FID (convertir a string)
-    fid = str(payload_data.get("FID_ELEM", "SIN_FID"))
+    fid = str(payload_data.get("FID_ELEM", "SIN_FID"))+'-RDP'
     sheet_name = fid[:31] if fid else "SIN_FID"
     ws_new = wb_final.create_sheet(title=sheet_name)
 
@@ -193,7 +198,7 @@ def generar_hoja_desde_template(
         except Exception:
             pass
 
-    # === AJUSTE MANUAL DE CELDAS PARA IMÁGENES (requerido) ===
+    # === AJUSTE MANUAL DE CELDAS ===
     if tipo_punto in ["puntos_medicion", "vrp"]:
         for col in ["B", "C", "D", "E"]:
             ws_new.column_dimensions[col].width = 40  # ancho ideal para imágenes
@@ -329,16 +334,17 @@ def generar_hoja_desde_template(
     return ws_new
 
 
-def generar_resumen_desde_template(wb_final, lista_puntos, bucket_name, template_path_s3):
+def generar_resumen_desde_template(wb_final, lista_puntos, datos_globales, bucket_name, template_path_s3):
     """
-    Genera la hoja 'Resumen' copiando encabezados/estilos desde la plantilla
-    y replicando una fila que contiene los placeholders {{punto.xxx}}.
+    Genera la hoja 'Resumen' copiando desde la plantilla,
+    incluyendo estilos, merges, imágenes, tamaños, formato condicional,
+    y replicando una sola fila con placeholders en repeat.
     """
 
     template_filename = "listado-senales.xlsx"
     template_key = f"{template_path_s3}{template_filename}"
 
-    # Descargar plantilla desde S3
+    # === Descargar plantilla ===
     template_stream = BytesIO()
     s3.download_fileobj(bucket_name, template_key, template_stream)
     template_stream.seek(0)
@@ -346,74 +352,219 @@ def generar_resumen_desde_template(wb_final, lista_puntos, bucket_name, template
     wb_template = load_workbook(template_stream)
     ws_template = wb_template.active
 
-    # Crear hoja final
-    ws_resumen = wb_final.create_sheet("Resumen")
+    # === Crear hoja resultado ===
+    ws_resumen = wb_final.create_sheet("LSE")
 
-    # Copiar TODA la hoja de plantilla (encabezados, estilos, merges)
+    #Para que quede al inicio
+    wb_final._sheets.remove(ws_resumen)
+    wb_final._sheets.insert(0, ws_resumen)
+
+    # === Copiar celdas + estilos completos ===
     for row_idx, row in enumerate(ws_template.iter_rows(), start=1):
         for col_idx, cell in enumerate(row, start=1):
+
             new_cell = ws_resumen.cell(row=row_idx, column=col_idx, value=cell.value)
 
             if cell.has_style:
-                new_cell.font = cell.font.copy()
-                new_cell.border = cell.border.copy()
-                new_cell.fill = cell.fill.copy()
-                new_cell.number_format = cell.number_format
-                new_cell.alignment = cell.alignment.copy()
+                try:
+                    new_cell.font = cell.font.copy()
+                    new_cell.border = cell.border.copy()
+                    new_cell.fill = cell.fill.copy()
+                    new_cell.number_format = cell.number_format
+                    new_cell.protection = cell.protection.copy()
+                    new_cell.alignment = cell.alignment.copy()
+                except:
+                    pass
 
-    # Copiar merges
-    for merge in ws_template.merged_cells.ranges:
-        ws_resumen.merge_cells(str(merge))
+    # === Copiar merges ===
+    for merged_range in ws_template.merged_cells.ranges:
+        ws_resumen.merge_cells(str(merged_range))
 
-    # Buscar fila plantilla con placeholders
+    # === Copiar tamaños de columnas ===
+    for col_letter, dim in ws_template.column_dimensions.items():
+        try:
+            if dim.width:
+                ws_resumen.column_dimensions[col_letter].width = dim.width
+        except:
+            pass
+
+    # === Copiar alturas de filas ===
+    for idx, dim in ws_template.row_dimensions.items():
+        try:
+            if dim.height:
+                ws_resumen.row_dimensions[idx].height = dim.height
+        except:
+            pass
+
+    # === AJUSTE MANUAL DE CELDAS ===
+    for col in ["B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]:
+        ws_resumen.column_dimensions[col].width = 22  # ancho ideal            
+
+    # === Copiar formato condicional ===
+    try:
+        for cf_range, rules in getattr(ws_template.conditional_formatting, "_cf_rules", {}).items():
+            for rule in rules:
+                ws_resumen.conditional_formatting.add(cf_range, rule)
+    except Exception as e:
+        print(f"Error copiando formato condicional: {e}")
+
+    # === Copiar imágenes (logos, etc.) ===
+    for img in getattr(ws_template, "_images", []):
+        try:
+            img_bytes = None
+
+            try:
+                img_bytes = BytesIO(img._data())
+            except:
+                try:
+                    img_bytes = BytesIO(open(img.ref, "rb").read())
+                except:
+                    img_bytes = None
+
+            if img_bytes:
+                new_img = Image(img_bytes)
+                try:
+                    new_img.anchor = img.anchor
+                except:
+                    pass
+                ws_resumen.add_image(new_img)
+
+        except:
+            pass
+  
+    #placeholders globales
+    for row in ws_resumen.iter_rows():
+        for cell in row:
+            if isinstance(cell.value, str):
+                val = cell.value
+                for k, v in datos_globales.items():
+                    val = val.replace(f"{{{{global.{k}}}}}", str(v if v is not None else ""))
+                cell.value = val
+
+    # === Buscar la fila plantilla con placeholders ===
     fila_template = None
-    for row_idx, row in enumerate(ws_template.iter_rows(), start=1):
-        row_text = " ".join([str(c.value) for c in row if isinstance(c.value, str)])
-        if "{{punto." in row_text:
-            fila_template = row_idx
+    for r in range(1, ws_template.max_row + 1):
+        for cell in ws_template[r]:
+            if isinstance(cell.value, str) and cell.value.strip() == "{{repeat:punto}}":
+                fila_template = r
+                break
+        if fila_template:
             break
 
     if not fila_template:
-        print("⚠ No se encontró fila plantilla con placeholders {{punto.xxx}}.")
+        print("⚠ No se encontró {{repeat:punto}} en la plantilla.")
         return ws_resumen
 
-    # Para evitar que la fila plantilla original quede vacía en la salida,
-    # se elimina esa fila y se reconstruye con datos reales
+    # Guardar estructura de la fila plantilla
+    base_row = []
+    for cell in ws_template[fila_template]:
+        base_row.append({
+            "value": cell.value,
+            "font": cell.font.copy() if cell.has_style else None,
+            "border": cell.border.copy() if cell.has_style else None,
+            "fill": cell.fill.copy() if cell.has_style else None,
+            "number_format": cell.number_format,
+            "alignment": cell.alignment.copy() if cell.has_style else None,
+        })
+
+
+    # Eliminar la fila plantilla original
     ws_resumen.delete_rows(fila_template)
 
-    # Insertar filas reemplazando los placeholders
+    current_row = fila_template
+
     for punto in lista_puntos:
-        ws_resumen.insert_rows(fila_template)
+        ws_resumen.insert_rows(current_row)
 
-        for col_idx, cell_template in enumerate(ws_template[fila_template], start=1):
-            valor = cell_template.value
+        for c, cell_tpl in enumerate(base_row, start=1):
+            val = cell_tpl["value"]
 
-            # Reemplazar placeholders
-            if isinstance(valor, str):
-                valor = (
-                    valor.replace("{{punto.FID_ELEM}}", str(punto.get("FID_ELEM", "")))
-                         .replace("{{punto.VARIABLES_MEDICION}}", str(punto.get("VARIABLES_MEDICION", "")))
-                         .replace("{{punto.OBSERV_ACU}}", str(punto.get("OBSERV_ACU", "")))
-                         .replace("{{punto.CRITERIO_ACU}}", str(punto.get("CRITERIO_ACU", "")))
-                )
+            # Reemplazar valores
+            if isinstance(val, str):
+                if val.strip() == "{{repeat:punto}}":
+                    val = punto.get("FID_ELEM", "")
+                else:
+                    for k, v in punto.items():
+                        val = val.replace(f"{{{{{k}}}}}", str(v if v is not None else ""))
+                    # Reemplazar global.xxx
+                    for k, v in datos_globales.items():
+                        val = val.replace(f"{{{{global.{k}}}}}", str(v if v is not None else ""))
+                    
 
-            new_cell = ws_resumen.cell(row=fila_template, column=col_idx, value=valor)
+            new = ws_resumen.cell(row=current_row, column=c, value=val)
 
-            # Copiar estilos
-            if cell_template.has_style:
-                new_cell.font = cell_template.font.copy()
-                new_cell.border = cell_template.border.copy()
-                new_cell.fill = cell_template.fill.copy()
-                new_cell.number_format = cell_template.number_format
-                new_cell.alignment = cell_template.alignment.copy()
+            if cell_tpl["font"]: new.font = cell_tpl["font"]
+            if cell_tpl["border"]: new.border = cell_tpl["border"]
+            if cell_tpl["fill"]: new.fill = cell_tpl["fill"]
+            new.number_format = cell_tpl["number_format"]
+            if cell_tpl["alignment"]: new.alignment = cell_tpl["alignment"]
 
-        fila_template += 1
+        current_row += 1
 
     return ws_resumen
 
 
+def agregar_registro_lse(capa_principal_data, payload_data, listado_senales, REGLAS, RANGOS_OPERACIONALES):
+
+    base = {
+        "FID_ELEM": capa_principal_data.get("FID_ELEM"),
+        "TIPO_PUNTO": capa_principal_data.get("TIPO_PUNTO"),
+        "OBSERV_ACU": capa_principal_data.get("OBSERV_ACU"),
+        "CRITERIO_ACU": capa_principal_data.get("CRITERIO_ACU"),
+        "VARIABLE_A_MEDIR": capa_principal_data.get("VARIABLE_A_MEDIR"),
+        "CIRCUITO_ACU" : payload_data.get("CIRCUITO_ACU", "")
+    }
+
+    tipo_punto = base["TIPO_PUNTO"]
+    equipo = payload_data.get("EQUIPO__DATALOGGER_INSTALADOS", ""),
+    variable_medir = base["VARIABLE_A_MEDIR"]
+
+    # siempre agregamos la fila base
+    #listado_senales.append(base)
+
+    for regla in REGLAS:
+        cond = regla["condicion"]
+
+        if (
+            tipo_punto == cond.get("TIPO_PUNTO") and
+            equipo == cond.get("EQUIPO__DATALOGGER_INSTALADOS") and
+            variable_medir == cond.get("VARIABLE_A_MEDIR")
+        ):
+            #aplicar reglas
+            for salida in regla["salidas"]:
+                nuevo = base.copy()
+
+                # agregar campos estáticos y dinámicos
+                for k, v in salida.items():
+                    if k == "identificador_datalogger":
+                        nuevo[k] = payload_data.get(v, "")
+                    else:
+                        nuevo[k] = v
+
+                #aplicar nuevo rango operacional
+                if equipo.lower() == "additel":
+                    identificador = nuevo.get("identificador_datalogger", "")
+                    rango_dinamico = RANGOS_OPERACIONALES.get(identificador)
+
+                    if rango_dinamico:
+                        nuevo["rango_operacional"] = rango_dinamico
+                    else:
+                        # fallback a lo definido en la regla, si existe
+                        if "rango_operacional" in salida:
+                            nuevo["rango_operacional"] = salida["rango_operacional"]
+                else:
+                    # si no es Additel, solo usa lo definido en salida
+                    if "rango_operacional" in salida:
+                        nuevo["rango_operacional"] = salida["rango_operacional"]
+
+                # agregar el registro generado
+                listado_senales.append(nuevo)
+
+            break  
+
 # === Lambda Handler principal que genera un workbook con una hoja por punto ===
 def lambda_handler(event, context):
+    print(event)
     cod = event["payload"].get("COD", "")
     numero_consolidado = int(event["payload"].get("numero_consolidado", 0))
     circuito_acu = event["payload"].get("CIRCUITO_ACU", "").replace(" ", "_")
@@ -479,6 +630,15 @@ def lambda_handler(event, context):
 
         listado_senales = []
 
+        #cargar reglas para pagina LSE
+        def cargar_json(json_name):
+            ruta = os.path.join(os.path.dirname(__file__), json_name)
+            with open(ruta, "r", encoding="utf-8") as f:
+                return json.load(f)
+
+        REGLAS = cargar_json("reglas_senales.json")
+        RANGOS_OPERACIONALES = cargar_json("rangos_operacionales_additel.json")
+
         for json_key in puntos_fase3:
             tmp_json = TMP_DIR / f"punto_{Path(json_key).name}"
             s3.download_file(bucket_name, json_key, str(tmp_json))
@@ -499,16 +659,27 @@ def lambda_handler(event, context):
             else:
                 code_key = tipo_punto
 
+            print(code_key)
+
             # Obtener capa principal (atributos + posiblemente imágenes en esa carpeta)
             capa_principal_data = obtener_info_de_capa_principal(bucket_name, tipo_punto, GlobalID, circuito_acu)
 
             # Para pagina inicial "LSE"
+            '''
             listado_senales.append({
                 "FID_ELEM": capa_principal_data.get("FID_ELEM"),
-                "VARIABLES_MEDICION": capa_principal_data.get("VARIABLES_MEDICION"),
+                "VARIABLE_A_MEDIR": VARIABLE_A_MEDIR,
                 "OBSERV_ACU": capa_principal_data.get("OBSERV_ACU"),
                 "CRITERIO_ACU": capa_principal_data.get("CRITERIO_ACU")
-            })
+            })'''
+            agregar_registro_lse(capa_principal_data, payload_data, listado_senales, REGLAS, RANGOS_OPERACIONALES)
+
+            # "traducir" valor de variable a medir en capa principal
+            raw_var = capa_principal_data.get("VARIABLE_A_MEDIR", "")
+            VARIABLE_A_MEDIR = variables_a_medir_traduccion.get(raw_var, raw_var)
+
+            # reemplazar tambien en la key de payload data
+            payload_data["VARIABLES_MEDICION"] = VARIABLE_A_MEDIR
 
             # Buscar imágenes dentro de Fase3
             folder = f"ArcGIS-Data/Puntos/{circuito_acu}/{GlobalID}_{tipo_punto}/Fase3/"
@@ -551,8 +722,18 @@ def lambda_handler(event, context):
                 template_path_s3,
                 template_name, code_key
             )
+        print("listado señales", listado_senales)
+       
+        
+        utc_minus_5 = timezone(timedelta(hours=-5))
+        fecha_actual = datetime.now(utc_minus_5)
+        fecha_reporte = fecha_actual.strftime("%Y-%m-%d")
 
-        generar_resumen_desde_template(wb_final,listado_senales,bucket_name,template_path_s3)
+        datos_globales = {
+            "CIRCUITO_ACU": circuito_acu.replace("_", " "),
+            "FECHA_CONSOLIDADO": fecha_reporte
+        }
+        generar_resumen_desde_template(wb_final,listado_senales, datos_globales, bucket_name,template_path_s3)
 
         #if ws_resumen.max_row == 1 and ws_resumen.max_column == 1:
         #    # si no quedó contenido en hoja resumen, borrarla

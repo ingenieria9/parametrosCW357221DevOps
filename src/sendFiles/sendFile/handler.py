@@ -35,8 +35,8 @@ def invoke_lambda_db(payload, FunctionName):
         return {"raw_response": result}
 
 
-def send_email(project_name, s3_keys, s3_client, s3_bucket, today_date_string, subject_override):
-    recipient_email = "natalia.tamayo@telemetrik.com.co,mateo.carmona@telemetrik.com.co"
+def send_email(project_name, s3_keys, s3_client, s3_bucket, today_date_string, subject_override, recipient_email):
+    #recipient_email = "natalia.tamayo@telemetrik.com.co,mateo.carmona@telemetrik.com.co,valentina.lopez@telemetrik.com.co"
     subject = subject_override
 
     sender_email = 'alarmas@telemetrik.com.co'
@@ -143,6 +143,7 @@ def lambda_handler(event, context):
         fecha_str = body.get("fecha")
         circuito_cuenca_valor = body.get("circuito")
         ACU = str(body.get("ACU", "true")).lower() == "true"
+        correo = body.get("correo", "natalia.tamayo@telemetrik.com.co,mateo.carmona@telemetrik.com.co,valentina.lopez@telemetrik.com.co")
 
     else:
         print("Ejecución programada diaria.")
@@ -225,7 +226,7 @@ def lambda_handler(event, context):
     for cod, s3_keys in finalized_circuits.items():
         subject_circuit = f"CW357221-ACU-CIR-{cod} - Entregables {today_date_string}"
         print(f"Enviando correo para circuito {cod}: {s3_keys}")
-        send_email("CW357221-MPH", s3_keys, s3_client, bucket_name, today_date_string, subject_circuit)
+        send_email("CW357221-MPH", s3_keys, s3_client, bucket_name, today_date_string, subject_circuit, correo)
 
     return {
         "statusCode": 200,

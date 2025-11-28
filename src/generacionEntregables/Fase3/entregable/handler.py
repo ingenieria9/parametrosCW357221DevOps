@@ -34,7 +34,7 @@ def lambda_handler(event, context):
     # mirar pertinencia (igual se fuerza desde grafana)
     payload_db = {
         "queryStringParameters": {
-            "query": f"""select case when "FINALIZADO" = 1 then 'Finalizado' else 'incompleto' end as "estado"  from trazabilidad_mediciones tm where "CIRCUITO_ACU" = '{CIRCUITO_ACU}'""",
+            "query": f"""select case when "FINALIZADO" = 1 then 'Finalizado' else 'incompleto' end as "estado"  from fase_3_a_b_trazabilidad_mediciones tm where "CIRCUITO_ACU" = '{CIRCUITO_ACU}'""",
             "time_column": "fecha_creacion",
             "db_name": "parametros"
         }
@@ -45,16 +45,17 @@ def lambda_handler(event, context):
     #Parsear el body 
     body = json.loads(response_db["body"])
     # Extraer el valor del campo "estado"
-    estado = body[0]["estado"]
+    #estado = body[0].get("estado", "incompleto")
+    estado = "incompleto"
     #circuito = body[0]["CIRCUITO_ACU"]
 
     print(estado)
     #print(circuito)
 
     # Si es ultimo punto, invocar a lambda de generación de informe (async) (O si es forzado por API)
-    if estado == "Finalizado" or str(forzarInforme).lower() == "true":
-        invoke_lambda(incoming_payload, informe_ARN)
-        print("Invocada lambda informe")
+    #if estado == "Finalizado" or str(forzarInforme).lower() == "true":
+        #invoke_lambda(incoming_payload, informe_ARN) #temporal
+        #print("Invocada lambda informe")
 
     return {
         "statusCode": 200,

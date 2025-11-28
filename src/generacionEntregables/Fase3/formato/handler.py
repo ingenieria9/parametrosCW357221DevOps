@@ -33,8 +33,8 @@ template_name = {"puntos_medicion": "formato-acueducto-pm.xlsx",
                    "camara": "formato-alcantarillado.xlsx"}
 
 #MPH-EJ-0601-{CIR_COD}-F01-{ACU/ALC}-EIN-{FID}
-COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F03-ACU-LSE-",
-            "vrp": "ACU/VRP/MPH-EJ-0601-{COD}-F03-ACU-LSE-", "camara": "ALC/MPH-EJ-0601-{COD}-F03-ALC-LSE-"}
+COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F03-ACU-RDP-",
+            "vrp": "ACU/VRP/MPH-EJ-0601-{COD}-F03-ACU-RDP-", "camara": "ALC/MPH-EJ-0601-{COD}-F03-ALC-RDP-"}
 
 celdas_imagenes_plantilla = {"puntos_medicion": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
                             "vrp-caudal-PLUM": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
@@ -42,6 +42,9 @@ celdas_imagenes_plantilla = {"puntos_medicion": ["B22", "C22", "D22", "E22","B23
                             "vrp-presion-Additel": ["B27", "C27", "D27", "E27","B28", "C28", "D28", "E28", "B29", "C29", "D29", "E29"],
                             "vrp-presion-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"], "camara": []}
 
+variables_a_medir_traduccion = {
+    "presion_caudal": "Presión, Caudal","presion": "Presión",
+    "caudal": "Caudal","area_velocidad": "Área, velocidad"}                        
 
 def insert_image(ws, cellNumber, imagen_path):
     img = Image(str(imagen_path))
@@ -254,6 +257,13 @@ def lambda_handler(event, context):
     else:
         value_code = tipo_punto
 
+    # "traducir" valor de variable a medir 
+    raw_var = payload_data.get("VARIABLES_MEDICION", "")
+    VARIABLES_MEDICION = variables_a_medir_traduccion.get(raw_var, raw_var)
+
+    # reemplazar tambien en la key de payload data
+    payload_data["VARIABLES_MEDICION"] = VARIABLES_MEDICION        
+
     #template_path_s3 + devolver de template key el value segun tipo de punto y variables a medir
     template_key = template_path_s3 + template_name.get(value_code)
 
@@ -402,7 +412,7 @@ def lambda_handler(event, context):
 
 
     # TO-DO: Revisar si si es pertinente
-    
+    '''
     payload_db = {
         "queryStringParameters": {
             "query": f""" WITH circuito AS (SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID" = '{GlobalID}'),
@@ -423,10 +433,9 @@ def lambda_handler(event, context):
     circuito = body[0]["CIRCUITO_ACU"]
     numero_puntos = body[0]["numero_puntos"]
     #puntos_realizados = body[0]["puntos_realizados"]
-    puntos_realizados = body[0].get("puntos_realizados", 0)
-
-    print("estado", estado)
-    print("circuito",circuito)
+    #puntos_realizados = body[0].get("puntos_realizados", 0)
+    '''
+    puntos_realizados = 0 #Temp value
 
     '''
     if estado == "Finalizado":   # Si es ultimo punto, invocar a lambda de generación de formato consolidado (async)

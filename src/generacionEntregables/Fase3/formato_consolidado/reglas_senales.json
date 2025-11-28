@@ -1,0 +1,133 @@
+[
+    {
+      "condicion": {
+        "TIPO_PUNTO": "vrp",
+        "EQUIPO__DATALOGGER_INSTALADOS": "Additel",
+        "VARIABLE_A_MEDIR": "presion"
+      },
+      "salidas": [
+        {
+          "variable": "PRESION_ENTRADA",
+          "identificador_datalogger": "IDENTIFICADOR_DATALOGGER",
+          "unidad_medida": "psi",
+          "frecuencia_medicion": 5,
+          "sensor": "Sensor de presión Additel 680A",
+          "rango_operacional": "20-100 psi",
+          "tipo_datalogger" : "Additel 680A"
+        },
+        {
+          "variable": "PRESION_SALIDA",
+          "identificador_datalogger": "CAMPO_EXTRA_2",
+          "unidad_medida": "psi",
+          "frecuencia_medicion": 5,
+          "sensor": "Sensor de presión Additel 680A",
+          "rango_operacional": "20-100 psi",
+          "tipo_datalogger" : "Additel 680A"
+        }
+      ]
+    },
+  
+    {
+      "condicion": {
+        "TIPO_PUNTO": "vrp",
+        "EQUIPO__DATALOGGER_INSTALADOS": "PLUM",
+        "VARIABLE_A_MEDIR": "presion"
+      },
+      "salidas": [
+        {
+          "variable": "PRESION_ENTRADA",
+          "identificador_datalogger": "IDENTIFICADOR_DATALOGGER",
+          "unidad_medida": "psi",
+          "frecuencia_medicion": 5,
+          "sensor": "Sensor presión integrado MacREJ5",
+          "rango_operacional": "20-200 psi",
+          "tipo_datalogger" : "PLUM MacREJ5"
+        },
+        {
+          "variable": "PRESION_SALIDA",
+          "identificador_datalogger": "IDENTIFICADOR_DATALOGGER",
+          "unidad_medida": "psi",
+          "frecuencia_medicion": 5,
+          "sensor": "Sensor presión integrado MacREJ5",
+          "rango_operacional": "20-200 psi",
+          "tipo_datalogger" : "PLUM MacREJ5"
+        }
+      ]
+    },
+  
+    {
+      "condicion": {
+        "TIPO_PUNTO": "vrp",
+        "EQUIPO__DATALOGGER_INSTALADOS": "PLUM",
+        "VARIABLE_A_MEDIR": "presion_caudal"
+      },
+      "salidas": [
+        {
+          "variable": "PRESION_ENTRADA",
+          "identificador_datalogger": "IDENTIFICADOR_DATALOGGER",
+          "unidad_medida": "psi",
+          "frecuencia_medicion": 5,
+          "sensor": "Sensor presión integrado MacREJ5",
+          "rango_operacional": "20-200 psi",
+          "tipo_datalogger" : "PLUM MacREJ5"
+        },
+        {
+          "variable": "PRESION_SALIDA",
+          "identificador_datalogger": "IDENTIFICADOR_DATALOGGER",
+          "unidad_medida": "psi",
+          "frecuencia_medicion": 5,
+          "sensor": "Sensor presión integrado MacREJ5",
+          "rango_operacional": "20-200 psi",
+          "tipo_datalogger" : "PLUM MacREJ5"
+        },
+        {
+          "variable": "CAUDAL",
+          "identificador_datalogger": "IDENTIFICADOR_DATALOGGER",
+          "unidad_medida": "l/s",
+          "frecuencia_medicion": 5,
+          "sensor":  "Caudalimetro SITRANS FMS500",
+          "rango_operacional": "0-1000 l/s",
+          "tipo_datalogger" : "PLUM MacREJ5"
+        }
+      ]
+    },
+  
+    {
+      "condicion": {
+        "TIPO_PUNTO": "vrp",
+        "EQUIPO__DATALOGGER_INSTALADOS": "PLUM",
+        "VARIABLE_A_MEDIR": "caudal"
+      },
+      "salidas": [
+        {
+          "variable": "CAUDAL",
+          "identificador_datalogger": "IDENTIFICADOR_DATALOGGER",
+          "unidad_medida": "l/s",
+          "frecuencia_medicion": 5,
+          "sensor":  "Caudalimetro SITRANS FMS500",
+          "rango_operacional": "0-1000 l/s",
+          "tipo_datalogger" : "PLUM MacREJ5"
+        }
+      ]
+    },
+  
+    {
+      "condicion": {
+        "TIPO_PUNTO": "puntos_medicion",
+        "EQUIPO__DATALOGGER_INSTALADOS": "Additel",
+        "VARIABLE_A_MEDIR": "presion"
+      },
+      "salidas": [
+        {
+          "variable": "PRESION",
+          "identificador_datalogger": "IDENTIFICADOR_DATALOGGER",
+          "unidad_medida": "psi",
+          "frecuencia_medicion": 5,
+          "sensor": "Sensor de presión Additel 680A",
+          "rango_operacional": "20-100 psi",
+          "tipo_datalogger" : "Additel 680A"
+        }
+      ]
+    }
+  ]
+  
