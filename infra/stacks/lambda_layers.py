@@ -63,6 +63,19 @@ class LayersStack(Stack):
             description="Layer con google desde ZIP",
         )               
 
+        # Pillow Layer (desde ZIP)
+        pillow_zip_path = os.path.join(layers_path, "pillow.zip")
+        self.pillow_layer = _lambda.LayerVersion(
+            self,
+            f"{project_name}-pillowLayer",
+            layer_version_name=f"{project_name}-pillow",
+            code=_lambda.Code.from_asset(pillow_zip_path),
+            compatible_runtimes=[
+                _lambda.Runtime.PYTHON_3_13
+            ],
+            description="Layer con pillow desde ZIP",
+        )          
+
         # Exponer los ARNs como outputs (para usar desde otros stacks)
         from aws_cdk import CfnOutput
 
@@ -70,3 +83,4 @@ class LayersStack(Stack):
         CfnOutput(self, "DocxtplLayerArn", value=self.docxtpl_layer.layer_version_arn)
         CfnOutput(self, "RequestsLayerArn", value=self.requests_layer.layer_version_arn)
         CfnOutput(self, "GoogleLayerArn", value=self.google_layer.layer_version_arn)
+        CfnOutput(self, "PillowLayerArn", value=self.pillow_layer.layer_version_arn)

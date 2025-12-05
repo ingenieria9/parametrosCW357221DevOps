@@ -6,8 +6,10 @@ from datetime import datetime
 from collections import defaultdict
 from DB_capa_principal import db_upsert_capa_principal,db_update_habilitado_fase3 # type: ignore
 from DB_fase1 import db_upsert_fase_1 #
-from DB_fase3 import db_upsert_fase_3_a_data,db_upsert_fase_3_a_status,db_fase_3_a_b_trazabilidad_mediciones
+from DB_fase3 import db_upsert_fase_3_a_data,db_upsert_fase_3_a_status,db_fase_3_a_b_trazabilidad_mediciones,db_update_trazabilidad
 import os
+import traceback
+
 
 # traer las variables de entorno
 DB_ACCESS_LAMBDA_ARN = os.environ["DB_ACCESS_LAMBDA_ARN"]
@@ -171,7 +173,46 @@ def get_feature_jsons(data):
                     
                 if layer_id == 3:
                     
+                    dia_desinstalacion = attrs.get("CAMPO_EXTRA_9_TEXT")
+                    hora_desinstalacion = attrs.get("CAMPO_EXTRA_8_TEXT")
+
+                    # Validar que ambos valores existan y no estén vacíos
+                    if dia_desinstalacion and hora_desinstalacion:
+                        try:
+                            # Convertir día a datetime
+                            dt_dia = datetime.fromisoformat(dia_desinstalacion)
+
+                            # Separar hora
+                            h, m, s = map(int, hora_desinstalacion.split(":"))
+
+                            # Combinar fecha y hora
+                            fecha_hora_desinstalacion = dt_dia.replace(
+                                hour=h,
+                                minute=m,
+                                second=s
+                            )
+                            
+                            #Convertir a timestamp para INSERT (timestamptz)
+                            fecha_hora_des = fecha_hora_desinstalacion.isoformat()
+
+                            print("FECHA HORA DESINSTALACION:", fecha_hora_des)
+
+                            # Guardar el valor combinado en el atributo
+                            attrs = {
+                                **attrs,
+                                "CAMPO_EXTRA_8_TEXT": fecha_hora_des
+                            }
+
+                        except Exception as e:
+                            print("Error al procesar fecha y hora:", e)
+                            # (Opcional) no modificar nada si hay error
+                    else:
+                        fecha_hora_des = None
+                        print("Día u hora vacíos → no se realiza combinación")
+
+                    
                     datalogger_2 = attrs.get("CAMPO_EXTRA_1")
+                    
                     
                     # Información del datalogger 1
                     dict_for_payload_fase_3_a_status.append({
@@ -190,7 +231,15 @@ def get_feature_jsons(data):
                         "REFERENCIA_PRESION" : attrs.get("REFERENCIA_PRESION"), #para cada datalogger
                         "REFERENCIA_PRESION_2" : attrs.get("MEDIDA_REF_PRESION_2"),
                         "CARGA_BATERIA" : attrs.get("CARGA_BATERIA"), #para cada datalogger
-                        "VARIABLES_MEDICION" : attrs.get("VARIABLES_MEDICION")                       
+                        "VARIABLES_MEDICION" : attrs.get("VARIABLES_MEDICION"),  
+                        "CAMPO_EXTRA_8_TEXT" : fecha_hora_des,
+                        "CHECK_REC" : attrs.get("CHECK_REC"),
+                        "TIEMPO_MUESTEREO" : attrs.get("TIEMPO_MUESTEREO"),
+                        "CAMPO_EXTRA_7_LIST" : attrs.get("CAMPO_EXTRA_7_LIST"),
+                        "CAMPO_EXTRA_6_TEXT" : attrs.get("CAMPO_EXTRA_6_TEXT"),
+                        "SENSORES_LIMPIOS" : attrs.get("SENSORES_LIMPIOS"),
+                        "ALMACENAMIENTO_DATOS_LOCALES" : attrs.get("ALMACENAMIENTO_DATOS_LOCALES"),
+                        "TRANSMISION_DATOS" : attrs.get("TRANSMISION_DATOS")                      
                         })
 
                     # si hay un segundo datalogger agregar información
@@ -211,7 +260,15 @@ def get_feature_jsons(data):
                             "REFERENCIA_PRESION" : attrs.get("REFERENCIA_PRESION"),
                             "REFERENCIA_PRESION_2" : attrs.get("MEDIDA_REF_PRESION_2"),
                             "CARGA_BATERIA" : attrs.get("CAMPO_EXTRA_2"), 
-                            "VARIABLES_MEDICION" : attrs.get("VARIABLES_MEDICION")                       
+                            "VARIABLES_MEDICION" : attrs.get("VARIABLES_MEDICION"),
+                            "CAMPO_EXTRA_8_TEXT" : fecha_hora_des,
+                            "CHECK_REC" : attrs.get("CHECK_REC"),
+                            "TIEMPO_MUESTEREO" : attrs.get("TIEMPO_MUESTEREO"),
+                            "CAMPO_EXTRA_7_LIST" : attrs.get("CAMPO_EXTRA_7_LIST"),
+                            "CAMPO_EXTRA_6_TEXT" : attrs.get("CAMPO_EXTRA_6_TEXT"),
+                            "SENSORES_LIMPIOS" : attrs.get("SENSORES_LIMPIOS"),
+                            "ALMACENAMIENTO_DATOS_LOCALES" : attrs.get("ALMACENAMIENTO_DATOS_LOCALES"),
+                            "TRANSMISION_DATOS" : attrs.get("TRANSMISION_DATOS")                       
                         }) 
                     
                 identificador = attrs.get("OBJECTID") 
@@ -278,7 +335,7 @@ def lambda_handler(event, context):
     # diccionarios que será utilizada para la base de datos de fase 3: "fase_3_a_status"
 
     features = get_feature_jsons(data)
-    
+    print ("PUNTOS UPDATED", features)
 
     # 3. Extraer la información del diccionario
     for feature in features:
@@ -425,7 +482,7 @@ def lambda_handler(event, context):
             
         
         
-    # Obtener (o buscar) la carpeta en S3 para cada parent_id ---
+        # Obtener (o buscar) la carpeta en S3 para cada parent_id ---
         if parent_id in prefix_cache:
             found_prefix = prefix_cache[parent_id]
            
@@ -524,51 +581,60 @@ def lambda_handler(event, context):
     payload_db_fase_3_a_status = dict(db_fase_3_a_status)
 
 
-    #GENERACION DE PAYLOADS PARA LAMBDA DE BASE DE DATOS
-    
-    json_capa_principal = json.dumps(payload_capa_principal)
-    json_fase_1 = json.dumps(payload_fase_1)
-    #print("INPUT UPSERT FASE 1: ",json_fase_1)
-    json_fase_3 = json.dumps(payload_fase_3)
-    json_payload_db_fase_3_a_status = json.dumps(payload_db_fase_3_a_status)
-    #print("INPUT UPSERT FASE 3 _ STATUS: ",json_payload_db_fase_3_a_status)
-    
-    # Para Capa principal
-    #print("capa principal")
-    payload_db_capa_principal =db_upsert_capa_principal(json_capa_principal)
-    invoke_lambda_db(payload_db_capa_principal, DB_ACCESS_LAMBDA_ARN)
 
-    # Para fase 1
-    #print("fase 1")
-    payload_db_fase_1 =db_upsert_fase_1(json_fase_1) 
-    invoke_lambda_db(payload_db_fase_1, DB_ACCESS_LAMBDA_ARN)
+    # ============================================
+    # GENERACIÓN DE PAYLOADS PARA LAMBDA DE BASE DE DATOS
+    # ============================================
 
-    ### para llenar una columna de la base de datos de capa_principal (habilitado_fase3)
-    ### teniendo en cuenta la base de datos de fase 1 y fase 2
-    payload_update_habilitado_fase3 = db_update_habilitado_fase3(parents_relation)   
-    invoke_lambda_db(payload_update_habilitado_fase3, DB_ACCESS_LAMBDA_ARN)
-    #print("Update completado: HABILITADO_FASE3 sincronizado con fase_1 y fase_2.")
+    try:
 
-    # Para fase 2
-    
-    #Para fase_3_a_data 
-    #(registro completo del formulario de fase 3. Campo único:PARENT_ID)
-    payload_db_fase_3_a_data = db_upsert_fase_3_a_data(json_fase_3)
-    invoke_lambda_db(payload_db_fase_3_a_data, DB_ACCESS_LAMBDA_ARN)
-    #print("payload db FASE 3:", payload_db_fase_3_a_data)
-    
-    #Para fase_3_a_status
-    #Registro actual de los dataloggers. Campo único: IDENTIFICADOR_DATALOGGER
-    #payload_db_fase_3_a_status = 
-    payload_db_fase_3_a_status = db_upsert_fase_3_a_status(json_payload_db_fase_3_a_status)
-    #print("PAYLOAD FASE 3 STATUS:",payload_db_fase_3_a_status)
-    invoke_lambda_db(payload_db_fase_3_a_status, DB_ACCESS_LAMBDA_ARN)
-    
-    #Para fase_3_a_b_trazabilidad_mediciones
-    print("PARENTS ID FOR FASE 3: ", parents_ID_fase_3)
-    payload_db_fase_3_a_b_trazabilidad_mediciones = db_fase_3_a_b_trazabilidad_mediciones(parents_ID_fase_3)
-    
-   # Generar los payloads para invocar lambda que genera archivos por punto
+        json_capa_principal = json.dumps(payload_capa_principal)
+        json_fase_1 = json.dumps(payload_fase_1)
+        json_fase_3 = json.dumps(payload_fase_3)
+        json_payload_db_fase_3_a_status = json.dumps(payload_db_fase_3_a_status)
+
+        # --- CAPA PRINCIPAL ---
+        payload_db_capa_principal = db_upsert_capa_principal(json_capa_principal)
+        print("Payload capa principal:", payload_db_capa_principal)
+        invoke_lambda_db(payload_db_capa_principal, DB_ACCESS_LAMBDA_ARN)
+
+        # --- FASE 1 ---
+        payload_db_fase_1 = db_upsert_fase_1(json_fase_1)
+        print("Payload fase 1:", payload_db_fase_1)
+        invoke_lambda_db(payload_db_fase_1, DB_ACCESS_LAMBDA_ARN)
+
+        # --- Actualizar columna HABILITADO_FASE3 ---
+        payload_update_habilitado_fase3 = db_update_habilitado_fase3(parents_relation)
+        print("Payload col_Hab_Fase_3:", payload_update_habilitado_fase3)
+        invoke_lambda_db(payload_update_habilitado_fase3, DB_ACCESS_LAMBDA_ARN)
+
+        # --- FASE 3 A DATA ---
+        payload_db_fase_3_a_data = db_upsert_fase_3_a_data(json_fase_3)
+        #print("Payload fase 3 a data:", payload_db_fase_3_a_data)
+        invoke_lambda_db(payload_db_fase_3_a_data, DB_ACCESS_LAMBDA_ARN)
+
+        # --- FASE 3 A STATUS ---
+        payload_db_fase_3_a_status = db_upsert_fase_3_a_status(json_payload_db_fase_3_a_status)
+        #print("Payload fase 3 a status:", payload_db_fase_3_a_status)
+        invoke_lambda_db(payload_db_fase_3_a_status, DB_ACCESS_LAMBDA_ARN)
+
+        # --- TRAZABILIDAD & FASE 3 A B ---
+        print("PARENTS ID FOR FASE 3:", parents_ID_fase_3)
+
+        if parents_ID_fase_3:
+
+            # FASE 3 A B TRAMO DE TRAZABILIDAD
+            #db_fase_3_a_b_trazabilidad_mediciones(parents_ID_fase_3)
+            print("")
+
+            
+    except Exception as e:
+        print(" ERROR DURANTE LA EJECUCIÓN DE LA SECUENCIA DE UPDATES/INSERTS EN LA BASE DE DATOS")
+        print("Detalles del error:", str(e))
+        traceback.print_exc()
+
+        
+    # Generar los payloads para invocar lambda que genera archivos por punto
 
     for count2 in payload_fase_1:
         for payload_f1 in payload_fase_1[count2]:
@@ -576,7 +642,7 @@ def lambda_handler(event, context):
             # Convertir a JSON
             json_f1 = json.dumps(payload_f1)
             #print("PAYLOAD_fase_1:",json_f1 )
-            invoke_lambda(payload_f1,0)
+            #invoke_lambda(payload_f1,0)
         
     for count3 in payload_fase_2:
         for payload_f2 in payload_fase_2[count3]:

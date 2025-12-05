@@ -96,6 +96,8 @@ def lambda_handler(event, context):
 
     #f"""SELECT CASE WHEN COUNT(*) = (SELECT COUNT(*)  FROM puntos_capa_principal p2 WHERE p2."CIRCUITO_ACU" = p1."CIRCUITO_ACU" AND p2."FID_ELEM" IN (SELECT "FID_ELEM" FROM fase_1))THEN 'Finalizado' ELSE 'Incompleto' END AS estado, p1."CIRCUITO_ACU" as "CIRCUITO_ACU" FROM puntos_capa_principal p1 WHERE p1."CIRCUITO_ACU" = ( SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID"  = '{GlobalID}')GROUP BY p1."CIRCUITO_ACU";"""
 
+    #mirar pertinencia
+    '''
     payload_db = {
         "queryStringParameters": {
             "query": f"""SELECT CASE WHEN COUNT(*) = (SELECT COUNT(*)  FROM puntos_capa_principal p2 WHERE p2."CIRCUITO_ACU" = p1."CIRCUITO_ACU"  AND p2."PUNTO_EXISTENTE" = 'Si' AND p2."FASE_INICIAL" = 'fase1'  AND p2."FID_ELEM" IN (SELECT "FID_ELEM" FROM fase_1))THEN 'Finalizado' ELSE 'Incompleto' END AS estado, p1."CIRCUITO_ACU" as "CIRCUITO_ACU" FROM puntos_capa_principal p1 WHERE p1."CIRCUITO_ACU" = ( SELECT "CIRCUITO_ACU" FROM puntos_capa_principal WHERE "GlobalID"  = '{GlobalID}')  AND p1."PUNTO_EXISTENTE" = 'Si' AND p1."FASE_INICIAL" = 'fase1' GROUP BY p1."CIRCUITO_ACU";""",
@@ -116,7 +118,9 @@ def lambda_handler(event, context):
     print(circuito)
 
     # Si es ultimo punto, invocar a lambda de generación de informe (async) (O si es forzado por API)
-    if estado == "Finalizado" or str(forzarInforme).lower() == "true":
+    if estado == "Finalizado" or
+    '''
+    if str(forzarInforme).lower() == "true":
         invoke_lambda(incoming_payload, informe_ARN)
         print("Invocada lambda informe")
 

@@ -11,6 +11,8 @@ from datetime import datetime, timezone, timedelta
 from openpyxl import load_workbook, Workbook
 from openpyxl.drawing.image import Image
 
+from PIL import Image as PImage, ExifTags
+
 
 s3 = boto3.client("s3")
 TMP_DIR = Path("/tmp")
@@ -30,11 +32,36 @@ template_name = {"puntos_medicion": "formato-acueducto-pm.xlsx",
 
 template_general = 'listado-senales'
 
-celdas_imagenes_plantilla = {"puntos_medicion": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
-                            "vrp-caudal-PLUM": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
-                            "vrp-presion_caudal-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"],
-                            "vrp-presion-Additel": ["B27", "C27", "D27", "E27","B28", "C28", "D28", "E28", "B29", "C29", "D29", "E29"],
-                            "vrp-presion-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"], "camara": []}
+celdas_imagenes_plantilla = {
+    "vrp-presion-Additel": {
+        "inst": ["B33", "C33", "D33", "B34", "C34", "D34", "B35", "C35", "D35"],
+        "desc": ["B37", "C37", "D37", "B38", "C38", "D38", "B39", "C39", "D39"]
+    },
+    "vrp-presion-PLUM": {
+        "inst": ["B29", "C29", "D29", "B30", "C30", "D30", "B31", "C31", "D31"],
+        "desc": ["B33", "C33", "D33",  "B34", "C34", "D34", "B35", "C35", "D35"]
+    },
+    "vrp-presion_caudal-PLUM": {
+        "inst": ["B29", "C29", "D29", "B30", "C30", "D30", "B31", "C31", "D31"],
+        "desc": ["B33", "C33", "D33"  "B34", "C34", "D34", "B35", "C35", "D35"]
+    },
+    "vrp-caudal-PLUM": {
+        "inst": ["B25", "C25", "D25", "B26", "C26", "D26", "B27", "C27", "D27"],
+        "desc": ["B29", "C29", "D29", "B30", "C30", "D30", "B31", "C31", "D31"]
+    },
+    "puntos_medicion": {
+        "inst": ["B26", "C26", "D26", "B27", "C27", "D27", "B28", "C28", "D28"],
+        "desc": ["B30", "C30", "D30", "B31", "C31", "D31", "B32", "C32", "D32"]
+    },
+    "camara": { #to be defined
+        "inst": ["B24", "C24", "D24"],
+        "desc": ["B28", "C28", "D28"]
+    }
+}
+
+datalogger_traduccion = {
+"Additel" : "Additel 680A", "PLUM" : "PLUM MacREJ5"
+}
 
 variables_a_medir_traduccion = {
     "presion_caudal": "Presión, Caudal","presion": "Presión",
@@ -42,6 +69,119 @@ variables_a_medir_traduccion = {
 
 # === Funciones auxiliares ===
 
+def obtener_fecha_exif(image_source):
+    try:
+        if isinstance(image_source, (str, Path)):
+            img = PImage.open(str(image_source))
+        else:
+            # BytesIO
+            image_source.seek(0)
+            img = PImage.open(image_source)
+
+        exif_data = img._getexif()
+        if not exif_data:
+            return None
+
+        exif = {
+            ExifTags.TAGS.get(tag, tag): value
+            for tag, value in exif_data.items()
+        }
+
+        dt = exif.get("DateTimeOriginal") or exif.get("DateTime")
+        if not dt:
+            return None
+
+        return datetime.strptime(dt, "%Y:%m:%d %H:%M:%S")
+
+    except Exception:
+        return None
+
+def clasificar_imagenes_por_fecha(imagen_sources):
+    imagenes_con_fecha = []
+
+    for src in imagen_sources:
+        fecha = obtener_fecha_exif(src)
+        if fecha:
+            imagenes_con_fecha.append((src, fecha))
+    
+    if not imagenes_con_fecha:
+        return [], []
+
+    imagenes_con_fecha.sort(key=lambda x: x[1])
+
+    dia_x = imagenes_con_fecha[0][1].date()
+    dia_z = imagenes_con_fecha[-1][1].date()
+
+    inst = []
+    desc = []
+
+    for src, fecha in imagenes_con_fecha:
+        if fecha.date() == dia_x:
+            inst.append(src)
+        else:
+            desc.append(src)
+
+    return inst, desc
+
+
+def insert_image(ws, cellNumber, image_source):
+
+    # === 1) Preparar la imagen PIL ===
+    if isinstance(image_source, PImage.Image):
+        pil_img = image_source
+
+    elif isinstance(image_source, (str, Path)):
+        pil_img = PImage.open(str(image_source))
+
+    else:
+        # asumimos BytesIO
+        image_source.seek(0)
+        pil_img = PImage.open(image_source)
+
+    pil_img.load()  # asegurar que está cargada en memoria
+
+
+    # Convertir PIL → openpyxl.Image 
+    # openpyxl NO acepta PIL directamente, necesita un archivo o BytesIO
+    temp_bytes = BytesIO()
+    pil_img.save(temp_bytes, format="PNG")
+    temp_bytes.seek(0)
+
+    img = Image(temp_bytes)  # esta es la imagen de openpyxl
+
+
+    #  Obtener info de la celda
+    cell = ws[cellNumber]
+
+    col_letter = cell.column_letter
+    row_idx = cell.row
+
+    col_dim = ws.column_dimensions.get(col_letter)
+    row_dim = ws.row_dimensions.get(row_idx)
+
+    col_width = col_dim.width if (col_dim and col_dim.width) else 8
+    row_height = row_dim.height if (row_dim and row_dim.height) else 15
+
+    max_width_px = col_width * 8
+    max_height_px = row_height * 1.33
+
+
+    #  Calcular escala
+    if pil_img.width == 0 or pil_img.height == 0:
+        ratio = 1.0
+    else:
+        ratio = min(max_width_px / pil_img.width,
+                    max_height_px / pil_img.height,
+                    1.0)
+
+    img.width = int(pil_img.width * ratio)
+    img.height = int(pil_img.height * ratio)
+
+
+    # Insertar en Excel
+    ws.add_image(img, cellNumber)
+    
+'''
 def insert_image(ws, cellNumber, image_source):
     if isinstance(image_source, (str, Path)):
         img = Image(str(image_source))
@@ -78,6 +218,7 @@ def insert_image(ws, cellNumber, image_source):
     img.height = int(img.height * ratio)
 
     ws.add_image(img, cellNumber)
+'''
 
 def normalizar_booleans(data):
     if isinstance(data, dict):
@@ -95,6 +236,15 @@ def normalizar_booleans(data):
 
 def convertir_valores_fecha(data):
     def convertir(k, v):
+        if k == "CAMPO_EXTRA_8_TEXT" and isinstance(v, str):
+            try:
+                dt = datetime.fromisoformat(v)  # Parsear fecha ISO8601
+                dt = dt.replace(tzinfo=None)   # Quitar timezone
+                return dt.strftime("%Y-%m-%d %H:%M:%S")
+            except Exception:
+                pass
+
+
         if "fecha" in k.lower():
             try:
                 if isinstance(v, (int, float)) or (isinstance(v, str) and v.isdigit()):
@@ -324,12 +474,37 @@ def generar_hoja_desde_template(
                         continue
 
     # === Insertar imágenes en las celdas asignadas ===
+    '''
     for celda, img_src in zip(celdas_imagenes, imagen_streams):
         try:
             insert_image(ws_new, celda, img_src)
         except Exception:
             # si falla una imagen, seguimos con las siguientes
             continue
+    '''
+    # Clasificar imágenes según EXIF (inst / desc)
+    inst_imgs, desc_imgs = clasificar_imagenes_por_fecha(imagen_streams)
+
+    # Obtener celdas desde la plantilla
+    celdas = celdas_imagenes_plantilla.get(code_key, {})
+    celdas_inst = celdas.get("inst", [])
+    celdas_desc = celdas.get("desc", [])
+
+    # Insertar imágenes de instalación
+    for celda, img_src in zip(celdas_inst, inst_imgs):
+        try:
+            insert_image(ws_new, celda, img_src)
+        except Exception:
+            continue
+
+    # Insertar imágenes de desinstalación
+    for celda, img_src in zip(celdas_desc, desc_imgs):
+        try:
+            insert_image(ws_new, celda, img_src)
+        except Exception:
+            continue
+
+
 
     return ws_new
 
@@ -397,7 +572,7 @@ def generar_resumen_desde_template(wb_final, lista_puntos, datos_globales, bucke
             pass
 
     # === AJUSTE MANUAL DE CELDAS ===
-    for col in ["B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]:
+    for col in ["B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"]:
         ws_resumen.column_dimensions[col].width = 22  # ancho ideal            
 
     # === Copiar formato condicional ===
@@ -505,18 +680,21 @@ def generar_resumen_desde_template(wb_final, lista_puntos, datos_globales, bucke
 
 
 def agregar_registro_lse(capa_principal_data, payload_data, listado_senales, REGLAS, RANGOS_OPERACIONALES):
-
+    payload_data = convertir_valores_fecha(payload_data)
+    capa_principal_data = convertir_valores_fecha(capa_principal_data)
     base = {
         "FID_ELEM": capa_principal_data.get("FID_ELEM"),
         "TIPO_PUNTO": capa_principal_data.get("TIPO_PUNTO"),
         "OBSERV_ACU": capa_principal_data.get("OBSERV_ACU"),
         "CRITERIO_ACU": capa_principal_data.get("CRITERIO_ACU"),
         "VARIABLE_A_MEDIR": capa_principal_data.get("VARIABLE_A_MEDIR"),
-        "CIRCUITO_ACU" : payload_data.get("CIRCUITO_ACU", "")
+        "CIRCUITO_ACU" : payload_data.get("CIRCUITO_ACU", ""),
+        "FECHA_FASE3" : payload_data.get("FECHA_FASE3", ""),
+        "CAMPO_EXTRA_8_TEXT" : payload_data.get("CAMPO_EXTRA_8_TEXT", ""),
     }
 
     tipo_punto = base["TIPO_PUNTO"]
-    equipo = payload_data.get("EQUIPO__DATALOGGER_INSTALADOS", ""),
+    equipo = payload_data.get("EQUIPO__DATALOGGER_INSTALADOS", "")
     variable_medir = base["VARIABLE_A_MEDIR"]
 
     # siempre agregamos la fila base
@@ -568,6 +746,8 @@ def lambda_handler(event, context):
     cod = event["payload"].get("COD", "")
     numero_consolidado = int(event["payload"].get("numero_consolidado", 0))
     circuito_acu = event["payload"].get("CIRCUITO_ACU", "").replace(" ", "_")
+    FECHA_INICIO_MEDICION = event["payload"].get("FECHA_INICIO_MEDICION", "")
+    FECHA_FIN_MEDICION = event["payload"].get("FECHA_FIN_MEDICION", "")
 
     # --- SISTEMA DE LOCK POR CIRCUITO ---
     lock_key = f"locks_formato/fase3/{circuito_acu}.lock"
@@ -681,6 +861,9 @@ def lambda_handler(event, context):
             # reemplazar tambien en la key de payload data
             payload_data["VARIABLES_MEDICION"] = VARIABLE_A_MEDIR
 
+            # reemplazar en la key equipo datalogger instalado
+            payload_data["EQUIPO__DATALOGGER_INSTALADOS"] = datalogger_traduccion.get(payload_data.get("EQUIPO__DATALOGGER_INSTALADOS", ""))
+
             # Buscar imágenes dentro de Fase3
             folder = f"ArcGIS-Data/Puntos/{circuito_acu}/{GlobalID}_{tipo_punto}/Fase3/"
             resp = s3.list_objects_v2(Bucket=bucket_name, Prefix=folder)
@@ -688,7 +871,9 @@ def lambda_handler(event, context):
             if "Contents" in resp:
                 imagen_keys = [x["Key"] for x in resp["Contents"] if x["Key"].lower().endswith((".jpg", ".jpeg", ".png"))]
 
-            # Buscar imágenes dentro de Capa_principal y agregarlas
+            
+            #Ya no se necesitan las imagenes de capa principal
+            '''
             folder_cp = f"ArcGIS-Data/Puntos/{circuito_acu}/{GlobalID}_{tipo_punto}/Capa_principal/"
             resp_cp = s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_cp)
             if "Contents" in resp_cp:
@@ -697,6 +882,7 @@ def lambda_handler(event, context):
                 for k in imagen_keys_cp:
                     if k not in imagen_keys:
                         imagen_keys.append(k)
+            '''
 
             # También soportar attachments que vengan dentro del JSON payload (campo attachments o attachments list)
             attachments = []
@@ -731,8 +917,11 @@ def lambda_handler(event, context):
 
         datos_globales = {
             "CIRCUITO_ACU": circuito_acu.replace("_", " "),
-            "FECHA_CONSOLIDADO": fecha_reporte
+            "FECHA_CONSOLIDADO": fecha_reporte,
+            "FECHA_INICIO_MEDICION" : FECHA_INICIO_MEDICION,
+            "FECHA_FIN_MEDICION" : FECHA_FIN_MEDICION
         }
+        print(datos_globales)
         generar_resumen_desde_template(wb_final,listado_senales, datos_globales, bucket_name,template_path_s3)
 
         #if ws_resumen.max_row == 1 and ws_resumen.max_column == 1:

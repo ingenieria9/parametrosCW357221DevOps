@@ -9,7 +9,7 @@ grafana_api_access = os.environ["GRAFANA_API_ACCESS"]
 
 class LambdasFileGenConstruct(Construct):
     def __init__(self, scope: Construct, id: str, bucket, folder_name: str, project_name: str,  db_access_lambda_arn: str, openpyxl_layer: _lambda.ILayerVersion,
-        docxtpl_layer: _lambda.ILayerVersion, requests_layer: _lambda.ILayerVersion):
+        docxtpl_layer: _lambda.ILayerVersion, requests_layer: _lambda.ILayerVersion, pillow_layer: _lambda.ILayerVersion):
         super().__init__(scope, id)
 
         # Referenciar la Layer existente (por ARN)
@@ -39,7 +39,7 @@ class LambdasFileGenConstruct(Construct):
                 "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn,
             },
             function_name=f"{project_name}-FormatoConsolidado-{folder_name}",
-            layers=[openpyxl_layer],
+            layers=[openpyxl_layer, pillow_layer],
             timeout=Duration.seconds(120),
             memory_size=512
         )        
@@ -59,7 +59,7 @@ class LambdasFileGenConstruct(Construct):
                 "FORMATO_CONSOLIDADO_LAMBDA_ARN" : self.formato_consolidado.function_arn
             },
             function_name=f"{project_name}-Formato-{folder_name}",
-            layers=[openpyxl_layer],
+            layers=[openpyxl_layer, pillow_layer],
             timeout=Duration.seconds(120)
         )
 

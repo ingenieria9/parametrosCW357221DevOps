@@ -289,7 +289,7 @@ def obtener_imagenes_grafana(doc, circuito_cuenca_valor, circuito_cuenca):
         panel_render_sizes = {
             8:  {"width": 800, "height": 600},
             9:  {"width": 1200, "height": 600},
-            10: {"width": 1200, "height": 600},
+            10: {"width": 1000, "height": 800},
             12:  {"width": 800, "height": 600}
         }
 
@@ -297,7 +297,7 @@ def obtener_imagenes_grafana(doc, circuito_cuenca_valor, circuito_cuenca):
         panel_word_sizes = {
             8:  {"width": Cm(8), "height": Cm(6)},
             9:  {"width": Cm(12), "height": Cm(6)},
-            10: {"width": Cm(12), "height": Cm(6)},
+            10: {"width": Cm(10), "height": Cm(8)},
             12:  {"width": Cm(8), "height": Cm(6)},
         }        
 

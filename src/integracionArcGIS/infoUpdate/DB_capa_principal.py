@@ -164,8 +164,8 @@ def db_update_habilitado_fase3(parents_relation):
             SET "HABILITADO_FASE3" = f.habilitado_medicion
             FROM fase_1 f
             WHERE p."GlobalID" = f."PARENT_ID"
-            AND f.habilitado_medicion IS NOT NULL;
-            AND p."GlobalID" IN {global_ids_tupla}
+            AND f.habilitado_medicion IS NOT NULL
+            AND p."GlobalID" IN {global_ids_tupla};
 
 
     """

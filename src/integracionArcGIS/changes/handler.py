@@ -165,8 +165,8 @@ def lambda_handler(event, context):
     else: # B. Evento de Cron
         
         # Filtra por el día actual
-        #select_fecha = date.today()  
-        select_fecha = date(2025, 11, 18)
+        select_fecha = date.today()  
+        #select_fecha = date(2025, 11, 18)
         select_circuito = None
         parents = []
         
@@ -200,7 +200,7 @@ def lambda_handler(event, context):
 
     
     payload_changes = json.dumps(data)
-    print("payload",json.dumps(data))
+    print("payload FINAL",json.dumps(data))
     
     
     #Subir a S3
@@ -479,43 +479,48 @@ def query_layer(token,fase,where_clause):
     #print("Respuesta:", response_API_query_layer.text[:500])  # imprime primeros 500 caracteres
     return response_API_query_layer
 
-def query_capa_principal(data,token,parents):
+def query_capa_principal(data, token, parents, max_chunk=15):
+    """
+    Ejecuta query de capa principal partiendo la lista parents en chunks
+    para evitar errores por un where_clause demasiado grande.
+    """
+    
+    # Si la lista es muy grande, partimos en chunks recursivamente
+    if len(parents) > max_chunk:
+        mid = len(parents) // 2
+        first_half = parents[:mid]
+        second_half = parents[mid:]
+        
+        # Ejecutar para ambas mitades
+        query_capa_principal(data, token, first_half, max_chunk)
+        query_capa_principal(data, token, second_half, max_chunk)
+        return  # ya procesado
+    
+    # -------------------------
+    #   PROCESAMIENTO NORMAL
+    # -------------------------
+    
     capa_principal_update = []
-    #Generamos el formato para el item "where" en la peticion hhtp
+
+    # Armar el WHERE
     where_clause = "GlobalID IN (" + ", ".join(f"'{{{parent}}}'" for parent in parents) + ")"
-    print(where_clause)
-    
-    #Vamos a realizar un http get request con esta URL + el token  
-    response_API_query_layer_capa_principal = query_layer(token,0,where_clause)
-    #print("Status:", response_API_query_layer.status_code)
-    
-    #print("Respuesta:", response_API_query_layer_capa_principal.text[:1000])  # imprime primeros 500 caracteres
-    
-    
-    # Vamos a recibir un json con la información de la capa principal
+
+    # Llamar API
+    response_API_query_layer_capa_principal = query_layer(token, 0, where_clause)
     response_API_query_layer_capa_principal_dict = response_API_query_layer_capa_principal.json()
-    
-    # recorrer el json recibido y tomar los atributos (tanto para guardar cda punto en s3 como para
-    # almacenar en la base de datos)
+
+    # Recorrer resultados
     for feature in response_API_query_layer_capa_principal_dict.get("features", []):
-        
         atributos = feature.get("attributes", {})
-        geometria = feature.get("geometry",{})
-        #identificador = atributos.get("GlobalID")
-        #parent_id = atributos.get("PARENT_ID")
-        
-        
-        #data_update = json.loads(payload_format)
-    
-        # atributos de la capa_principal
-        # crear el bloque para agregar dentro de updates
+        geometria = feature.get("geometry", {})
+
         capa_principal_update = {
             "attributes": atributos,
-            "geometry" : geometria
+            "geometry": geometria
         }
-        
-        # agregar al diccionario principal
-        data["edits"][0]["features"]["updates"].append(capa_principal_update) 
+
+        data["edits"][0]["features"]["updates"].append(capa_principal_update)
+
  
 def filtro_layer(data,token,fase,where_clause,select_fecha,select_circuito,parents):
     fase_update = []
@@ -669,3 +674,5 @@ def filtro_layer(data,token,fase,where_clause,select_fecha,select_circuito,paren
                 
                
     return parents,global_id_fase1,global_id_fase2,global_id_fase3       
+    
+        

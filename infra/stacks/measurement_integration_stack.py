@@ -9,7 +9,8 @@ from aws_cdk import (
     aws_events_targets as targets,
     Duration,
     aws_s3 as s3, 
-    aws_ssm as ssm
+    aws_ssm as ssm,
+    aws_s3_notifications as s3n
 )
 from constructs import Construct
 import os
@@ -28,7 +29,7 @@ class MeasurementIntStack(Stack):
         )
 
         # ======================================================
-        # Parámetro: Service Account JSON
+        # SSM --> Parámetro: Service Account JSON
         # ======================================================
         service_account_param = ssm.StringParameter(
             self,
@@ -67,7 +68,7 @@ class MeasurementIntStack(Stack):
             },
             layers=[drive_layer],
             timeout=Duration.seconds(60)
-        )
+        )            
 
         # Acceso al bucket
         bucket.grant_read_write(drive_integration_lambda)
@@ -77,6 +78,17 @@ class MeasurementIntStack(Stack):
         service_account_param.grant_read(drive_integration_lambda)
         start_token_param.grant_read(drive_integration_lambda)
         start_token_param.grant_write(drive_integration_lambda)
+
+        events.Rule(
+            self, "cronMeasurementIntegration",  rule_name = f"{project_name}-cronMeasurementIntegration",
+            schedule=events.Schedule.cron(
+                minute="30",
+                hour="17,21",  # 12:30 pm UTC-5 y 4:30 pm UTC-5
+                week_day="MON-SAT"
+            ),
+            targets=[targets.LambdaFunction(drive_integration_lambda)],
+            enabled = False
+        )           
 
         # Por crear: Lambda que se triggerea por put object a s3 (carpeta drive_uploads/).
         # Esta lambda tiene permisos para llamar a db_access_lambda_arn y asi almacenar 
@@ -106,4 +118,16 @@ class MeasurementIntStack(Stack):
                 actions=["lambda:InvokeFunction"],
                 resources=[db_access_lambda_arn]
             )
-        )
+        ) 
+
+        # Trigger S3 → Lambda (solo para archivos CSV en Campo_Data_Uploads/)
+        notification = s3n.LambdaDestination(upload_data_lambda)
+        bucket.add_event_notification(
+            s3.EventType.OBJECT_CREATED_PUT,
+            notification,
+            s3.NotificationKeyFilter(
+                prefix="Campo_Data_Uploads/",
+                suffix=".csv",
+            ),
+            enabled = False
+        )        

@@ -69,7 +69,8 @@ filegen_stack = FileGenStack(
     db_access_lambda_arn=db_stack.db_access_lambda_arn, 
     openpyxl_layer=layers_stack.openpyxl_layer,
     docxtpl_layer=layers_stack.docxtpl_layer,
-    requests_layer = layers_stack.requests_layer
+    requests_layer = layers_stack.requests_layer,
+    pillow_layer = layers_stack.pillow_layer
 )
 
 # Stack conversor docx a pdf (lambda en ECR + trigger S3)

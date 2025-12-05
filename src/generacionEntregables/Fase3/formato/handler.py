@@ -9,6 +9,8 @@ import os
 from datetime import datetime, timezone, timedelta
 import re
 
+from PIL import Image as PImage, ExifTags
+
 
 s3 = boto3.client("s3")
 client_lambda_db = boto3.client("lambda", region_name="us-east-1") 
@@ -36,33 +38,122 @@ template_name = {"puntos_medicion": "formato-acueducto-pm.xlsx",
 COD_name = {"puntos_medicion": "ACU/PM/MPH-EJ-0601-{COD}-F03-ACU-RDP-",
             "vrp": "ACU/VRP/MPH-EJ-0601-{COD}-F03-ACU-RDP-", "camara": "ALC/MPH-EJ-0601-{COD}-F03-ALC-RDP-"}
 
-celdas_imagenes_plantilla = {"puntos_medicion": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
+'''celdas_imagenes_plantilla = {"puntos_medicion": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
                             "vrp-caudal-PLUM": ["B22", "C22", "D22", "E22","B23", "C23", "D23", "E23", "B24", "C24", "D24", "E24"],
                             "vrp-presion_caudal-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"],
                             "vrp-presion-Additel": ["B27", "C27", "D27", "E27","B28", "C28", "D28", "E28", "B29", "C29", "D29", "E29"],
                             "vrp-presion-PLUM": ["B24", "C24", "D24", "E24","B25", "C25", "D25", "E25", "B26", "C26", "D26", "E26"], "camara": []}
+'''
+celdas_imagenes_plantilla = {
+    "vrp-presion-Additel": {
+        "inst": ["B33", "C33", "D33", "B34", "C34", "D34", "B35", "C35", "D35"],
+        "desc": ["B37", "C37", "D37", "B38", "C38", "D38", "B39", "C39", "D39"]
+    },
+    "vrp-presion-PLUM": {
+        "inst": ["B29", "C29", "D29", "B30", "C30", "D30", "B31", "C31", "D31"],
+        "desc": ["B33", "C33", "D33",  "B34", "C34", "D34", "B35", "C35", "D35"]
+    },
+    "vrp-presion_caudal-PLUM": {
+        "inst": ["B29", "C29", "D29", "B30", "C30", "D30", "B31", "C31", "D31"],
+        "desc": ["B33", "C33", "D33"  "B34", "C34", "D34", "B35", "C35", "D35"]
+    },
+    "vrp-caudal-PLUM": {
+        "inst": ["B25", "C25", "D25", "B26", "C26", "D26", "B27", "C27", "D27"],
+        "desc": ["B29", "C29", "D29", "B30", "C30", "D30", "B31", "C31", "D31"]
+    },
+    "puntos_medicion": {
+        "inst": ["B26", "C26", "D26", "B27", "C27", "D27", "B28", "C28", "D28"],
+        "desc": ["B30", "C30", "D30", "B31", "C31", "D31", "B32", "C32", "D32"]
+    },
+    "camara": { #to be defined
+        "inst": ["B24", "C24", "D24"],
+        "desc": ["B28", "C28", "D28"]
+    }
+}
+
 
 variables_a_medir_traduccion = {
     "presion_caudal": "Presión, Caudal","presion": "Presión",
     "caudal": "Caudal","area_velocidad": "Área, velocidad"}                        
 
+
+def obtener_fecha_exif(imagen_path):
+    try:
+        img = PImage.open(imagen_path)
+        exif_data = img._getexif()
+        if not exif_data:
+            return None
+
+        exif = {
+            ExifTags.TAGS.get(tag, tag): value
+            for tag, value in exif_data.items()
+        }
+
+        fecha_raw = exif.get("DateTimeOriginal") or exif.get("DateTime")
+        if not fecha_raw:
+            return None
+        print(fecha_raw)
+        return datetime.strptime(fecha_raw, "%Y:%m:%d %H:%M:%S")
+    
+    except Exception:
+        return None
+
+def clasificar_imagenes_por_fecha(imagen_paths):
+    imagenes_con_fecha = []
+
+    for path in imagen_paths:
+        fecha = obtener_fecha_exif(path)
+        if fecha is None:
+            continue
+        imagenes_con_fecha.append((path, fecha))
+    
+    if not imagenes_con_fecha:
+        return [], []
+
+    # Ordenar por fecha ascendente
+    imagenes_con_fecha.sort(key=lambda x: x[1])
+
+    # Día X = instalación (más antiguo)
+    dia_x = imagenes_con_fecha[0][1].date()
+    # Día Z = desinstalación (más reciente)
+    dia_z = imagenes_con_fecha[-1][1].date()
+
+    inst = []
+    desc = []
+
+    for path, fecha in imagenes_con_fecha:
+        if fecha.date() == dia_x:
+            inst.append(path)
+        else:
+            desc.append(path)
+
+    return inst, desc        
+
+
+
 def insert_image(ws, cellNumber, imagen_path):
+
+    # Abrir imagen con PIL para poder leer dimensiones reales
+    pil_img = PImage.open(str(imagen_path))
+
+    # Crear imagen para openpyxl
     img = Image(str(imagen_path))
+
     cell = ws[cellNumber]
 
     # Medidas de la celda
-    col_width = ws.column_dimensions[cell.column_letter].width   # ancho columna en unidades de Excel
-    row_height = ws.row_dimensions[cell.row].height             # alto fila en puntos
+    col_width = ws.column_dimensions[cell.column_letter].width or 8
+    row_height = ws.row_dimensions[cell.row].height or 15
 
     # Conversión aproximada a píxeles
     max_width = col_width * 8
     max_height = row_height * 1.0
 
-    # Escala manteniendo proporciones
-    ratio = min(max_width / img.width, max_height / img.height)
+    # Escala manteniendo proporciones (usamos dimensiones reales de PIL)
+    ratio = min(max_width / pil_img.width, max_height / pil_img.height)
 
-    img.width = img.width * ratio
-    img.height = img.height * ratio
+    img.width = pil_img.width * ratio
+    img.height = pil_img.height * ratio
 
     ws.add_image(img, cellNumber)
 
@@ -98,7 +189,7 @@ def convertir_valores_fecha(data):
 
     def convertir_fecha(key, valor):
         try:
-            if "fecha" in key.lower():
+            if "fecha" in key.lower() or "CAMPO_EXTRA_8_TEXT" in key:
                 if isinstance(valor, (int, float)) or (isinstance(valor, str) and valor.isdigit()):
                     timestamp = int(valor) / 1000  # convertir a segundos
                     # Interpretar en UTC y convertir a UTC-5
@@ -143,8 +234,6 @@ def obtener_consecutivo_s3(bucket, prefix, cod_name):
                     max_consec = num
 
     return f"{max_consec + 1:03}"
-
-
 
 
     # Tomar el más reciente por fecha
@@ -270,6 +359,9 @@ def lambda_handler(event, context):
     # Paths locales en Lambda (/tmp)
     template_path = TMP_DIR / "plantilla.xlsx"
     imagen_keys = event["attachments"]
+
+    # IMAGENES EXTRA DE CAPA PRINCIPAL (NO APLICA EN FASE 3)
+    '''
     # otras imagenes extra de capa principal
     folder_imagen_extra = f"ArcGIS-Data/Puntos/{CIRCUITO_ACU}/{GlobalID}_{tipo_punto}/Capa_principal/"
     # Listar objetos PNG en el folder del bucket
@@ -285,6 +377,7 @@ def lambda_handler(event, context):
                 imagen_keys.append(key)
     # Eliminar duplicados si existen
     imagen_keys = list(set(imagen_keys))
+    '''
 
     imagen_paths = [TMP_DIR / Path(k).name for k in imagen_keys]
     output_path = TMP_DIR / "output.xlsx"
@@ -295,6 +388,7 @@ def lambda_handler(event, context):
     
     #descargar imagenes
     for key, path in zip(imagen_keys, imagen_paths):
+        print("descargando", key)
         s3.download_file(bucket_name, key, str(path))
 
     # Cargar plantilla Excel
@@ -359,13 +453,28 @@ def lambda_handler(event, context):
                     if placeholder in cell.value:
                         cell.value = cell.value.replace(placeholder, str(value))
 
-    # Insertar imágenes (en celdas específicas)
-    #celdas_imagenes = ["B40", "C40", "D40", "E40","B41", "C41", "D41", "E41", "B42", "C42", "D42", "E42"]
-    celdas_imagenes = celdas_imagenes_plantilla.get(value_code)
+    # INSERTAR IMAGENES
+    celdas_tipo = celdas_imagenes_plantilla[value_code]
+    print(celdas_tipo)
 
+    # Clasificar imágenes por EXIF
+    inst_imgs, desc_imgs = clasificar_imagenes_por_fecha(imagen_paths)
+
+    print("inst_imgs", inst_imgs)
+    print("desc_imgs",desc_imgs )
+
+    # Inserción instalación
+    for celda, img in zip(celdas_tipo["inst"], inst_imgs):
+        insert_image(ws, celda, img)
+
+    # Inserción desinstalación
+    for celda, img in zip(celdas_tipo["desc"], desc_imgs):
+        insert_image(ws, celda, img)
+
+    #celdas_imagenes = celdas_imagenes_plantilla.get(value_code)
     #Ciclo para insertar las imagenes en las celdas disponibles
-    for celda, imagen_path in zip(celdas_imagenes, imagen_paths):
-        insert_image(ws, celda, imagen_path)
+    #for celda, imagen_path in zip(celdas_imagenes, imagen_paths):
+    #    insert_image(ws, celda, imagen_path)
 
     # Guardar archivo final
     wb.save(output_path)
@@ -411,6 +520,46 @@ def lambda_handler(event, context):
     s3.upload_file(str(output_path), bucket_name, output_key)
 
 
+    # BUSCAR EN LA DB FECHA_INICIO_MEDICIONES Y FECHA_FIN_MEDICIONES
+    payload_db = {
+        "queryStringParameters": {
+            "query": f"""SELECT "FECHA_INICIO_MEDICION" from fase_3_a_b_trazabilidad_mediciones fabtm where "CIRCUITO_ACU" = '{event["payload"]["CIRCUITO_ACU"]}'""",
+            "time_column": "FECHA_INICIO_MEDICION",
+            "db_name": "parametros"
+        }
+    }
+    response_db =invoke_lambda_db(payload_db, db_access_arn)
+    body = json.loads(response_db["body"])
+    FECHA_INICIO_MEDICION = body[0]["FECHA_INICIO_MEDICION"]
+
+    # ajustar utc
+    dt = datetime.strptime(FECHA_INICIO_MEDICION, "%Y-%m-%d %H:%M:%S")
+    # Ajustar a UTC-5 (restar 5 horas)
+    dt = dt - timedelta(hours=5)
+    # Convertir de nuevo a string si lo necesitas igual que antes
+    FECHA_INICIO_MEDICION = dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    payload_db = {
+        "queryStringParameters": {
+            "query": f"""SELECT "FECHA_FIN_MEDICION" from fase_3_a_b_trazabilidad_mediciones fabtm where "CIRCUITO_ACU" = '{event["payload"]["CIRCUITO_ACU"]}'""",
+            "time_column": "FECHA_FIN_MEDICION",
+            "db_name": "parametros"
+        }
+    }
+    response_db =invoke_lambda_db(payload_db, db_access_arn)
+    body = json.loads(response_db["body"])
+    FECHA_FIN_MEDICION = body[0]["FECHA_FIN_MEDICION"]
+
+    # ajustar utc
+    dt = datetime.strptime(FECHA_FIN_MEDICION, "%Y-%m-%d %H:%M:%S")
+    # Ajustar a UTC-5 (restar 5 horas)
+    dt = dt - timedelta(hours=5)
+    # Convertir de nuevo a string si lo necesitas igual que antes
+    FECHA_FIN_MEDICION = dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    print(FECHA_FIN_MEDICION)
+    print(FECHA_INICIO_MEDICION)
+
     # TO-DO: Revisar si si es pertinente
     '''
     payload_db = {
@@ -443,11 +592,12 @@ def lambda_handler(event, context):
         invoke_lambda(incoming_payload, FORMATO_CONSOLIDADO_LAMBDA_ARN)
         print("Invocada lambda formato consolidado")    
     '''
+    
     if str(forzarInforme).lower() == "true": #si viene de la API Forzado a ejecutarse
-        incoming_payload = { "payload": { "COD": code_data, "numero_consolidado" : puntos_realizados, "CIRCUITO_ACU" : CIRCUITO_ACU } }
+        incoming_payload = { "payload": { "COD": code_data, "numero_consolidado" : puntos_realizados, "CIRCUITO_ACU" : CIRCUITO_ACU, "FECHA_FIN_MEDICION" : FECHA_FIN_MEDICION, "FECHA_INICIO_MEDICION" : FECHA_INICIO_MEDICION } } 
+        print(incoming_payload)
         invoke_lambda(incoming_payload, FORMATO_CONSOLIDADO_LAMBDA_ARN)
         print("Invocada lambda formato consolidado")    
-    
     return {
         "status": "ok",
         "output_file": f"s3://{bucket_name}/{output_key}"

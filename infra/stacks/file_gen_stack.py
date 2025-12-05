@@ -5,7 +5,7 @@ from .lambdas_file_gen_construct import LambdasFileGenConstruct
 
 class FileGenStack(Stack):
     def __init__(self, scope: Construct, id: str, bucket, project_name: str, db_access_lambda_arn: str,  openpyxl_layer: _lambda.ILayerVersion,
-        docxtpl_layer: _lambda.ILayerVersion, requests_layer: _lambda.ILayerVersion, **kwargs):
+        docxtpl_layer: _lambda.ILayerVersion, requests_layer: _lambda.ILayerVersion,  pillow_layer: _lambda.ILayerVersion,**kwargs):
         super().__init__(scope, id, **kwargs)
 
         #fase 1
@@ -17,7 +17,8 @@ class FileGenStack(Stack):
             db_access_lambda_arn = db_access_lambda_arn, 
             openpyxl_layer = openpyxl_layer ,
             docxtpl_layer = docxtpl_layer,
-            requests_layer = requests_layer
+            requests_layer = requests_layer,
+            pillow_layer = pillow_layer
         )
         
         self.entregable_fase1_lambda = self.pipeline1.entregable 
@@ -31,7 +32,8 @@ class FileGenStack(Stack):
             db_access_lambda_arn = db_access_lambda_arn, 
             openpyxl_layer = openpyxl_layer ,
             docxtpl_layer = docxtpl_layer,
-            requests_layer = requests_layer
+            requests_layer = requests_layer,
+            pillow_layer = pillow_layer
         )
 
         self.entregable_fase3_lambda = self.pipeline3.entregable 

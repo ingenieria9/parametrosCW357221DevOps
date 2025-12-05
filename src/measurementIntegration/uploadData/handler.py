@@ -31,7 +31,7 @@ def lambda_handler(event, context):
 
     # Obtener FID_ELEM y TIPO_PUNTO desde la DB
     query_status = f"""
-        SELECT "FID_ELEM", "TIPO_PUNTO" 
+        SELECT "FID_ELEM", "TIPO_PUNTO", "CIRCUITO_ACU"
         FROM fase_3_a_status 
         WHERE "IDENTIFICADOR_DATALOGGER" = '{id_datalogger}';
     """
@@ -43,6 +43,8 @@ def lambda_handler(event, context):
         }
     }
 
+    
+
     status_result = invoke_lambda_db(payload_status, db_access_arn)
     print("Resultado status:", status_result)
 
@@ -52,8 +54,9 @@ def lambda_handler(event, context):
 
     try:
         status_body = json.loads(status_result["body"])
-        fid_elem = status_body[0]["fid_elem"]
-        tipo_punto = status_body[0]["tipo_punto"]
+        fid_elem = status_body[0]["FID_ELEM"]
+        tipo_punto = status_body[0]["TIPO_PUNTO"]
+        circuito_acu = status_body[0]["CIRCUITO_ACU"]
     except Exception as e:
         print("Error parseando respuesta de status:", e)
         return {"statusCode": 500, "body": "Invalid response from dbAccess"}
@@ -68,11 +71,18 @@ def lambda_handler(event, context):
             continue  # saltar filas vacías
 
         fecha_hora = row[0].strip()
-        presion = row[1].strip()
-        temperatura = row[2].strip()
+        presion = row[1].strip() if row[1] is not None else ""
+        temperatura = row[2].strip() if row[2] is not None else ""
+
+        presion_sql = presion.replace(',', '.') if presion else None
+        temperatura_sql = temperatura.replace(',', '.') if temperatura else None
+
+        presion_val = presion_sql if presion_sql is not None else "NULL"
+        temperatura_val = temperatura_sql if temperatura_sql is not None else "NULL"
 
         registros.append(
-            f"('{fecha_hora}', {presion or 'NULL'}, {temperatura or 'NULL'}, '{id_datalogger}', '{fid_elem}', '{tipo_punto}')"
+            f"('{fecha_hora}', {presion_val}, {temperatura_val}, "
+            f"'{id_datalogger}', '{fid_elem}', '{tipo_punto}', '{circuito_acu}')"
         )
 
     # Armar e insertar por lotes de 500 registros
@@ -80,19 +90,22 @@ def lambda_handler(event, context):
     for i in range(0, len(registros), batch_size):
         batch = registros[i:i+batch_size]
         values_sql = ",\n".join(batch)
-
+        print("values sql:",values_sql)
         insert_query = f"""
             INSERT INTO fase_3_b_mediciones 
-            (FECHA_HORA, PRESION_1, TEMPERATURA, IDENTIFICADOR_DATALOGGER, FID_ELEM, TIPO_PUNTO)
+            ("FECHA_HORA", "PRESION_1", "TEMPERATURA", "IDENTIFICADOR_DATALOGGER", "FID_ELEM", "TIPO_PUNTO", "CIRCUITO_ACU")
             VALUES {values_sql};
         """
 
         payload_insert = {
             "queryStringParameters": {
                 "query": insert_query,
-                "db_name": "parametros"
+                "db_name": "parametros",
+                "time_column": "FECHA_HORA"
             }
         }
+
+ 
 
         print(f"Insertando batch {i//batch_size + 1} con {len(batch)} registros...")
         insert_result = invoke_lambda_db(payload_insert, db_access_arn)

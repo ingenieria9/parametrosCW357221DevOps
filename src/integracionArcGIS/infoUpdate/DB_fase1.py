@@ -102,7 +102,7 @@ def db_upsert_fase_1(json_data):
 
     upsert_sql = build_bulk_upsert_sql("fase_1", all_rows, "PARENT_ID")
 
-    #print("upsert_fase_1", upsert_sql)
+    print("upsert_fase_1", upsert_sql)
 
     payload_db = {
         "queryStringParameters": {
