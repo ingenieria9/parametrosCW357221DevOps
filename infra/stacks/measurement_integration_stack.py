@@ -15,6 +15,19 @@ from aws_cdk import (
 from constructs import Construct
 import os
 
+lambda_configs = [
+    {
+        "name": "uploadDataAdditel",
+        "code": "../src/measurementIntegration/uploadDataAdditel",
+        "prefix": "Campo_Data_Uploads/Additel/"
+    },
+    {
+        "name": "uploadDataHwm",
+        "code": "../src/measurementIntegration/uploadDataHwm",
+        "prefix": "Campo_Data_Uploads/Hwm/"
+    }
+]   
+
 class MeasurementIntStack(Stack):
     # bucket, project_name: str, db_access_lambda_arn, lambdas_gen_files (list)
     def __init__(self, scope: Construct, id: str, bucket_name: str, bucket_arn:str , project_name: str, drive_layer: _lambda.ILayerVersion, db_access_lambda_arn: str, **kwargs):
@@ -130,3 +143,52 @@ class MeasurementIntStack(Stack):
                 suffix=".csv",
             )
         )        
+
+        # Crear lambdas del listado
+        for cfg in lambda_configs:
+            self._create_upload_lambda(
+                name=cfg["name"],
+                code_path=cfg["code"],
+                s3_prefix=cfg["prefix"],
+                project_name=project_name,
+                bucket=bucket,
+                db_access_lambda_arn=db_access_lambda_arn
+            )
+
+    # ==========================================================================================
+    # Método privado reutilizable
+    # ==========================================================================================
+    def _create_upload_lambda(self, name: str, code_path: str, s3_prefix: str,
+                              project_name: str, bucket, db_access_lambda_arn: str):
+
+        upload_lambda = _lambda.Function(
+            self,
+            f"{name}Lambda",
+            function_name=f"{project_name}-{name}",
+            runtime=_lambda.Runtime.PYTHON_3_13,
+            handler="handler.lambda_handler",
+            code=_lambda.Code.from_asset(code_path),
+            environment={
+                "BUCKET_NAME": bucket.bucket_name,
+                "DB_ACCESS_LAMBDA_ARN": db_access_lambda_arn
+            },
+            reserved_concurrent_executions=5,
+            timeout=Duration.seconds(180)
+        )
+
+        # Permiso para llamar a db_access_lambda
+        upload_lambda.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["lambda:InvokeFunction"],
+                resources=[db_access_lambda_arn]
+            )
+        )
+
+        # Notificación S3
+        bucket.add_event_notification(
+            s3.EventType.OBJECT_CREATED_PUT,
+            s3n.LambdaDestination(upload_lambda),
+            s3.NotificationKeyFilter(prefix=s3_prefix, suffix=".csv")
+        )
+
+        return upload_lambda
