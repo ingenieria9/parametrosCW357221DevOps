@@ -128,6 +128,5 @@ class MeasurementIntStack(Stack):
             s3.NotificationKeyFilter(
                 prefix="Campo_Data_Uploads/",
                 suffix=".csv",
-            ),
-            enabled = False
+            )
         )        
