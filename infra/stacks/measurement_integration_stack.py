@@ -107,6 +107,7 @@ class MeasurementIntStack(Stack):
         # Esta lambda tiene permisos para llamar a db_access_lambda_arn y asi almacenar 
         # y procesar la información en la DB. 
 
+        '''
         # ======================================================
         # Lambda: uploadData
         # ======================================================
@@ -143,7 +144,7 @@ class MeasurementIntStack(Stack):
                 suffix=".csv",
             )
         )        
-
+        ''' 
         # Crear lambdas del listado
         for cfg in lambda_configs:
             self._create_upload_lambda(
@@ -154,6 +155,7 @@ class MeasurementIntStack(Stack):
                 bucket=bucket,
                 db_access_lambda_arn=db_access_lambda_arn
             )
+               
 
     # ==========================================================================================
     # Método privado reutilizable
